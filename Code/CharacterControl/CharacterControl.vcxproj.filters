@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Characters">
+      <UniqueIdentifier>{9abc8d46-78ba-4edf-8319-02f553dd4563}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Events">
+      <UniqueIdentifier>{6f8306b9-3de5-48bd-8846-f34251fd5dc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tank">
+      <UniqueIdentifier>{c86068df-96c4-42e2-8818-9fabe5f53c4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CharacterControlContext.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterControlIncludes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientCharacterControlGame.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientGameObjectManagerAddon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectMangerAddon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalRegistry.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerCharacterControlGame.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerGameObjectManagerAddon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WayPoint.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Characters\Flyer.h">
+      <Filter>Source Files\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Characters\SoldierNPC.h">
+      <Filter>Source Files\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Characters\SoldierNPCAnimationSM.h">
+      <Filter>Source Files\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Characters\SoldierNPCBehaviorSM.h">
+      <Filter>Source Files\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Characters\SoldierNPCMovementSM.h">
+      <Filter>Source Files\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\Events.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Tank\ClientTank.h">
+      <Filter>Source Files\Tank</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClientCharacterControlGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientGameObjectManagerAddon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectManagerAddon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalRegistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerCharacterControlGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerGameObjectManagerAddon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WayPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Characters\Flyer.cpp">
+      <Filter>Source Files\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="Characters\SoldierNPC.cpp">
+      <Filter>Source Files\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="Characters\SoldierNPCAnimationSM.cpp">
+      <Filter>Source Files\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="Characters\SoldierNPCBehaviorSM.cpp">
+      <Filter>Source Files\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="Characters\SoldierNPCMovementSM.cpp">
+      <Filter>Source Files\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\Events.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Tank\ClientTank.cpp">
+      <Filter>Source Files\Tank</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="test.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+  </ItemGroup>
+</Project>
