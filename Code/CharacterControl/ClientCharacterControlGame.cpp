@@ -183,15 +183,15 @@ int ClientCharacterControlGame::initGame()
 	m_pContext->getGPUScreen()->ReleaseRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 	
 	#if PE_API_IS_D3D11
-	if (true)
-	{
-		int smallx = 4;
+	//if (true)
+	//{
+	//	int smallx = 4;
 
-		for (int y = 0; y < 16; ++y)
-			for (int x = 0; x < smallx; ++x)
-				((ClientGameObjectManagerAddon*)(m_pContext->get<CharacterControlContext>()->getGameObjectManagerAddon()))->createSoldierNPC(
-				Vector3(x * 2.0f , 0.0f, 2.0f * y), m_pContext->m_gameThreadThreadOwnershipMask);
-	}
+	//	for (int y = 0; y < 16; ++y)
+	//		for (int x = 0; x < smallx; ++x)
+	//			((ClientGameObjectManagerAddon*)(m_pContext->get<CharacterControlContext>()->getGameObjectManagerAddon()))->createSoldierNPC(
+	//			Vector3(x * 2.0f , 0.0f, 2.0f * y), m_pContext->m_gameThreadThreadOwnershipMask);
+	//}
 	#endif
     
     m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);

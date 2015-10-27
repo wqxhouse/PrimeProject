@@ -311,7 +311,8 @@ int ClientGame::runGameFrame()
 				//FPS
 				{
 					float fps = (1.0f/m_frameTime);
-					sprintf(PEString::s_buf, "%.2f zonglinw Fall 2015 FPS", fps);
+					//sprintf(PEString::s_buf, "%.2f zonglinw Fall 2015 FPS", fps);
+					sprintf(PEString::s_buf, "%.2f FPS", fps);
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0, 
 						Vector3(.75f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
