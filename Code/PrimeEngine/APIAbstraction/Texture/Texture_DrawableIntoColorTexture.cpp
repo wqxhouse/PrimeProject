@@ -13,7 +13,7 @@
 #include "PrimeEngine/Render/D3D11Renderer.h"
 namespace PE {
 #if 1
-void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler)
+void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler, int textureMode /* = 0 */)
 {
 	
 	m_samplerState = sampler;
@@ -163,7 +163,19 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 		texDesc.Height = h;
 		texDesc.MipLevels = 0;
 		texDesc.ArraySize = 1;
-		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		// + Deferred 
+		if (textureMode == 0)
+		{
+			texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+		else if (textureMode == 1)
+		{
+			texDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+		}
+		else if (textureMode == 2)
+		{
+			texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		}
 		texDesc.SampleDesc.Count = 1;
 		texDesc.SampleDesc.Quality = 0;
 		texDesc.Usage = D3D11_USAGE_DEFAULT;

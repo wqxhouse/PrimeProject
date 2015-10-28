@@ -1,0 +1,49 @@
+#ifndef DETAILEDMESH_GBUFFER_PS
+#define DETAILEDMESH_GBUFFER_PS
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "DetailedMesh_Structs.fx"
+
+DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
+{
+	DETAILED_MESH_GBUFFER_PS_OUT output;
+	// output.Albedo = float4(0.1, 0.2, 0.6, 1);
+	// output.Normal = float4(0.6, 0.2, 0.1, 1); 
+	
+	output.Albedo = sample2D(gDiffuseMapSampler, pIn.iTexCoord, gDiffuseMap);
+	
+	float3 perPixelNormal = pIn.iNormalW;
+	if (xHasNrm_yHasSpec_zHasGlow_wHasDiff.x > 0.1)
+	{
+		// retrieve the normal vector from bump map
+		perPixelNormal = sample2D(gBumpMapSampler, pIn.iTexCoord, gBumpMap).xyz;
+
+		//Uncompress from [0,1] to [-1,1]
+		perPixelNormal = 2.0*perPixelNormal - 1.0;
+		
+		//Build orthonormal basis
+		float3 N = normalize(pIn.iNormalW);
+		float3 T = normalize(pIn.iTangentW - dot(pIn.iTangentW, N)*N);
+		float3 B = cross(N,T);
+		
+		float3x3 TBN = make_float3x3(T, B, N);
+		
+		// Tranform from tangent space to world space
+		perPixelNormal = normalize(mul(perPixelNormal, TBN));
+	}
+	else
+	{
+		perPixelNormal = normalize(perPixelNormal);
+	}
+	
+	output.Normal = float4(perPixelNormal, 1.0);
+	
+	return output;
+}
+
+PS_wrapper_DETAILED_MESH_GBUFFER(DetailedMesh_GBuffer_PS)
+
+#endif
+

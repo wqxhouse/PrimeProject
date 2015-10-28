@@ -26,6 +26,10 @@ namespace TextureFamily
 		GLOW_MAP,
 		COLOR_MAP_ARRAY,
 		COLOR_CUBE,
+
+		// +Deferred
+		ALBEDO, 
+		WORLD_NORMAL,
 	};
 };
 
@@ -55,7 +59,7 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	void createSpecularTextureGPU(const PrimitiveTypes::String textureFilename, const char *package = NULL);
 	void createGlowTextureGPU(const PrimitiveTypes::String textureFilename, const char *package = NULL);
 
-	void createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler);
+	void createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler, int textureMode=0);
 	void createDrawableIntoColorTextureWithDepth(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler, bool use32BitRedForDepth = false);
 	void createDrawableIntoDepthTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler);
 

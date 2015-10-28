@@ -232,7 +232,13 @@ _Pvt_Extensions
 # PrimeEngine Miscs
 3rdPartyInstallations/**
 AssetsIn/**
-AssetsOut/**
+
+# Exclude AssetsOut except for shaders
+AssetsOut/*
+!AssetsOut/Default/
+AssetsOut/Default/*
+!AssetsOut/Default/GPUPrograms/
+
 External/**
 GlobalConfig/**
 Python25/**
@@ -248,3 +254,5 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj
 Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
+
+

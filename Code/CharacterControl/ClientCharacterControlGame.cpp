@@ -255,7 +255,7 @@ int ClientCharacterControlGame::initGame()
 #if PE_PLAT_IS_PSVITA // do it for ps3 becasue right now communication between pyClient and ps3 is not working
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('ccontrollvl0.x_level.levela', 'CharacterControl')");
 #endif
-	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
+	m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
 
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 

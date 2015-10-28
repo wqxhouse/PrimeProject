@@ -71,10 +71,15 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 		EffectManager::s_myHandle = handle;
 	}
 
-	void setTextureAndDepthTextureRenderTargetForGlow();
-	void setTextureAndDepthTextureRenderTargetForDefaultRendering();
+	// + Deferred
+	void setTextureAndDepthTextureRenderTargetForGBuffer();
+	// void setLightAccumTextureRenderTarget();
+	void setFinalLDRTextureRenderTarget();
 
+	void setTextureAndDepthTextureRenderTargetForDefaultRendering();
+	void setTextureAndDepthTextureRenderTargetForGlow();
 	void set2ndGlowRenderTarget();
+
 	void setFrameBufferCopyRenderTarget();
 
 	void setShadowMapRenderTarget();
@@ -90,7 +95,12 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawMotionBlur();
 	void drawFrameBufferCopy();
 
+	// + Deferred
+	void drawDeferredFinalPass();
+	void drawDeferredFinalToBackBuffer();
+
 	void debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSeparatedGlow, bool drawGlow1stPass, bool drawGlow2ndPass, bool drawShadowRenderTarget);
+	void debugDeferredRenderTarget(int which);
 
 public:
 	// Singleton
@@ -115,6 +125,12 @@ public:
 	// enable when readable textures for DX 9 are available
 	TextureGPU m_readableTexture;
 #endif
+	// + Deferred
+	Handle m_halbedoTextureGPU;
+	Handle m_hnormalTextureGPU;
+	Handle m_haccumHDRTextureGPU;
+	Handle m_hfinalLDRTextureGPU;
+	// + End deferred 
 	
 	Matrix4x4 m_currentViewProjMatrix;
 	Matrix4x4 m_previousViewProjMatrix;
@@ -127,6 +143,10 @@ public:
 	Handle m_hGlowSeparationEffect;
 	Handle m_hMotionBlurEffect;
 	Handle m_hColoredMinimalMeshTech;
+
+	// + Deferred
+	Handle m_hAccumulationHDRPassEffect;
+	Handle m_hfinalLDRPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11

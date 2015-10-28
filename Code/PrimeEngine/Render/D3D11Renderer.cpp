@@ -228,6 +228,45 @@ D3D11Renderer::D3D11Renderer(PE::GameContext &context, unsigned int width, unsig
 	setRenderTargetsAndViewportWithDepth();
 }
 
+void D3D11Renderer::setDeferredShadingRTsAndViewportWithDepth(TextureGPU **pTexArr, int nRTs, TextureGPU *pDestDepthTex, bool clearRT, bool clearDepth)
+{
+	ID3D11RenderTargetView *renderTargets[4];
+	assert(nRTs <= 4);
+
+	for (int i = 0; i < nRTs; i++)
+	{
+		renderTargets[i] = pTexArr[i]->m_pRenderTargetView;
+	}
+
+	m_pD3DContext->OMSetRenderTargets(nRTs, renderTargets, 
+		pDestDepthTex ? pDestDepthTex->m_DepthStencilView : m_pDepthStencilView);
+
+	float color[] = { 0.1f, 0.6f, 0.3f, 0.0f };
+
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	vp.Width = (float)(m_width);
+	vp.Height = (float)(m_height);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+
+	m_pD3DContext->RSSetViewports(1, &vp);
+
+	if (clearRT)
+	{
+		for (int j = 0; j < nRTs; j++)
+		{
+			m_pD3DContext->ClearRenderTargetView(pTexArr[j]->m_pRenderTargetView, color);
+		}
+	}
+
+	if (clearDepth)
+	{
+		m_pD3DContext->ClearDepthStencilView(pDestDepthTex ? pDestDepthTex->m_DepthStencilView : m_pDepthStencilView,
+			D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
+}
 
 void D3D11Renderer::setRenderTargetsAndViewportWithDepth(TextureGPU *pDestColorTex, TextureGPU *pDestDepthTex, bool clearRenderTarget, bool clearDepth)
 {

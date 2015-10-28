@@ -94,22 +94,22 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 	#if !APIABSTRACTION_IOS && !APIABSTRACTION_PS3 && !PE_PLAT_IS_PSVITA /* && !PE_API_IS_D3D11*/
 		renderShadowMap = true;
 	#endif
-	if (renderShadowMap)
-	{
-		// for shadow mapping:
-		EffectManager::Instance()->setShadowMapRenderTarget();
+	//if (renderShadowMap)
+	//{
+	//	// for shadow mapping:
+	//	EffectManager::Instance()->setShadowMapRenderTarget();
 
-		DrawList::ZOnlyInstanceReadOnly()->optimize();
+	//	DrawList::ZOnlyInstanceReadOnly()->optimize();
 
-		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+	//	ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 
-		// the render context is acquired and release inside of this function
-		DrawList::ZOnlyInstanceReadOnly()->do_RENDER_Z_ONLY(NULL, threadOwnershipMask);
+	//	// the render context is acquired and release inside of this function
+	//	DrawList::ZOnlyInstanceReadOnly()->do_RENDER_Z_ONLY(NULL, threadOwnershipMask);
 
-		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+	//	ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 
-		EffectManager::Instance()->endCurrentRenderTarget();
-	}
+	//	EffectManager::Instance()->endCurrentRenderTarget();
+	//}
 
 	IRenderer::checkForErrors("renderjob update start\n");
 
@@ -117,63 +117,101 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 	bool disableScreenSpaceEffects = renderMode == IRenderer::RenderMode_DefaultNoPostProcess;
 	if (!disableScreenSpaceEffects)
     {
-		// set render target: GlowTargetTextureGPU
-        EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGlow();
-         
-        assert(DrawList::InstanceReadOnly() != DrawList::Instance());
-        DrawList::InstanceReadOnly()->optimize();
-                
-		// set global shader value (applied to all draw calls) for shadow map texture
-		if (renderShadowMap)
-			EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
-
-		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
-
-		DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
-		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
-
-		EffectManager::Instance()->endCurrentRenderTarget();
-
-		#if APIABSTRACTION_D3D9
-			//IRenderer::Instance()->getDevice()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		#elif APIABSTRACTION_D3D11
-			pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		#endif
-
-		// sets render target to separated glow texture
-		EffectManager::Instance()->drawGlowSeparationPass();
-		EffectManager::Instance()->endCurrentRenderTarget();
-
-        // First glow path into another texture with horizontal glow
-                
-        // Draw Effects
-        // horizontal glow into 2nd glow target
-        EffectManager::Instance()->drawFirstGlowPass();
-		EffectManager::Instance()->endCurrentRenderTarget();
-
-        // from second glow target to FinishedGlowTargetTexture
-
-		EffectManager::Instance()->drawSecondGlowPass();
-		EffectManager::Instance()->endCurrentRenderTarget();
-
-		bool drawMotionBlur = renderMode == IRenderer::RenderMode_DefaultGlow;
-		if (drawMotionBlur)
+		// 1) Fill GBuffer
+		EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGBuffer();
 		{
-			//draw back into main back buffer render target
-			EffectManager::Instance()->drawMotionBlur();
-			EffectManager::Instance()->endCurrentRenderTarget();
-		}
-		else
-		{
-			bool debugGlowRenderTarget = renderMode == IRenderer::RenderMode_DebugGlowRT;
-			bool drawSeparatedGlow = renderMode == IRenderer::RenderMode_DebugSeparatedGlow;
-			bool drawGlow1stPass = renderMode == IRenderer::RenderMode_DebugGlowHorizontalBlur;
-			bool drawGlow2ndPass = renderMode == IRenderer::RenderMode_DebugGlowVerticalBlurCombine;
-			bool drawShadowRenderTarget = renderMode == IRenderer::RenderMode_DebugShadowRT;
+			assert(DrawList::InstanceReadOnly() != DrawList::Instance());
+			DrawList::InstanceReadOnly()->optimize();
 
-			EffectManager::Instance()->debugDrawRenderTarget(debugGlowRenderTarget, drawSeparatedGlow, drawGlow1stPass, drawGlow2ndPass, drawShadowRenderTarget);
-			EffectManager::Instance()->endCurrentRenderTarget();
+			// TODO: skip shadow maps for now, since shadows are implemented differently
+			// in deferred pipeline.
+
+			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+			DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 		}
+		EffectManager::Instance()->endCurrentRenderTarget();
+
+#if APIABSTRACTION_D3D11
+		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+#else
+		assert(false);
+#endif
+		// 2) Render lights
+	
+		// 3) Render post process & final pass
+	/*	EffectManager::Instance()->setFinalLDRTextureRenderTarget();
+		{
+			EffectManager::Instance()->drawDeferredFinalPass();
+		}
+		EffectManager::Instance()->endCurrentRenderTarget();*/
+#if 0
+		EffectManager::Instance()->drawDeferredFinalToBackBuffer();
+		EffectManager::Instance()->endCurrentRenderTarget();
+#else  
+		EffectManager::Instance()->debugDeferredRenderTarget(1);
+		EffectManager::Instance()->endCurrentRenderTarget();
+#endif
+
+		//// set render target: GlowTargetTextureGPU
+  //      EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGlow();
+  //       
+  //      assert(DrawList::InstanceReadOnly() != DrawList::Instance());
+  //      DrawList::InstanceReadOnly()->optimize();
+  //              
+		//// set global shader value (applied to all draw calls) for shadow map texture
+		//if (renderShadowMap)
+		//	EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
+
+		//ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+
+		//DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+		//ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+
+		//EffectManager::Instance()->endCurrentRenderTarget();
+
+		//#if APIABSTRACTION_D3D9
+		//	//IRenderer::Instance()->getDevice()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//#elif APIABSTRACTION_D3D11
+		//	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//#endif
+
+		//// sets render target to separated glow texture
+		//EffectManager::Instance()->drawGlowSeparationPass();
+		//EffectManager::Instance()->endCurrentRenderTarget();
+
+  //      // First glow path into another texture with horizontal glow
+  //              
+  //      // Draw Effects
+  //      // horizontal glow into 2nd glow target
+  //      EffectManager::Instance()->drawFirstGlowPass();
+		//EffectManager::Instance()->endCurrentRenderTarget();
+
+  //      // from second glow target to FinishedGlowTargetTexture
+
+		//EffectManager::Instance()->drawSecondGlowPass();
+		//EffectManager::Instance()->endCurrentRenderTarget();
+
+		//bool drawMotionBlur = renderMode == IRenderer::RenderMode_DefaultGlow;
+		//if (drawMotionBlur)
+		//{
+		//	//draw back into main back buffer render target
+		//	EffectManager::Instance()->drawMotionBlur();
+		//	EffectManager::Instance()->endCurrentRenderTarget();
+		//}
+		//else
+		//{
+		//	bool debugGlowRenderTarget = renderMode == IRenderer::RenderMode_DebugGlowRT;
+		//	bool drawSeparatedGlow = renderMode == IRenderer::RenderMode_DebugSeparatedGlow;
+		//	bool drawGlow1stPass = renderMode == IRenderer::RenderMode_DebugGlowHorizontalBlur;
+		//	bool drawGlow2ndPass = renderMode == IRenderer::RenderMode_DebugGlowVerticalBlurCombine;
+		//	bool drawShadowRenderTarget = renderMode == IRenderer::RenderMode_DebugShadowRT;
+
+		//	EffectManager::Instance()->debugDrawRenderTarget(debugGlowRenderTarget, drawSeparatedGlow, drawGlow1stPass, drawGlow2ndPass, drawShadowRenderTarget);
+		//	EffectManager::Instance()->endCurrentRenderTarget();
+		//}
+
+		
     }
     else
     {
