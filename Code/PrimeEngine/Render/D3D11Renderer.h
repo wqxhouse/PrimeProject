@@ -36,6 +36,9 @@ public:
 
 	virtual void setRenderTargetsAndViewportWithDepth(TextureGPU *pDestColorTex = 0, TextureGPU *pDestDepthTex = 0, bool clearRenderTargte = false, bool clearDepth = false);
 
+	// + Deferred 
+	void setDeferredShadingRTsAndViewportWithDepth(TextureGPU **pTexArr, int nRTs, TextureGPU *pDestDepthTex, bool clearRT, bool clearDepth);
+
 	virtual void setDepthStencilOnlyRenderTargetAndViewport(TextureGPU *pDestDepthTex, bool clear = false);
 
 	virtual void setRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex = 0, bool clear = false);

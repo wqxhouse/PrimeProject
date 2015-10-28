@@ -134,36 +134,36 @@ int ClientGame::runGameFrame()
 			// Push Event_PRE_GATHER_DRAWCALLS
 			{
 				Handle hctevt("EVENT", sizeof(Event_PRE_GATHER_DRAWCALLS));
-				Event_PRE_GATHER_DRAWCALLS *ctevt =  new(hctevt) Event_PRE_GATHER_DRAWCALLS ;
-        
+				Event_PRE_GATHER_DRAWCALLS *ctevt = new(hctevt)Event_PRE_GATHER_DRAWCALLS;
+
 				PE::Events::EventQueueManager::Instance()->add(hctevt, Events::QT_GENERAL);
 
 				ctevt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
 				ctevt->m_eyePos = pcam->m_worldTransform.getPos();
-				
+
 			}
 
-            {
-                Handle hdrawZOnlyEvt("EVENT", sizeof(Event_GATHER_DRAWCALLS_Z_ONLY));
-                Event_GATHER_DRAWCALLS_Z_ONLY *drawZOnlyEvt = new(hdrawZOnlyEvt) Event_GATHER_DRAWCALLS_Z_ONLY ;
-                
-                drawZOnlyEvt->m_pZOnlyDrawListOverride = 0;
+			{
+				Handle hdrawZOnlyEvt("EVENT", sizeof(Event_GATHER_DRAWCALLS_Z_ONLY));
+				Event_GATHER_DRAWCALLS_Z_ONLY *drawZOnlyEvt = new(hdrawZOnlyEvt)Event_GATHER_DRAWCALLS_Z_ONLY;
+
+				drawZOnlyEvt->m_pZOnlyDrawListOverride = 0;
 
 				RootSceneNode *pRoot = RootSceneNode::Instance();
 
 				if (pRoot->m_lights.m_size)
 				{
 					PrimitiveTypes::Bool foundShadower = false;
-					for(PrimitiveTypes::UInt32 i=0; i<(pRoot->m_lights.m_size); i++){
+					for (PrimitiveTypes::UInt32 i = 0; i < (pRoot->m_lights.m_size); i++){
 						Light *pLight = pRoot->m_lights[i].getObject<Light>();
-						if(pLight->castsShadow()){
+						if (pLight->castsShadow()){
 
 							drawZOnlyEvt->m_projectionViewTransform = (pLight->m_viewToProjectedTransform * pLight->m_worldToViewTransform);
 							drawZOnlyEvt->m_eyePos = pLight->m_base.getPos();
-							foundShadower=true;
+							foundShadower = true;
 							break;
 						}
-						if(!foundShadower){
+						if (!foundShadower){
 							drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
 							drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
 						}
@@ -174,9 +174,9 @@ int ClientGame::runGameFrame()
 					drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
 					drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
 				}
-                drawZOnlyEvt->m_parentWorldTransform.loadIdentity();
-                Events::EventQueueManager::Instance()->add(hdrawZOnlyEvt);
-            }
+				drawZOnlyEvt->m_parentWorldTransform.loadIdentity();
+				Events::EventQueueManager::Instance()->add(hdrawZOnlyEvt);
+			}
             
             // After the transformations are done. We can put a DRAW event in the queue
             // Push DRAW event into message queue because camera has updated transformations
