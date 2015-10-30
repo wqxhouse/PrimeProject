@@ -255,4 +255,8 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
 
+*.exe
+*.dll
+*.bat
+
 

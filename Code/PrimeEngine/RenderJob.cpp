@@ -138,15 +138,14 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		assert(false);
 #endif
 		// 2) Render lights
+		EffectManager::Instance()->setLightAccumTextureRenderTarget();
+		EffectManager::Instance()->drawClusteredLightHDRPass();
+		EffectManager::Instance()->endCurrentRenderTarget();
 	
 		// 3) Render post process & final pass
-	/*	EffectManager::Instance()->setFinalLDRTextureRenderTarget();
-		{
-			EffectManager::Instance()->drawDeferredFinalPass();
-		}
-		EffectManager::Instance()->endCurrentRenderTarget();*/
-#if 0
-		EffectManager::Instance()->drawDeferredFinalToBackBuffer();
+#if 1 
+		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
+		EffectManager::Instance()->drawDeferredFinalPass();
 		EffectManager::Instance()->endCurrentRenderTarget();
 #else  
 		EffectManager::Instance()->debugDeferredRenderTarget(1);

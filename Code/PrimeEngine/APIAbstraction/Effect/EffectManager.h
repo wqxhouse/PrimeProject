@@ -73,7 +73,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
-	// void setLightAccumTextureRenderTarget();
+	void setLightAccumTextureRenderTarget();
 	void setFinalLDRTextureRenderTarget();
 
 	void setTextureAndDepthTextureRenderTargetForDefaultRendering();
@@ -96,6 +96,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawFrameBufferCopy();
 
 	// + Deferred
+	void drawClusteredLightHDRPass();
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();
 
@@ -130,6 +131,7 @@ public:
 	Handle m_hnormalTextureGPU;
 	Handle m_haccumHDRTextureGPU;
 	Handle m_hfinalLDRTextureGPU;
+	Handle m_hrootDepthBufferTextureGPU;
 	// + End deferred 
 	
 	Matrix4x4 m_currentViewProjMatrix;
@@ -166,7 +168,7 @@ public:
 #	if APIABSTRACTION_D3D11
 		PEMap<ID3D11Buffer *> m_cbuffers; // only DX 11 has constant buffers. DX9 just has constant registers
 #	endif
-		
+
 	bool m_doMotionBlur;
 
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;

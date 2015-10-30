@@ -17,6 +17,9 @@
 #include "PrimeEngine/Render/ShaderActions/SA_SetAndBind_ConstResource_SingleObjectAnimationPalette.h"
 #include "PrimeEngine/Render/ShaderActions/SA_SetAndBind_ConstResource_InstancedObjectsAnimationPalettes.h"
 
+// + Deferred
+#include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
+
 #include "PrimeEngine/APIAbstraction/GPUBuffers/AnimSetBufferGPU.h"
 #include "PrimeEngine/APIAbstraction/Texture/GPUTextureManager.h"
 #include "PrimeEngine/Scene/DrawList.h"
@@ -31,7 +34,7 @@ namespace PE {
 using namespace Components;
 
 Handle EffectManager::s_myHandle;
-	
+
 EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	: m_map(context, arena, 128)
 	, m_pixelShaderSubstitutes(context, arena)
@@ -134,6 +137,13 @@ void EffectManager::setupConstantBuffersAndShaderResources()
 			assert(SUCCEEDED(hr));
 			SetInstanceControlConstantsShaderAction::s_pBuffer = pBuf;
 			m_cbuffers.add("cbInstanceControlConstants", pBuf);
+
+			// + Deferred - clustered shading constant buffer
+			cbDesc.ByteWidth = sizeof(SetClusteredShadingConstantsShaderAction::Data);
+			hr = pDevice->CreateBuffer(&cbDesc, NULL, &pBuf);
+			assert(SUCCEEDED(hr));
+			SetClusteredShadingConstantsShaderAction::s_pBuffer= pBuf;
+			m_cbuffers.add("cbClusteredShadingConsts", pBuf);
 		}
 
 		{
@@ -209,6 +219,10 @@ void EffectManager::setupConstantBuffersAndShaderResources()
 		}
 
 		AnimSetBufferGPU::createGPUBufferForAnimationCSResult(*m_pContext);
+
+		// + Deferred - create constant buffer for clustered shading
+		
+
 #	endif
 }
 
@@ -229,8 +243,24 @@ void EffectManager::buildFullScreenBoard()
 	float fx = -1.0f / fw / 2.0f;
 	float fy = 1.0f / fh / 2.0f;
 
-	vbcpu.createNormalizeBillboardCPUBufferXYWithPtOffsets(fx, fy);
-	
+	// vbcpu.createNormalizeBillboardCPUBufferXYWithPtOffsets(fx, fy);
+
+	// + Deferred -- Make the compensation for Deferred depth reconstruction
+	vbcpu.createNormalizeBillboardCPUBufferXYWithPtOffsets(0, 0);
+	vbcpu.m_values[2] = 1.0f;
+	vbcpu.m_values[5] = 1.0f;
+	vbcpu.m_values[8] = 1.0f;
+	vbcpu.m_values[11] = 1.0f;
+
+	//for (int i = 0; i < vbcpu.m_values.m_size; i++)
+	//{
+	//	if (i % 3 == 0 && i != 0)
+	//	{
+	//		printf("\n");
+	//	}
+	//	printf("%f ", vbcpu.m_values[i]);
+	//}
+	//
 	ColorBufferCPU tcbcpu(*m_pContext, m_arena);
 	tcbcpu.m_values.reset(3 * 4);
 	#if APIABSTRACTION_OGL
@@ -263,8 +293,7 @@ void EffectManager::buildFullScreenBoard()
 	m_hMotionBlurEffect = getEffectHandle("motionblur.fx");
 	m_hColoredMinimalMeshTech = getEffectHandle("ColoredMinimalMesh_Tech");
 
-	// TODO: light accumulation buffer handle get here as well
-	// m_hAccumulationHDRPassEffect = getEffectHandle("");
+	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
 	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
 }
 
@@ -324,6 +353,14 @@ void EffectManager::setTextureAndDepthTextureRenderTargetForGBuffer()
 	// really not necessary since we use MRT, not a single render target
 	// but for convention... meh...
 	m_pCurRenderTarget = m_halbedoTextureGPU.getObject<TextureGPU>();
+}
+
+void EffectManager::setLightAccumTextureRenderTarget()
+{
+	TextureGPU* accumTex = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(accumTex, true);
+
+	m_pCurRenderTarget = m_haccumHDRTextureGPU.getObject<TextureGPU>();
 }
 
 void EffectManager::setFinalLDRTextureRenderTarget()
@@ -544,15 +581,78 @@ void EffectManager::drawSecondGlowPass()
 }
 
 // + Deferred
+void EffectManager::drawClusteredLightHDRPass()
+{
+	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+
+	TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
+	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
+	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
+
+	PE::SA_Bind_Resource setTextureActionAlbedo(
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		albedoTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(albedoTexture->m_pShaderResourceView, albedoTexture->m_pTexture, albedoTexture->m_texture));
+	setTextureActionAlbedo.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionNormal(
+		*m_pContext, m_arena, ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		normalTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(normalTexture->m_pShaderResourceView, normalTexture->m_pTexture, normalTexture->m_texture));
+	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionDepth(
+		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		// TODO: wrong
+		API_CHOOSE_DX11_DX9_OGL(rootDepthTexture->m_pDepthShaderResourceView, rootDepthTexture->m_pTexture, rootDepthTexture->m_texture));
+	setTextureActionDepth.bindToPipeline(&curEffect);
+
+
+	// Quad
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
+
+	objSa.bindToPipeline(&curEffect);
+
+	pibGPU->draw(1, 0);
+
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureActionAlbedo.unbindFromPipeline(&curEffect);
+	setTextureActionNormal.unbindFromPipeline(&curEffect);
+	setTextureActionDepth.unbindFromPipeline(&curEffect);
+	objSa.unbindFromPipeline(&curEffect);
+}
+
 void EffectManager::drawDeferredFinalPass()
 {
 	Effect &curEffect = *m_hfinalLDRPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
 
+#if 0
+	// We could do this if more complex postprocessing is used
 	m_pContext->getGPUScreen()->
 		setRenderTargetsAndViewportWithNoDepth(
 		m_hfinalLDRTextureGPU.getObject<TextureGPU>(), true);
+#else
+	// For simplicity, just draw directly into back buffer
+	// TODO: with or without depth?
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+#endif
 
 	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
 	pibGPU->setAsCurrent();
@@ -562,13 +662,12 @@ void EffectManager::drawDeferredFinalPass()
 
 	curEffect.setCurrent(pvbGPU);
 
-	TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
-	// TextureGPU *normalTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
+	TextureGPU *lightPassHDRTex = m_haccumHDRTextureGPU.getObject<TextureGPU>();
 
 	PE::SA_Bind_Resource setTextureAction(
-		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-		albedoTexture->m_samplerState, 
-		API_CHOOSE_DX11_DX9_OGL(albedoTexture->m_pShaderResourceView, albedoTexture->m_pTexture, albedoTexture->m_texture));
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		lightPassHDRTex->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(lightPassHDRTex->m_pShaderResourceView, lightPassHDRTex->m_pTexture, lightPassHDRTex->m_texture));
 
 	setTextureAction.bindToPipeline(&curEffect);
 
@@ -712,20 +811,20 @@ void EffectManager::drawDeferredFinalToBackBuffer()
 		API_CHOOSE_DX11_DX9_OGL(m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
 	setTextureAction.bindToPipeline(&curEffect);
 
-	SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
-	cb.m_data.gPreviousViewProjMatrix = m_previousViewProjMatrix;
-	cb.m_data.gViewProjInverseMatrix = m_currentViewProjMatrix.inverse();
-	// cb.m_data.gDoMotionBlur = m_doMotionBlur;
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
 
-	cb.bindToPipeline();
+	objSa.bindToPipeline(&curEffect);
 
 	pibGPU->draw(1, 0);
-	m_previousViewProjMatrix = m_currentViewProjMatrix;
-
-	setTextureAction.unbindFromPipeline(&curEffect);
 
 	pibGPU->unbindFromPipeline();
 	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureAction.unbindFromPipeline(&curEffect);
+	objSa.unbindFromPipeline(&curEffect);
 }
 
 // + Deferred

@@ -26,10 +26,6 @@ namespace TextureFamily
 		GLOW_MAP,
 		COLOR_MAP_ARRAY,
 		COLOR_CUBE,
-
-		// +Deferred
-		ALBEDO, 
-		WORLD_NORMAL,
 	};
 };
 

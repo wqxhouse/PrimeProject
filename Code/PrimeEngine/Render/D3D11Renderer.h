@@ -70,6 +70,9 @@ public:
 	ID3D11Texture2D *m_pDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pDepthStencilView;
 	ID3D11RenderTargetView *m_pRenderTargetView;
+
+	// + Deferred 
+	ID3D11ShaderResourceView *m_pDepthStencilShaderView;
 	
 public:
 	ID3D11ShaderResourceView *m_pSRV;

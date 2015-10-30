@@ -5,11 +5,34 @@
 #include "StandardConstants.fx"
 #include "ColoredMinimalMesh_Structs.fx"
 
+// We use b4 since API_BUFFER_INDEX is up to 3 in StandardConstants.fx
+cbuffer cbClusteredShadingConsts : register(b4)
+{
+	float cs_near      : packoffset(c0.x);
+    float cs_far       : packoffset(c0.y);
+    float cs_projA     : packoffset(c0.z);
+    float cs_projB     : packoffset(c0.w);     
+	float3 cs_camPos   : packoffset(c1);
+	float cs_pad	   : packoffset(c1.w);
+	float3 cs_camZAxis : packoffset(c2);
+	float cs_pad2	   : packoffset(c2.w);
+};
+
+
 COLORED_MINIMAL_MESH_PS_IN ColoredMinimalMesh_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
 {
     COLORED_MINIMAL_MESH_PS_IN vOut;
     vOut.iPosH = mul(make_float4(vIn.iPosL, 1.0), gWVP);
     vOut.iPosW =  mul(make_float4(vIn.iPosL, 1.0), gW).xyz;
+	
+	// + Deferred -- hacking ColoredMinimalMesh -- only valid for screen quad
+	// where input is NDC space corners
+	matrix testing = gViewProjInverseMatrix;
+	
+	float4 quadWPos = mul(make_float4(vIn.iPosL, 1.0), gViewProjInverseMatrix);
+	quadWPos /= quadWPos.w;
+	vOut.viewRay = quadWPos.xyz - cs_camPos;
+	
     vOut.iColor = vIn.iColor;
     
 //     vOut.iPosH = make_float4(vIn.iPosL.xy, 0, 1.0);

@@ -10,9 +10,10 @@
 
 float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
-	// Get the initial color at this pixel.
-	float4 color = sample2D(gDiffuseMapSampler, pIn.iColor.xy, gDiffuseMap);
-	return color;
+	float4 shading = sample2D(gDiffuseMapSampler, pIn.iColor.xy, gDiffuseMap);
+	return shading;
+	
+	// return float4(0.1, 0.2, 0.6, 1);
 }
 
 PS_wrapper_COLORED_MINIMAL_MESH(DeferredFinalPass_PS)

@@ -1,0 +1,74 @@
+#ifndef DEFERRED_LIGHT_PASS_CLUSTERED_PS
+#define DEFERRED_LIGHT_PASS_CLUSTERED_PS
+
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "lighthelper.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+
+// We use b4 since API_BUFFER_INDEX is up to 3 in StandardConstants.fx
+cbuffer cbClusteredShadingConsts : register(b4)
+{
+	float cs_near      : packoffset(c0.x);
+    float cs_far       : packoffset(c0.y);
+    float cs_projA     : packoffset(c0.z);
+    float cs_projB     : packoffset(c0.w);     
+	float3 cs_camPos   : packoffset(c1);
+	float cs_pad	   : packoffset(c1.w);
+	float3 cs_camZAxis : packoffset(c2);
+	float cs_pad2	   : packoffset(c2.w);
+};
+
+// texture register maxed t70 used in animations
+
+
+float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	uint4 fragCoord = pIn.iPosH;
+	/*
+	uint width;
+	uint height;
+	gDepthMap.GetDimensions(width, height);
+	float4 texcoord = pIn.iPosH * float4(1.0 / width, 1.0 / height, 1.0, 1.0);
+	*/
+	
+	float4 albedo = gDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float4 normal = gAdditionalDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	
+	// float3 quadPosWS = pIn.iQuadPosW; 
+	// float3 viewRay = quadPosWS - cs_camPos;
+    // float3 viewRay = float3(quadPos.xy  / quadPos.z, 1.0f);
+	
+	//float3 viewRay = pIn.viewRay;
+    //float3 posWS = cs_camPos + linearZ * viewRay;
+	
+	//float3 normViewRay = normalize(viewRay);
+	//float linZ = linearZ * cs_far;
+	//float3 posWS = cs_camPos + normViewRay * linZ;
+	
+	//float3 posVS = mul(posWS, gView);
+	
+	// float3 viewRay = float3(quadVSPos.xy * (cs_far / quadVSPos.z), cs_far);
+	// float3 posVS = viewRay * (linearZ * cs_far);
+	
+	
+	// return float4(1.0, 1.0, 0.8 ,1.0);
+	return float4(posWS, 1.0);
+	// return float4(linearZ, linearZ, linearZ, 1.0);
+	// return float4(perspectiveZ, perspectiveZ, perspectiveZ, 1.0);
+	// return float4(0.3, 0.7, 0.3, 1.0);
+	 //return normal;
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(DeferredLightPass_Clustered_PS)
+
+#endif

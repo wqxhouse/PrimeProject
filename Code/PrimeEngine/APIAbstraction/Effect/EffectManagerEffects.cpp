@@ -53,6 +53,25 @@ namespace PE {
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp);
+
+		// Root Depth buffer TextureGPU
+		m_hrootDepthBufferTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *pRootDepthBufferGPU = new (m_hrootDepthBufferTextureGPU)TextureGPU(*m_pContext, m_arena);
+
+#if APIABSTRACTION_D3D11
+		D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
+		pRootDepthBufferGPU->m_samplerState = SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp;
+		pRootDepthBufferGPU->m_viewport.TopLeftX = 0;
+		pRootDepthBufferGPU->m_viewport.TopLeftY = 0;
+		pRootDepthBufferGPU->m_viewport.Width = pD3D11Renderer->getWidth();
+		pRootDepthBufferGPU->m_viewport.Height = pD3D11Renderer->getHeight();
+		pRootDepthBufferGPU->m_viewport.MinDepth = 0.0f;
+		pRootDepthBufferGPU->m_viewport.MaxDepth = 1.0f;
+		pRootDepthBufferGPU->m_DepthStencilView = pD3D11Renderer->m_pDepthStencilView;
+		pRootDepthBufferGPU->m_pDepthShaderResourceView = pD3D11Renderer->m_pDepthStencilShaderView;
+#else 
+		assert(false);
+#endif
 		// + End
 
 // 
@@ -319,10 +338,22 @@ namespace PE {
 	}
 
 	// TODO: Light Pass - classical deferred and clustered will be different here
-	// Classical Deferred pass render geometry + additive blending
+	// Classical Deferred pass render sphere/cone geometry + additive blending
 	// Clustered Deferred pass render quad... (no additive blending, implied in one-pass shader)
 	{
-		
+		Handle hLightHDRClusteredFx("EFFECT", sizeof(Effect));
+		Effect *pLightHDRClusteredFx = new(hLightHDRClusteredFx)Effect(*m_pContext, m_arena, hLightHDRClusteredFx);
+		pLightHDRClusteredFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"Deferred_LightPassClustered_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"DeferredLightPass_Clustered_Tech");
+		pLightHDRClusteredFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DeferredLightPass_Clustered_Tech", hLightHDRClusteredFx);
 	}
 
 	// + Deferred final LDR Pass
