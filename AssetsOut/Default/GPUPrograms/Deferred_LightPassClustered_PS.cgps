@@ -22,18 +22,27 @@ cbuffer cbClusteredShadingConsts : register(b4)
 };
 
 // texture register maxed t70 used in animations
+// StructuredBuffer<Light> gDeferredLights : register(t71);
 
+float3 blinn_phong(float3 n, float3 l, float3 e, 
+				   float3 le, float3 la, float spec_pow, 
+				   float3 kd, float3 ks, float3 ka)
+{
+	float NoH = 0.0f;
+	float NoL = dot(n, l);
+	if (NoL > 0)
+	{
+		float3 h = normalize(l + e);
+		NoH = max(dot(n, h), 0.0);
+	}
+
+	return le * (kd * NoL + ks * pow(NoH, spec_pow)) + la; //ka * la;
+}
 
 float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
 	uint4 fragCoord = pIn.iPosH;
-	/*
-	uint width;
-	uint height;
-	gDepthMap.GetDimensions(width, height);
-	float4 texcoord = pIn.iPosH * float4(1.0 / width, 1.0 / height, 1.0, 1.0);
-	*/
-	
+
 	float4 albedo = gDiffuseMap.Load(uint3(fragCoord.xy, 0));
 	float4 normal = gAdditionalDiffuseMap.Load(uint3(fragCoord.xy, 0));
 	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
@@ -43,6 +52,26 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	
 	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
 	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	
+	// Lighting 
+	Light light = gLight0;
+	
+	float3 E = normalize(cs_camPos - posWS);
+	float3 L = normalize(light.xyzDir_w.xyz);
+	float3 N = normal.xyz;
+	float3 kd = albedo.rgb;
+	float3 ks = light.spec.rgb;
+	const float3 ka = float3(1.0, 1.0, 1.0);
+	float3 la = light.ambient.rgb;
+	float3 le = light.diffuse.rgb;
+	float  sp = light.xyzAtt_wSpotPwr.w; // hardcode for now
+	
+	float3 color = blinn_phong(N, L, E,
+				   le, la, sp, 
+				   kd, ks, ka);
+				   
+	return float4(color, 1.0);
+	
 	
 	// float3 quadPosWS = pIn.iQuadPosW; 
 	// float3 viewRay = quadPosWS - cs_camPos;
@@ -62,7 +91,7 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	
 	
 	// return float4(1.0, 1.0, 0.8 ,1.0);
-	return float4(posWS, 1.0);
+	// return float4(posWS, 1.0);
 	// return float4(linearZ, linearZ, linearZ, 1.0);
 	// return float4(perspectiveZ, perspectiveZ, perspectiveZ, 1.0);
 	// return float4(0.3, 0.7, 0.3, 1.0);

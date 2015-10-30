@@ -220,7 +220,21 @@ void EffectManager::setupConstantBuffersAndShaderResources()
 
 		AnimSetBufferGPU::createGPUBufferForAnimationCSResult(*m_pContext);
 
-		// + Deferred - create constant buffer for clustered shading
+		// + Deferred - create structured buffer to store lights
+		{
+			D3D11_BUFFER_DESC bufferDesc;
+			ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+			// bufferDesc.ByteWidth = iNumElements * sizeof(T);
+
+			bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+			bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			// bufferDesc.StructureByteStride = sizeof(T);
+
+
+		}
 		
 
 #	endif

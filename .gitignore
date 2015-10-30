@@ -239,6 +239,11 @@ AssetsOut/*
 AssetsOut/Default/*
 !AssetsOut/Default/GPUPrograms/
 
+# Exclude test level
+!AssetsOut/Basic/
+AssetsOut/Basic/*
+!AssetsOut/Basic/Levels/
+
 External/**
 GlobalConfig/**
 Python25/**
