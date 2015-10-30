@@ -30,13 +30,17 @@ float3 blinn_phong(float3 n, float3 l, float3 e,
 {
 	float NoH = 0.0f;
 	float NoL = dot(n, l);
+	float3 diffuse = float3(0, 0, 0);
+	float3 specular = float3(0, 0, 0);
 	if (NoL > 0)
 	{
 		float3 h = normalize(l + e);
 		NoH = max(dot(n, h), 0.0);
+		diffuse = kd * NoL;
+		specular = ks * pow(NoH, spec_pow);
 	}
 
-	return le * (kd * NoL + ks * pow(NoH, spec_pow)) + la; //ka * la;
+	return le * (diffuse + specular) + la; //ka * la;
 }
 
 float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
@@ -64,7 +68,7 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	const float3 ka = float3(1.0, 1.0, 1.0);
 	float3 la = light.ambient.rgb;
 	float3 le = light.diffuse.rgb;
-	float  sp = light.xyzAtt_wSpotPwr.w; // hardcode for now
+	float  sp = 40;// light.xyzAtt_wSpotPwr.w; // hardcode for now
 	
 	float3 color = blinn_phong(N, L, E,
 				   le, la, sp, 

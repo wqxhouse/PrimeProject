@@ -11,9 +11,10 @@
 float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
 	float4 shading = sample2D(gDiffuseMapSampler, pIn.iColor.xy, gDiffuseMap);
-	return shading;
 	
-	// return float4(0.1, 0.2, 0.6, 1);
+	// Gamma correction
+	shading = pow(shading, (1.0 / 2.2));
+	return shading;
 }
 
 PS_wrapper_COLORED_MINIMAL_MESH(DeferredFinalPass_PS)
