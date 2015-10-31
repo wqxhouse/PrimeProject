@@ -51,14 +51,49 @@ namespace PE {
 			float cProjB;
 		};
 
+		struct cbDirectionalLight // 2 vec4
+		{
+			Vector3 cDir;
+			float pad;
+			Vector3 cColor;
+			float pad2;
+		};
+
+		struct cbPointLight // 2 vec4
+		{
+			Vector3 cPos;
+			float cRadius;
+			Vector3 cColor;
+			float cSpecPow;
+		};
+
+		struct cbSpotLight // 3 vec4
+		{
+			Vector3 cPos;
+			float cSpotCutOff;
+			Vector3 cColor;
+			float cSpotPow;
+			Vector3 cDir;
+			float pad;
+		};
+
 		// the actual data that is transferred to video memory
 		struct Data {
 			cbClusteredShadingConsts csconsts;
 			Vector3 camPos;
 			float pad;
 			Vector3 camZAxisWS;
+			unsigned int dirLightNum;
+
+			Vector3 scale;
 			float pad2;
-			// Matrix4x4 viewToWorldMatrix;
+			Vector3 bias;
+			float pad3;
+
+			cbDirectionalLight dirLights[8];
+			cbPointLight pointLights[1024];
+			cbSpotLight spotLights[512];
+
 		} m_data;
 
 #	if APIABSTRACTION_OGL

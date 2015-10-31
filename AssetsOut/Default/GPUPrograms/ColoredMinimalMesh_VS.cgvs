@@ -4,20 +4,7 @@
 #include "APIAbstraction.gpu"
 #include "StandardConstants.fx"
 #include "ColoredMinimalMesh_Structs.fx"
-
-// We use b4 since API_BUFFER_INDEX is up to 3 in StandardConstants.fx
-cbuffer cbClusteredShadingConsts : register(b4)
-{
-	float cs_near      : packoffset(c0.x);
-    float cs_far       : packoffset(c0.y);
-    float cs_projA     : packoffset(c0.z);
-    float cs_projB     : packoffset(c0.w);     
-	float3 cs_camPos   : packoffset(c1);
-	float cs_pad	   : packoffset(c1.w);
-	float3 cs_camZAxis : packoffset(c2);
-	float cs_pad2	   : packoffset(c2.w);
-};
-
+#include "DeferredLightCommon.fx"
 
 COLORED_MINIMAL_MESH_PS_IN ColoredMinimalMesh_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
 {

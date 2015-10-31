@@ -48,7 +48,6 @@ SamplerState gWindMapSampler : register(s7);
 Texture1D gRandomMap : register(t7);
 SamplerState gRandomMapSampler : register(s7);
 
-
 // DX compute
 struct BufferStruct
 {

@@ -137,7 +137,10 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 #else
 		assert(false);
 #endif
-		// 2) Render lights
+		// 2.1) Assign light to clusters
+		EffectManager::Instance()->assignLightToClusters();
+
+		// 2.2) Render lights
 		EffectManager::Instance()->setLightAccumTextureRenderTarget();
 		EffectManager::Instance()->drawClusteredLightHDRPass();
 		EffectManager::Instance()->endCurrentRenderTarget();

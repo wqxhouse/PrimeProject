@@ -43,6 +43,9 @@ enum EGpuResourceSlot
 	WIND_TEXTURE_2D_SAMPLER_SLOT = 7,
 	RANDOM_TEXTURE_1D_SAMPLER_SLOT = 7,
 
+	// + Deferred
+	CLUSTERED_TEXTURE_3D_SAMPLER_SLOT = 8,
+
 	NUM_GPU_SAMPLERS, // how many samplers can be bound at the same time
 
 	// we can surpass NUM_GPU_SAMPLERS since below buffer ids dont require samplers
@@ -53,6 +56,13 @@ enum EGpuResourceSlot
 	GpuResourceSlot_AnimationCSReduceResultResource = 67,
 	GpuResourceSlot_SkeletonStructure_ConstResource = 68,
 	GpuResourceSlot_SkeletonBindInverses_ConstResource = 69,
+
+	// register(t70) is also used!!!
+	// StructuredBuffer<PerObjectInstanceData> gPerInstanceDataBuffer : register(t70); 
+	// in standardInstacingConstants.fx
+
+	// + Deferred
+	GpuResourceSlot_ClusteredLightIndexListResource = 71,
 
 	GpuResourceSlot_FirstUAV = 1024, // all values past thsi will be subreacted 1024
 	GpuResourceSlot_AnimationCSUAV = GpuResourceSlot_FirstUAV, // register(u0)

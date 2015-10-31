@@ -24,10 +24,17 @@
 #include "PERasterizerState.h"
 #include "PEDepthStencilState.h"
 
+#include <vector>
+#include <D3DCommon.h>
+#include <D3DCompiler.h>
+#include <d3d11.h>
+
+
 namespace PE {
 namespace Components{
 struct Effect;
 struct DrawList;
+struct Light;
 };
 
 struct EffectManager : public PE::PEAllocatableAndDefragmentable
@@ -100,6 +107,8 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();
 
+	void assignLightToClusters();
+
 	void debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSeparatedGlow, bool drawGlow1stPass, bool drawGlow2ndPass, bool drawShadowRenderTarget);
 	void debugDeferredRenderTarget(int which);
 
@@ -149,6 +158,37 @@ public:
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
 	Handle m_hfinalLDRPassEffect;
+
+	// + Deferred cluster data - hard coded cluster size
+	struct ClusterData
+	{
+		unsigned int offset;
+		unsigned int counts;
+		// short pointLightCount;
+		// short spotLightCount;
+	};
+
+	Vector3 m_cMin;
+	Vector3 m_cMax;
+	static const int CX = 32;
+	static const int CY = 8;
+	static const int CZ = 32;
+	std::vector<PE::Components::Light *> _dirLights;
+	std::vector<PE::Components::Light *> _pointLights;
+	std::vector<PE::Components::Light *> _spotLights;
+	int _dirLightNum, _pointLightNum, _spotLightNum;
+	// std::vector<short> _lightIndices;
+	std::vector<unsigned int> _lightIndices;
+	ClusterData _cluster[CZ][CY][CX];
+
+	// DX11 resources - did not bother impl for TextureCPU
+	ID3D11Texture3D *_clusterTex;
+	ID3D11ShaderResourceView *_clusterTexShaderView;
+	ID3D11Buffer *_lightIndicesBuffer;
+	// ID3D11Texture1D *_lightIndicesTex;
+	ID3D11ShaderResourceView *_lightIndicesBufferShaderView;
+
+	// + End
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11

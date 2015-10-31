@@ -7,26 +7,22 @@
 #include "samplerhelper.fx"
 #include "lighthelper.fx"
 #include "ColoredMinimalMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
 
-// We use b4 since API_BUFFER_INDEX is up to 3 in StandardConstants.fx
-cbuffer cbClusteredShadingConsts : register(b4)
+float getPointLightAtt(float radius, float dist) 
 {
-	float cs_near      : packoffset(c0.x);
-    float cs_far       : packoffset(c0.y);
-    float cs_projA     : packoffset(c0.z);
-    float cs_projB     : packoffset(c0.w);     
-	float3 cs_camPos   : packoffset(c1);
-	float cs_pad	   : packoffset(c1.w);
-	float3 cs_camZAxis : packoffset(c2);
-	float cs_pad2	   : packoffset(c2.w);
-};
-
-// texture register maxed t70 used in animations
-// StructuredBuffer<Light> gDeferredLights : register(t71);
+    // Soft transition
+    float attenuation = pow(1.0 + (dist / radius) , -2.0) * 1.2;
+    
+    float cutoff = radius * 0.7;
+    attenuation *= 1.0 - smoothstep(0.0, 1.0, ( (dist / cutoff) - 1.0) * 4.0 );
+    attenuation = max(0.0, attenuation);
+    return attenuation;
+}
 
 float3 blinn_phong(float3 n, float3 l, float3 e, 
 				   float3 le, float3 la, float spec_pow, 
-				   float3 kd, float3 ks, float3 ka)
+				   float3 kd, float3 ks, float3 ka, float att)
 {
 	float NoH = 0.0f;
 	float NoL = dot(n, l);
@@ -40,7 +36,46 @@ float3 blinn_phong(float3 n, float3 l, float3 e,
 		specular = ks * pow(NoH, spec_pow);
 	}
 
-	return le * (diffuse + specular) + la; //ka * la;
+	return att * le * (diffuse + specular) + la; //ka * la;
+}
+
+float3 renderDirLight(float3 posWS, float3 albedo, float3 normal, cbDirectionalLight light)
+{
+	const float3 one = float3(1, 1, 1);
+	const float3 amb = float3(0.01, 0.01, 0.02);
+	
+	float3 E = normalize(cs_camPos - posWS);
+	float3 L = normalize(light.cDir); // check if inverted -- should be fine
+	
+	// float3 N = normal.xyz;
+	// float3 kd = albedo.rgb;
+	// float3 ks = light.spec.rgb;
+	// float3 ks = float3(1, 1, 1);
+	// const float3 ka = float3(1.0, 1.0, 1.0);
+	// float3 la = light.ambient.rgb;
+	// float3 le = light.diffuse.rgb;
+	// float  sp = 30;
+	// float  att = 1.0f;
+	
+	return blinn_phong(normal, L, E,
+		   light.cColor, amb, 30, 
+		   albedo, one, one, 1.0);	   
+}
+
+float3 renderPointLight(float posWS, float3 albedo, float3 normal, cbPointLight light)
+{
+	const float3 one = float3(1, 1, 1);
+	const float3 zero = float3(0, 0, 0);
+	
+	float3 E = normalize(cs_camPos - posWS);
+	float3 L = light.cPos - posWS;
+	float  dist = length(L);
+	float  att = getPointLightAtt(light.cRadius, dist);
+	L = normalize(L);
+	
+	return blinn_phong(normal, L, E,
+				   light.cColor, zero, light.cSpecPow, 
+				   albedo, one, one, att);
 }
 
 float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
@@ -58,7 +93,42 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
 	
 	// Lighting 
-	Light light = gLight0;
+	float3 finalColor = float3(0, 0, 0);
+	
+	// Process directional light first
+	for (uint i = 0; i < cs_dirLightNum; i++)
+	{
+		finalColor += renderDirLight(posWS, albedo.xyz, normal.xyz, cs_dirLights[i]);
+	}
+	
+	int4 cluster_coord = int4(posWS * cs_scale + cs_bias, 0);
+	ClusterData data = gClusters.Load(cluster_coord);
+	uint offset = data.offset;
+	uint counts = data.counts;
+	
+	uint pointLightCount = counts >> 16;
+	uint spotLightCount  = counts & 0xFFFF;
+	
+	for (uint i = 0; i < pointLightCount; i++)
+	{
+		uint lightIndex = gLightIndices[offset + i];
+		
+		cbPointLight p = cs_pointLights[lightIndex];
+		float3 ppos = p.cPos;
+		float3 pcl = p.cColor;
+		float rad = p.cRadius;
+		cbPointLight asdf;
+		asdf.cPos = ppos;
+		asdf.cColor = pcl;
+		asdf.cRadius = rad;
+		asdf.cSpecPow = 20;
+		
+		finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, asdf);
+		// finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, cs_pointLights[lightIndex]);
+	}
+	
+	/* 
+	Light light = gLight1;
 	
 	float3 E = normalize(cs_camPos - posWS);
 	float3 L = normalize(light.xyzDir_w.xyz);
@@ -69,12 +139,34 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float3 la = light.ambient.rgb;
 	float3 le = light.diffuse.rgb;
 	float  sp = 40;// light.xyzAtt_wSpotPwr.w; // hardcode for now
+	float  att = 1.0f;
 	
 	float3 color = blinn_phong(N, L, E,
 				   le, la, sp, 
-				   kd, ks, ka);
+				   kd, ks, ka, att);
 				   
-	return float4(color, 1.0);
+	Light lightPoint = gLight0;
+	float3 E1 = normalize(cs_camPos - posWS);
+	float3 L1 = (lightPoint.xyzPos_w.xyz - posWS);
+	float dist = length(L1);
+	float radius = lightPoint.xRange_yType_zw.x;
+	L1 = normalize(L1);
+	float3 N1 = normal.xyz;
+	float3 kd1 = albedo.rgb;
+	float3 ks1 = lightPoint.spec.rgb;
+	const float3 ka1 = float3(1.0, 1.0, 1.0);
+	float3 la1 = lightPoint.ambient.rgb;
+	float3 le1 = lightPoint.diffuse.rgb;
+	float  sp1 = lightPoint.xyzAtt_wSpotPwr.w; 
+	float att1 = getPointLightAtt(radius, dist);
+	
+	color += blinn_phong(N1, L1, E1,
+				   le1, la1, sp1, 
+				   kd1, ks1, ka1, att1);
+				   
+	*/
+	
+	return float4(finalColor, 1.0);
 	
 	
 	// float3 quadPosWS = pIn.iQuadPosW; 
