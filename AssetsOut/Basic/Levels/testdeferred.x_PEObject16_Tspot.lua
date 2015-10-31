@@ -11,7 +11,7 @@ args['myScriptPackage']="Default"
 args['lightType'] = "point"
 args['meshPackage'] = "Default"
 
-args['diffuse'] = {0.1, 0.9, 0.1, 1.0}
+args['diffuse'] = {0.9, 0.9, 0.1, 1.0}
 args['spec'] = {1, 1, 1, 1.0}
 args['ambient'] = {0, 0, 0, 1.0}
 args['attenuation'] = {0.05, 0.05, 0.05}

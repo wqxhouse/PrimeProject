@@ -445,8 +445,10 @@ void EffectManager::assignLightToClusters()
 							sprintf_s(dbg, 512, "curLightIndices reached maximum\n");
 							break;
 						}
+						
+*/	
+						// printf("Assigned %d, %d, %d\n", x, y, z);
 
-*/
 						int curClusterLightCount = c_list_count[z][y][x];
 						if (curClusterLightCount >= 20)
 						{
@@ -502,9 +504,6 @@ void EffectManager::assignLightToClusters()
 
 	// Upload 3D Texture
 	context->Map(_clusterTex, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	/*For D3D_FEATURE_LEVEL_10_0 and higher, the pointer is aligned to 16 bytes.
-	  For lower than D3D_FEATURE_LEVEL_10_0, the pointer is aligned to 4 bytes.*/
-
 	mappedData = reinterpret_cast<BYTE*>(mappedResource.pData);
 	for (int z = 0; z < CZ; z++)
 	{
@@ -961,6 +960,7 @@ void EffectManager::drawClusteredLightHDRPass()
 	bias.m_y = -scale.m_y * m_cMin.m_y;
 	bias.m_z = -scale.m_z * m_cMin.m_z;
 	pscs.m_data.bias = bias;
+	// pscs.m_data.bias = m_cMin;
 
 	// Convert PE Light to shader Light (huge overhead...; 
 	// but no time to change the fundamental structure of PE)
