@@ -260,6 +260,27 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
 
+# IOS specific ignore
+.DS_Store
+Code/CharacterControl/CharacterControl-ios.vcxproj
+Code/CharacterControl/CharacterControl-ios.vcxproj.filters
+Code/CharacterControl/CharacterControl-ios.xcodeproj/
+Code/PEWorkspace-ios.sln
+Code/PEWorkspace-ios.xcworkspace/
+Code/PrimeEngine/PrimeEngine-ios.vcxproj
+Code/PrimeEngine/PrimeEngine-ios.vcxproj.filters
+Code/PrimeEngine/PrimeEngine-ios.xcodeproj/
+Code/glues/glues-ios.vcxproj
+Code/glues/glues-ios.vcxproj.filters
+Code/glues/glues-ios.xcodeproj/
+Code/lua_dist/lua_dist-ios.vcxproj
+Code/lua_dist/lua_dist-ios.vcxproj.filters
+Code/lua_dist/lua_dist-ios.xcodeproj/
+Code/luasocket_dist/luasocket_dist-ios.vcxproj
+Code/luasocket_dist/luasocket_dist-ios.vcxproj.filters
+Code/luasocket_dist/luasocket_dist-ios.xcodeproj/
+
+
 *.exe
 *.dll
 *.bat
