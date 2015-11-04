@@ -68,15 +68,15 @@ StructuredBuffer<uint> gLightIndices : register(t71);
 Texture3D<ClusterData> gClusters : register(t8);
 
 #elif APIABSTRACTION_D3D9
-#define MAX_POINT_LIGHTS 3
+#define MAX_POINT_LIGHTS 29
 
 struct cbPointLight // 2 vec4
 {
-	float3 cPos;
-	float cRadius;
-	float3 cColor;
-	float cSpecPow;
+	float4 cPos_wRad;
+	float4 cColor_wSpec;
 };
+
+// wtf - in dx9 float padding in struct is going to be float4?????
 
 struct ClusterData
 {
@@ -92,7 +92,9 @@ float4 cs_scale : register(c163);
 float4 cs_bias  : register(c164);
 cbPointLight cs_pointLights[MAX_POINT_LIGHTS] : register(c165);
 
-// 224 - 165 = 159 / 2 = 79 > 78 - ok
+// 78 * 2 = 156 + 165 = 421 > 224 fxk...
+// 224 - 165 = 59 / 2 < 30 ... fxk!! -- losing all the meaning of going clustered
+// For xbox, try put lights in EDRAM instead.
 
 #endif // D3D9
 

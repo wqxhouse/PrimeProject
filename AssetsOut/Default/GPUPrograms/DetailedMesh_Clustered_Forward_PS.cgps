@@ -44,13 +44,13 @@ float3 renderPointLight(float3 posWS, float3 albedo, float3 normal, cbPointLight
 	const float3 zero = float3(0, 0, 0);
 	
 	float3 E = normalize(xyzgEyePosW_wDoMotionBlur.xyz - posWS);
-	float3 L = light.cPos - posWS;
+	float3 L = light.cPos_wRad.xyz - posWS;
 	float  dist = length(L);
-	float  att = getPointLightAtt(light.cRadius, dist);
+	float  att = getPointLightAtt(light.cPos_wRad.w, dist);
 	L = normalize(L);
 	
 	return blinn_phong(normal, L, E,
-				   light.cColor, zero, light.cSpecPow, 
+				   light.cColor_wSpec.rgb, zero, light.cColor_wSpec.w, 
 				   albedo, one, one, att);
 }
 

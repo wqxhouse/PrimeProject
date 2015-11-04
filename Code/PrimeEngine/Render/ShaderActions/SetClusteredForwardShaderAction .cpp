@@ -45,8 +45,9 @@ void SetClusteredForwardShaderAction::bindToPipeline(Effect *pCurEffect /* = NUL
 		//pDevice->SetPixelShaderConstantF(1, (const float *)(&m_data), totalFloat4);
 
 		// + clustered forward
-		// pDevice->SetVertexShaderConstantF(163, (const float *)(&m_dataClusteredForward), 2+78*2);
-		pDevice->SetPixelShaderConstantF(163, (const float *)(&m_dataClusteredForward), 2+78*2);
+		// pDevice->SetPixelShaderConstantF(163, (const float *)(&m_dataClusteredForward), 2+78*2);
+		pDevice->SetPixelShaderConstantF(163, (const float *)(&m_dataClusteredForward), 2+29*2);
+		assert(sizeof(m_dataClusteredForward) == (2+29*2) *4 * sizeof(float));
 
 	#elif APIABSTRACTION_OGL
 		

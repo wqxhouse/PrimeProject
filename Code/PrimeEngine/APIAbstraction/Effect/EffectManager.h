@@ -28,7 +28,8 @@
 #define CX 32
 #define CY 8
 #define CZ 32
-#define POINTLIGHT_NUM_D3D9 78
+// #define POINTLIGHT_NUM_D3D9 78
+#define POINTLIGHT_NUM_D3D9 29 // TODO: try put them in EDRAM
 #define MAX_LIGHT_INDICES 4096 // limited by dx9 texture dimension
 #endif
 

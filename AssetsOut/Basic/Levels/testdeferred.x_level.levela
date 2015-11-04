@@ -1,0 +1,30 @@
+LevelLoader.CreateGameObject("PEObject15_TspotRep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -323.536149, 337.624698, 389.851156, 1.0, 'testdeferred.x_PEObject15_Tspot.lua', 'Basic',0xdcf186cf, 0x7fe611e5, 0xa9c428d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject9_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 251.819366, 0.0, 208.294309, 1.0, 'testdeferred.x_PEObject9_TImrod.lua', 'Basic',0x63c498e1, 0x7ee411e5, 0x8d2428d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject13_TspotRep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, -0.0, 1.0, 'testdeferred.x_PEObject13_Tspot.lua', 'Basic',0x6ff2ce30, 0x7efc11e5, 0x8fc428d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject10_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, 0.368691, 1.0, 'testdeferred.x_PEObject10_TImro.lua', 'Basic',0x63e3928f, 0x7ee411e5, 0xbee828d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject1_pPlane1",5.373616, 0.0, -0.0, 0.0, 0.0, 5.373616, -0.0, 0.0, -0.0, -0.0, 5.373616, 0.0, -8.326546, 0.0, -4.034357, 1.0, 'testdeferred.x_PEObject1_pPlane.lua', 'Basic',0x58470200, 0x7ee411e5, 0x9b3128d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject14_TspotRep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 480.283761, 319.377653, 305.85777, 1.0, 'testdeferred.x_PEObject14_Tspot.lua', 'Basic',0xc7e3f840, 0x7fe611e5, 0x95df28d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject16_TspotRep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -483.011685, 348.215821, -245.744324, 1.0, 'testdeferred.x_PEObject16_Tspot.lua', 'Basic',0xf0dd2aa1, 0x7fe611e5, 0xba5c28d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject4_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, -223.137787, 1.0, 'testdeferred.x_PEObject4_TImrod.lua', 'Basic',0x60c5b0c0, 0x7ee411e5, 0x8fc128d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject3_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 253.190553, 0.0, -33.627828, 1.0, 'testdeferred.x_PEObject3_TImrod.lua', 'Basic',0x60915a4f, 0x7ee411e5, 0xa65728d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject5_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, 239.606304, 1.0, 'testdeferred.x_PEObject5_TImrod.lua', 'Basic',0x6104b58f, 0x7ee411e5, 0xbb2128d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject11_polySurface1",-0.536548, 0.0, -0.84387, 0.0, -0.338672, 0.915932, 0.215334, 0.0, 0.772928, 0.401333, -0.491441, 0.0, 699.01312, 502.182627, -570.960978, 1.0, 'testdeferred.x_PEObject11_polyS.lua', 'Basic',0xbffa3fc0, 0x7ee411e5, 0xb84e28d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject6_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 246.7273, 0.0, -215.96701, 1.0, 'testdeferred.x_PEObject6_TImrod.lua', 'Basic',0x61414961, 0x7ee411e5, 0x8f4c28d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject7_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -282.97581, 0.0, 255.279151, 1.0, 'testdeferred.x_PEObject7_TImrod.lua', 'Basic',0x6180000f, 0x7ee411e5, 0x8a5028d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject2_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -279.7675, 0.0, -0.0, 1.0, 'testdeferred.x_PEObject2_TImrod.lua', 'Basic',0x5db2a461, 0x7ee411e5, 0xbf2728d2, 0x44693c7a)
+
+LevelLoader.CreateGameObject("PEObject8_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -294.349655, 0.0, -212.669964, 1.0, 'testdeferred.x_PEObject8_TImrod.lua', 'Basic',0x627f47a1, 0x7ee411e5, 0x984128d2, 0x44693c7a)
+

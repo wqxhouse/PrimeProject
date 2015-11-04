@@ -97,7 +97,8 @@ struct SetClusteredForwardShaderAction : ShaderAction
 	struct DataClusteredForward {
 		Vector4 scale;
 		Vector4 bias;
-		cbPointLight pointLights[78]; 
+		cbPointLight pointLights[29]; 
+		// cbPointLight pointLights[14]; 
 	} m_dataClusteredForward;
 #endif
 
