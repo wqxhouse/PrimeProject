@@ -20,44 +20,64 @@ namespace PE {
     void EffectManager::loadDefaultEffects()
     {
         PEINFO("PE: PROGRESS: EffectManager::loadDefaultEffects() Entry\n");
- 
-		m_hGlowTargetTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
-		TextureGPU *pGlowTargetTextureGPU = new(m_hGlowTargetTextureGPU) TextureGPU(*m_pContext, m_arena);
-		//todo: once mipmaps are generated for this RT enable SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp
-		// if donwsampling doesnt look good
-		// for now stick with because we dont have cross platform mipmap generation, should work fine
-		pGlowTargetTextureGPU->createDrawableIntoColorTextureWithDepth(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
-#ifndef _XBOX
-		m_frameBufferCopyTexture.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
-#endif
-#if 0
-		// enable when readable textures for DX 9 are available
-		m_readableTexture.createReadableColorTexture(IRenderer::Instance()->getWidth(), IRenderer::Instance()->getHeight());
-#endif
+//
+//		m_hGlowTargetTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+//		TextureGPU *pGlowTargetTextureGPU = new(m_hGlowTargetTextureGPU) TextureGPU(*m_pContext, m_arena);
+//		//todo: once mipmaps are generated for this RT enable SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp
+//		// if donwsampling doesnt look good
+//		// for now stick with because we dont have cross platform mipmap generation, should work fine
+//		pGlowTargetTextureGPU->createDrawableIntoColorTextureWithDepth(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
+//#ifndef _XBOX
+//		m_frameBufferCopyTexture.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
+//#endif
+//#if 0
+//		// enable when readable textures for DX 9 are available
+//		m_readableTexture.createReadableColorTexture(IRenderer::Instance()->getWidth(), IRenderer::Instance()->getHeight());
+//#endif
+//
+//		// 1/4 scren texture blur
+//		PEINFO("PE: PROGRESS: Creating m_glowSeparatedTextureGPU\n");
+//		// no need to magnification filtering for this texture since we render it into same size texture
+//		m_glowSeparatedTextureGPU.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth() / 2, m_pContext->getGPUScreen()->getHeight() / 2, SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
+//
+//		PEINFO("PE: PROGRESS: Creating m_2ndGlowTargetTextureGPU\n");
+//		// need magnification filtering since we render this small texture onto larger result RT
+//		m_2ndGlowTargetTextureGPU.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth() / 2, m_pContext->getGPUScreen()->getHeight() / 2, SamplerState_NoMips_NoMinTexelLerp_MagTexelLerp_Clamp);
+//		
+//		PEINFO("PE: PROGRESS: Creating pFinishedGlowTargetTextureGPU\n");
+//		m_hFinishedGlowTargetTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+//		TextureGPU *pFinishedGlowTargetTextureGPU = new(m_hFinishedGlowTargetTextureGPU) TextureGPU(*m_pContext, m_arena);
+//		// need to use mag texel lerp since will be upscaled and put on result
+//		pFinishedGlowTargetTextureGPU->createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
+//
+//#if APIABSTRACTION_IOS || APIABSTRACTION_X360
+//		PEINFO("PE: PROGRESS: Creating m_shadowMapDepthTexture 128x128\n");
+//		// need to lerp minimization and at this point we dont lerp magnification
+//		m_shadowMapDepthTexture.createDrawableIntoDepthTexture(128, 128, SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
+//#else
+//		PEINFO("PE: PROGRESS: Creating m_shadowMapDepthTexture 2048x2048\n");
+//		// need to lerp minimization and at this point we dont lerp magnification
+//		m_shadowMapDepthTexture.createDrawableIntoDepthTexture(2048,2048, SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
+//#endif
 
-		// 1/4 scren texture blur
-		PEINFO("PE: PROGRESS: Creating m_glowSeparatedTextureGPU\n");
-		// no need to magnification filtering for this texture since we render it into same size texture
-		m_glowSeparatedTextureGPU.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth() / 2, m_pContext->getGPUScreen()->getHeight() / 2, SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
+		// + Clustered forward
+#if APIABSTRACTION_D3D9
+		_pointLights.resize(POINTLIGHT_NUM_D3D9);
+		_lightIndices.resize(CX*CY*CZ * 20);
+		_pointLightNum = 0;
+		m_cMin = Vector3(-500, -250, -500);
+		m_cMax = Vector3(500, 250, 500);
 
-		PEINFO("PE: PROGRESS: Creating m_2ndGlowTargetTextureGPU\n");
-		// need magnification filtering since we render this small texture onto larger result RT
-		m_2ndGlowTargetTextureGPU.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth() / 2, m_pContext->getGPUScreen()->getHeight() / 2, SamplerState_NoMips_NoMinTexelLerp_MagTexelLerp_Clamp);
-		
-		PEINFO("PE: PROGRESS: Creating pFinishedGlowTargetTextureGPU\n");
-		m_hFinishedGlowTargetTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
-		TextureGPU *pFinishedGlowTargetTextureGPU = new(m_hFinishedGlowTargetTextureGPU) TextureGPU(*m_pContext, m_arena);
-		// need to use mag texel lerp since will be upscaled and put on result
-		pFinishedGlowTargetTextureGPU->createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
+		// m_clustersTex
+		D3D9Renderer *ren = (D3D9Renderer *)m_pContext->getGPUScreen();
+		LPDIRECT3DDEVICE9 device = ren->m_pD3D9Device;
+		HRESULT hr = 
+			device->CreateVolumeTexture(CX, CY, CZ, 0, 0, D3DFMT_G16R16F, D3DPOOL_MANAGED, &m_clustersTex, NULL);
+		assert(SUCCEEDED(hr));
 
-#if APIABSTRACTION_IOS || APIABSTRACTION_X360
-		PEINFO("PE: PROGRESS: Creating m_shadowMapDepthTexture 128x128\n");
-		// need to lerp minimization and at this point we dont lerp magnification
-		m_shadowMapDepthTexture.createDrawableIntoDepthTexture(128, 128, SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
-#else
-		PEINFO("PE: PROGRESS: Creating m_shadowMapDepthTexture 2048x2048\n");
-		// need to lerp minimization and at this point we dont lerp magnification
-		m_shadowMapDepthTexture.createDrawableIntoDepthTexture(2048,2048, SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
+		hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_MANAGED, &m_lightIndicesTex, NULL);
+		assert(SUCCEEDED(hr));
+
 #endif
 
 		m_pixelShaderSubstitutes.reset(EffectPSInputFamily::Count);
@@ -253,7 +273,7 @@ namespace PE {
 		pEffect->loadTechnique(
 				"DetailedMesh_Shadowed_VS", "main",
 				NULL, NULL, // geometry shader
-				"DetailedMesh_Shadowed_A_Glow_PS", "main",
+				"DetailedMesh_Clustered_Forward_PS", "main",
 			NULL, NULL, // compute shader
 			PERasterizerState_SolidTriBackCull,
 			PEDepthStencilState_ZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states

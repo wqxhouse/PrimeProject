@@ -90,26 +90,26 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	#endif
 
-	bool renderShadowMap = false;
-	#if !APIABSTRACTION_IOS && !APIABSTRACTION_PS3 && !PE_PLAT_IS_PSVITA /* && !PE_API_IS_D3D11*/
-		renderShadowMap = true;
-	#endif
-	if (renderShadowMap)
-	{
-		// for shadow mapping:
-		EffectManager::Instance()->setShadowMapRenderTarget();
+	//bool renderShadowMap = false;
+	//#if !APIABSTRACTION_IOS && !APIABSTRACTION_PS3 && !PE_PLAT_IS_PSVITA /* && !PE_API_IS_D3D11*/
+	//	renderShadowMap = true;
+	//#endif
+	//if (renderShadowMap)
+	//{
+	//	// for shadow mapping:
+	//	EffectManager::Instance()->setShadowMapRenderTarget();
 
-		DrawList::ZOnlyInstanceReadOnly()->optimize();
+	//	DrawList::ZOnlyInstanceReadOnly()->optimize();
 
-		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+	//	ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 
-		// the render context is acquired and release inside of this function
-		DrawList::ZOnlyInstanceReadOnly()->do_RENDER_Z_ONLY(NULL, threadOwnershipMask);
+	//	// the render context is acquired and release inside of this function
+	//	DrawList::ZOnlyInstanceReadOnly()->do_RENDER_Z_ONLY(NULL, threadOwnershipMask);
 
-		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+	//	ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 
-		EffectManager::Instance()->endCurrentRenderTarget();
-	}
+	//	EffectManager::Instance()->endCurrentRenderTarget();
+	//}
 
 	IRenderer::checkForErrors("renderjob update start\n");
 
@@ -124,8 +124,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
         DrawList::InstanceReadOnly()->optimize();
                 
 		// set global shader value (applied to all draw calls) for shadow map texture
-		if (renderShadowMap)
-			EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
+		//if (renderShadowMap)
+		//	EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
 
 		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 
@@ -190,8 +190,13 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		#endif
 		
 		// set global shader value (applied to all draw calls) for shadow map texture
-		if (renderShadowMap)
-			EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
+		//if (renderShadowMap)
+		//	EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
+
+#if APIABSTRACTION_D3D9
+		EffectManager::Instance()->assignLightToClustersD3D9();
+		EffectManager::Instance()->uploadClusteredForwardConstantsD3D9();
+#endif
 
 		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 
@@ -201,6 +206,10 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 
         // Required when rendering to backbuffer directly. also done in drawMotionBlur_EndScene() since it is the last step of post process
 		EffectManager::Instance()->endCurrentRenderTarget();
+
+#if APIABSTRACTION_D3D9
+		EffectManager::Instance()->unbindClusteredForwardTextureResources();
+#endif
     }
             
 	ctx.getGPUScreen()->endFrame();

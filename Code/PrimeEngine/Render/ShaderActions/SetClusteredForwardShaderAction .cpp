@@ -7,12 +7,12 @@
 #include "PrimeEngine/APIAbstraction/Effect/Effect.h"
 
 // Sibling/Children includes
-#include "SetPerObjectGroupConstantsShaderAction.h"
+#include "SetClusteredForwardShaderAction.h"
 
 namespace PE {
 using namespace Components;
 
-void SetPerObjectGroupConstantsShaderAction::bindToPipeline(Effect *pCurEffect /* = NULL*/)
+void SetClusteredForwardShaderAction::bindToPipeline(Effect *pCurEffect /* = NULL*/)
 {
 #if PE_PLAT_IS_PSVITA
 	PSVitaRenderer *pPSVitaRenderer = static_cast<PSVitaRenderer *>(m_pContext->getGPUScreen());
@@ -32,17 +32,21 @@ void SetPerObjectGroupConstantsShaderAction::bindToPipeline(Effect *pCurEffect /
 		Effect::setConstantBuffer(pDevice, pDeviceContext, s_pBuffer, 1, &m_data, sizeof(Data));
 	#elif APIABSTRACTION_D3D9
     
-        int float4PerLight = 7;
-        int float4PerLights = float4PerLight * NUM_LIGHT_SOURCES_DATAS; // note shaders are hardcoded to allocate registers in shader files. if these valeus are changed, shaders have to be changed too
-    
-        int totalFloat4 = (21 + float4PerLights);
-        assert(sizeof(m_data) == totalFloat4 * 4 * sizeof(float)); // the data is synced to take totalFloat4 float4 registers on GPU
-		
+  //      int float4PerLight = 7;
+  //      int float4PerLights = float4PerLight * NUM_LIGHT_SOURCES_DATAS; // note shaders are hardcoded to allocate registers in shader files. if these valeus are changed, shaders have to be changed too
+  //  
+  //      int totalFloat4 = (21 + float4PerLights);
+  //      assert(sizeof(m_data) == totalFloat4 * 4 * sizeof(float)); // the data is synced to take totalFloat4 float4 registers on GPU
+		//
 		D3D9Renderer *pD3D9Renderer = static_cast<D3D9Renderer *>(m_pContext->getGPUScreen());
 		LPDIRECT3DDEVICE9 pDevice = pD3D9Renderer->m_pD3D9Device;
-		
-		pDevice->SetVertexShaderConstantF(1, (const float *)(&m_data), totalFloat4);
-		pDevice->SetPixelShaderConstantF(1, (const float *)(&m_data), totalFloat4);
+		//
+		//pDevice->SetVertexShaderConstantF(1, (const float *)(&m_data), totalFloat4);
+		//pDevice->SetPixelShaderConstantF(1, (const float *)(&m_data), totalFloat4);
+
+		// + clustered forward
+		// pDevice->SetVertexShaderConstantF(163, (const float *)(&m_dataClusteredForward), 2+78*2);
+		pDevice->SetPixelShaderConstantF(163, (const float *)(&m_dataClusteredForward), 2+78*2);
 
 	#elif APIABSTRACTION_OGL
 		
@@ -287,15 +291,15 @@ void SetPerObjectGroupConstantsShaderAction::bindToPipeline(Effect *pCurEffect /
 	#endif // if APIABSTRACTION_OGL
 }
 
-void SetPerObjectGroupConstantsShaderAction::unbindFromPipeline(Components::Effect *pCurEffect/* = NULL*/)
+void SetClusteredForwardShaderAction::unbindFromPipeline(Components::Effect *pCurEffect/* = NULL*/)
 {}
 
-void SetPerObjectGroupConstantsShaderAction::releaseData()
+void SetClusteredForwardShaderAction::releaseData()
 {}
 
 
 #if APIABSTRACTION_OGL
-void SetPerObjectGroupConstantsShaderAction::PerEffectBindIds::initialize(Effect *pEffect)
+void SetClusteredForwardShaderAction::PerEffectBindIds::initialize(Effect *pEffect)
 {
 #if APIABSTRACTION_IOS 
 
@@ -407,7 +411,7 @@ void SetPerObjectGroupConstantsShaderAction::PerEffectBindIds::initialize(Effect
 	}
 }
 
-void SetPerObjectGroupConstantsShaderAction::PerEffectBindIds::initializeLightCGParams(unsigned int index, LightCGParams &out_v, LightCGParams &out_f, Effect *pEffect)
+void SetClusteredForwardShaderAction::PerEffectBindIds::initializeLightCGParams(unsigned int index, LightCGParams &out_v, LightCGParams &out_f, Effect *pEffect)
 {
 #if APIABSTRACTION_IOS
     char index_num[8];

@@ -1,0 +1,112 @@
+#ifndef DETAILEDMESH_GLOW_PS
+#define DETAILEDMESH_GLOW_PS
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "DetailedMesh_Structs.fx"
+
+#include "DeferredLightCommon.fx"
+
+float getPointLightAtt(float radius, float dist) 
+{
+    // Soft transition
+    float attenuation = pow(1.0 + (dist / radius) , -2.0) * 1.2;
+    
+    float cutoff = radius * 0.7;
+    attenuation *= 1.0 - smoothstep(0.0, 1.0, ( (dist / cutoff) - 1.0) * 4.0 );
+    attenuation = max(0.0, attenuation);
+    return attenuation;
+}
+
+float3 blinn_phong(float3 n, float3 l, float3 e, 
+				   float3 le, float3 la, float spec_pow, 
+				   float3 kd, float3 ks, float3 ka, float att)
+{
+	float NoH = 0.0f;
+	float NoL = dot(n, l);
+	float3 diffuse = float3(0, 0, 0);
+	float3 specular = float3(0, 0, 0);
+	if (NoL > 0)
+	{
+		float3 h = normalize(l + e);
+		NoH = max(dot(n, h), 0.0);
+		diffuse = kd * NoL;
+		specular = ks * pow(NoH, spec_pow);
+	}
+
+	return att * le * (diffuse + specular) + la; //ka * la;
+}
+
+float3 renderPointLight(float3 posWS, float3 albedo, float3 normal, cbPointLight light)
+{
+	const float3 one = float3(1, 1, 1);
+	const float3 zero = float3(0, 0, 0);
+	
+	float3 E = normalize(xyzgEyePosW_wDoMotionBlur.xyz - posWS);
+	float3 L = light.cPos - posWS;
+	float  dist = length(L);
+	float  att = getPointLightAtt(light.cRadius, dist);
+	L = normalize(L);
+	
+	return blinn_phong(normal, L, E,
+				   light.cColor, zero, light.cSpecPow, 
+				   albedo, one, one, att);
+}
+
+
+float4 DetailedMesh_Clustered_Forward_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
+{
+	// note: 0 alpha means no glow
+	float4 originalColor = sample2D(gDiffuseMapSampler, pIn.iTexCoord, gDiffuseMap);
+	float3 perPixelNormal = pIn.iNormalW;
+	if (xHasNrm_yHasSpec_zHasGlow_wHasDiff.x > 0.1)
+	{
+		// retrieve the normal vector from bump map
+		perPixelNormal = sample2D(gBumpMapSampler, pIn.iTexCoord, gBumpMap).xyz;
+		
+
+		//Uncompress from [0,1] to [-1,1]
+		perPixelNormal = 2.0*perPixelNormal - 1.0;
+		
+		//Build orthonormal basis
+		float3 N = normalize(pIn.iNormalW);
+		float3 T = normalize(pIn.iTangentW - dot(pIn.iTangentW, N)*N);
+		float3 B = cross(N,T);
+		
+		float3x3 TBN = make_float3x3(T, B, N);
+		
+		// Tranform from tangent space to world space
+		perPixelNormal = normalize(mul(perPixelNormal, TBN));
+	}
+	else
+	{
+		perPixelNormal = normalize(perPixelNormal);
+	}
+	
+	float3 finalColor = float3(0, 0, 0);
+	
+	// load cluster 
+	float3 cluster_coord = pIn.iPosW * cs_scale.xyz + cs_bias.xyz;
+	float4 normalized_coord = float4(cluster_coord * float3(1.0/32.0, 1.0/8.0, 1.0/32.0), 0.0);
+	float4 data = tex3Dlod(gClusters, normalized_coord);
+	int offset = int(data.r);
+	int counts = int(data.g);
+	
+	for (int i = 0; i < counts; i++)
+	{
+		float offsetCoord = (offset + i) * (1.0 / 4095.0);
+		float lightIndexNormalized = tex2Dlod(gLightIndices, float4(offsetCoord, 0.0, 0.0, 0.0)).a;
+		int lightIndex = int(lightIndexNormalized * 255.0);
+		cbPointLight light = cs_pointLights[lightIndex];
+		
+		finalColor += renderPointLight(pIn.iPosW, originalColor.rgb, perPixelNormal, light);
+	}
+	
+	return float4(finalColor, 1.0);
+}
+
+PS_wrapper_DETAILED_MESH_SHADOWED(DetailedMesh_Clustered_Forward_PS)
+
+#endif
+

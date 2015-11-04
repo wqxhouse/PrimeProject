@@ -43,6 +43,10 @@ enum EGpuResourceSlot
 	WIND_TEXTURE_2D_SAMPLER_SLOT = 7,
 	RANDOM_TEXTURE_1D_SAMPLER_SLOT = 7,
 
+	// + Clustered
+	CLUSTERES_3D_SAMPLER_SLOT = 8,
+	LIGHT_INDICES_SAMPLER_SLOT = 9,
+
 	NUM_GPU_SAMPLERS, // how many samplers can be bound at the same time
 
 	// we can surpass NUM_GPU_SAMPLERS since below buffer ids dont require samplers
@@ -81,6 +85,13 @@ struct SA_Bind_Resource : ShaderAction
 		EGpuResourceSlot bufferId,
 		ESamplerState samplerState,
 		API_CHOOSE_DX11_DX9_OGL_PSVITA_NO_PAREN(ID3D11ShaderResourceView* pShaderResource, IDirect3DTexture9* pTextureResource, GLuint texture, SceGxmTexture texture),
+		const char *dbgStr = NULL
+	);
+
+	void set(
+		EGpuResourceSlot bufferId,
+		ESamplerState samplerState,
+		IDirect3DVolumeTexture9* pTextureResource3D,
 		const char *dbgStr = NULL
 	);
 
@@ -126,6 +137,7 @@ private:
 	PrimitiveTypes::UInt32 m_bufferId;
 #	if APIABSTRACTION_D3D9
 		IDirect3DTexture9* m_pTextureResource;
+		IDirect3DVolumeTexture9 *m_pTextureResourceVolume;
 #	elif APIABSTRACTION_D3D11
 	union{
 		ID3D11ShaderResourceView* m_pShaderResource;

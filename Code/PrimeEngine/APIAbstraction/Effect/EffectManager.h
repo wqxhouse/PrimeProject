@@ -24,10 +24,21 @@
 #include "PERasterizerState.h"
 #include "PEDepthStencilState.h"
 
+#if APIABSTRACTION_D3D9
+#define CX 32
+#define CY 8
+#define CZ 32
+#define POINTLIGHT_NUM_D3D9 78
+#define MAX_LIGHT_INDICES 4096 // limited by dx9 texture dimension
+#endif
+
+#include <vector>
+
 namespace PE {
 namespace Components{
 struct Effect;
 struct DrawList;
+struct Light;
 };
 
 struct EffectManager : public PE::PEAllocatableAndDefragmentable
@@ -92,6 +103,12 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	void debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSeparatedGlow, bool drawGlow1stPass, bool drawGlow2ndPass, bool drawShadowRenderTarget);
 
+#if APIABSTRACTION_D3D9
+	void assignLightToClustersD3D9();
+	void uploadClusteredForwardConstantsD3D9();
+	void unbindClusteredForwardTextureResources();
+#endif
+
 public:
 	// Singleton
 	static Handle s_myHandle;
@@ -135,6 +152,11 @@ public:
 #	elif APIABSTRACTION_D3D9
 		PEMap<IDirect3DPixelShader9*> m_pixelShaders;
 		PEMap<IDirect3DVertexShader9*> m_vertexShaders;
+
+		// Volume texture
+		LPDIRECT3DVOLUMETEXTURE9 m_clustersTex;
+		LPDIRECT3DTEXTURE9 m_lightIndicesTex;
+
 #	elif APIABSTRACTION_OGL
 	PEMap<GLuint> m_vertexShaders;
 	PEMap<GLuint> m_pixelShaders;
@@ -150,6 +172,24 @@ public:
 	bool m_doMotionBlur;
 
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;
+
+#if APIABSTRACTION_D3D9
+	std::vector<PE::Components::Light *> _pointLights;
+	std::vector<float> _lightIndices;
+	Vector3 m_cMin;
+	Vector3 m_cMax;
+	unsigned int _pointLightNum;
+
+	// + Deferred cluster data - hard coded cluster size
+	struct ClusterDataD3D9
+	{
+		float offset;
+		float counts;
+	};
+
+	ClusterDataD3D9 _cluster[CZ][CY][CX];
+#endif
+
 }; // class EffectManager
 
 }; // namespace PE

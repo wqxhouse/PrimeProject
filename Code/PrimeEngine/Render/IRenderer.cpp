@@ -14,7 +14,10 @@ IRenderer::IRenderer(PE::GameContext &context, unsigned int width, unsigned int 
 	m_vsProfile[0] = '\0';
 	m_psProfile[0] = '\0';
 
-	m_renderMode = RenderMode_DefaultGlow;
+	// m_renderMode = RenderMode_DefaultGlow;
+
+	// + clustered
+	m_renderMode = RenderMode_DefaultNoPostProcess;
 	
 #if APIABSTRACTION_IOS || APIABSTRACTION_PS3 || PE_PLAT_IS_PSVITA
 	m_renderMode = RenderMode_DefaultNoPostProcess;

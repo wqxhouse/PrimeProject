@@ -13,6 +13,7 @@
 namespace PE {
 using namespace Components;
 SA_Bind_Resource::SA_Bind_Resource(PE::GameContext &context, PE::MemoryArena arena)
+	:m_pTextureResource(NULL), m_pTextureResourceVolume(NULL)
 {
 	m_arena = arena; m_pContext = &context;
 	m_samplerState = SamplerState_INVALID;
@@ -25,7 +26,7 @@ SA_Bind_Resource::SA_Bind_Resource(
 	API_CHOOSE_DX11_DX9_OGL_PSVITA_NO_PAREN(ID3D11ShaderResourceView* pShaderResource, IDirect3DTexture9* pTextureResource, GLuint texture, SceGxmTexture texture),
 	const char *dbgStr/* = NULL*/
 )
-: ShaderAction()
+: ShaderAction(), m_pTextureResource(NULL), m_pTextureResourceVolume(NULL)
 {
 	m_arena = arena; m_pContext = &context;
 	#if PE_PLAT_IS_PSVITA
@@ -61,6 +62,21 @@ void SA_Bind_Resource::set(
 #endif
 }
 
+#if APIABSTRACTION_D3D9
+void SA_Bind_Resource::set(
+	EGpuResourceSlot bufferId,
+	ESamplerState samplerState,
+	IDirect3DVolumeTexture9* pTextureResource3D,
+	const char *dbgStr 
+	)
+{
+	m_dbgStr = dbgStr;
+	m_samplerState = samplerState;
+	m_bufferId = bufferId;
+	m_pTextureResourceVolume = pTextureResource3D;
+}
+#endif
+
 #if APIABSTRACTION_D3D11
 void SA_Bind_Resource::set(
 	EGpuResourceSlot bufferId,
@@ -92,8 +108,19 @@ void SA_Bind_Resource::bindToPipeline(Effect *pCurEffect /* = NULL*/)
 #elif APIABSTRACTION_D3D9
 		D3D9Renderer *pD3D9Renderer = static_cast<D3D9Renderer *>(m_pContext->getGPUScreen());
 		LPDIRECT3DDEVICE9 pDevice = pD3D9Renderer->m_pD3D9Device;
-		
-		pDevice->SetTexture(m_bufferId, m_pTextureResource);
+	
+		if (m_pTextureResource != NULL)
+		{
+			pDevice->SetTexture(m_bufferId, m_pTextureResource);
+		}
+		else if (m_pTextureResourceVolume != NULL)
+		{
+			pDevice->SetTexture(m_bufferId, m_pTextureResourceVolume);
+		}
+		else
+		{
+			assert(false);
+		}
 		/*
 		pDevice->VSSetShaderResources(m_bufferId, 1, &pRV);
 		pDevice->GSSetShaderResources(m_bufferId, 1, &pRV);

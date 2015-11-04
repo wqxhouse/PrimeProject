@@ -25,6 +25,8 @@
 #include "EffectManager.h"
 #include "Effect.h"
 
+#include "PrimeEngine/Scene/RootSceneNode.h"
+#include "PrimeEngine/Render/ShaderActions/SetClusteredForwardShaderAction.h"
 
 namespace PE {
 
@@ -46,6 +48,7 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	, m_2ndGlowTargetTextureGPU(context, arena)
 	, m_shadowMapDepthTexture(context, arena)
 	, m_frameBufferCopyTexture(context, arena)
+	, m_clustersTex(NULL)
 {
 	m_arena = arena; m_pContext = &context;
 }
@@ -660,6 +663,232 @@ void EffectManager::debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSe
 	pibGPU->unbindFromPipeline();
 	pvbGPU->unbindFromPipeline(&curEffect);
 }
+
+void EffectManager::assignLightToClustersD3D9()
+{
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+
+	int curPointLight = 0;
+	int curLightIndices = 0;
+	memset(&_cluster, 0, sizeof(ClusterDataD3D9)*CX*CY*CZ);
+
+	int c_list[CZ][CY][CX][20]; // currently allow each cluster store 20 lights at maximum
+	short c_list_count[CZ][CY][CX];
+
+	memset(c_list, 0, sizeof(c_list));
+	memset(c_list_count, 0, sizeof(c_list_count));
+
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Light *l = lights[i].getObject<Light>();
+		if (l->m_cbuffer.type == 0) // p
+		{
+			_pointLights[curPointLight++] = l;
+		}
+	}
+
+	Vector3 size = m_cMax - m_cMin;
+	Vector3 scale = Vector3(float(CX) / size.m_x, float(CY) / size.m_y, float(CZ) / size.m_z);
+	Vector3 inv_scale = Vector3(1.0f / scale.m_x, 1.0f / scale.m_y, 1.0f / scale.m_z);
+
+	// Directional light treat differently - do not assign to clusters
+
+	// Point light assignment
+	for (int i = 0; i < curPointLight; i++)
+	{
+		Light *pl = _pointLights[i];
+
+		const Vector3 p = (pl->m_cbuffer.pos - m_cMin);
+		const Vector3 pos = pl->m_cbuffer.pos;
+		const Vector3 radiusVec = Vector3(pl->m_cbuffer.range, pl->m_cbuffer.range, pl->m_cbuffer.range);
+
+		Vector3 p_min;
+		Vector3 p_max;
+
+		Vector3 p0 = p - radiusVec;
+		Vector3 p1 = p + radiusVec;
+		p0.m_x *= scale.m_x;
+		p0.m_y *= scale.m_y;
+		p0.m_z *= scale.m_z;
+		p1.m_x *= scale.m_x;
+		p1.m_y *= scale.m_y;
+		p1.m_z *= scale.m_z;
+
+		p_min = p0;
+		p_max = p1;
+
+		// Cluster for the center of the light
+		const int px = (int)floorf(p.m_x * scale.m_x);
+		const int py = (int)floorf(p.m_y * scale.m_y);
+		const int pz = (int)floorf(p.m_z * scale.m_z);
+
+		// Cluster bounds for the light
+		const int x0 = max((int)floorf(p_min.m_x), 0);
+		const int x1 = min((int)ceilf(p_max.m_x), CX);
+		const int y0 = max((int)floorf(p_min.m_y), 0);
+		const int y1 = min((int)ceilf(p_max.m_y), CY);
+		const int z0 = max((int)floorf(p_min.m_z), 0);
+		const int z1 = min((int)ceilf(p_max.m_z), CZ);
+
+		const float radius_sqr = radiusVec.m_x * radiusVec.m_x;
+
+		// Do AABB<->Sphere tests to figure out which clusters are actually intersected by the light
+		for (int z = z0; z < z1; z++)
+		{
+			float dz = (pz == z) ? 0.0f : m_cMin.m_z + (pz < z ? z : z + 1) * inv_scale.m_z - pos.m_z;
+			dz *= dz;
+
+			for (int y = y0; y < y1; y++)
+			{
+				float dy = (py == y) ? 0.0f : m_cMin.m_y + (py < y ? y : y + 1) * inv_scale.m_y - pos.m_y;
+				dy *= dy;
+				dy += dz;
+
+				for (int x = x0; x < x1; x++)
+				{
+					float dx = (px == x) ? 0.0f : m_cMin.m_x + (px < x ? x : x + 1) * inv_scale.m_x - pos.m_x;
+					dx *= dx;
+					dx += dy;
+
+					if (dx < radius_sqr)
+					{
+						// TOOD: find ways to allocate larger buffer
+						// than max limit of d3d11 of texture1D
+						/*	if (curLightIndices >= MAX_LIGHT_INDICES)
+						{
+						char dbg[512];
+						sprintf_s(dbg, 512, "curLightIndices reached maximum\n");
+						break;
+						}
+
+						*/
+						// printf("Assigned %d, %d, %d\n", x, y, z);
+
+						int curClusterLightCount = c_list_count[z][y][x];
+						if (curClusterLightCount >= 20)
+						{
+							char dbg[512];
+							sprintf_s(dbg, 512, "curLightIndices reached maximum\n");
+							break;
+						}
+
+						_cluster[z][y][x].offset = curLightIndices;
+
+						int lightCount = (int)_cluster[z][y][x].counts;
+						lightCount++; // prevent ++ = +0.99999...
+						_cluster[z][y][x].counts = (float)lightCount;
+
+						c_list[z][y][x][c_list_count[z][y][x]++] = i;
+
+						// _lightIndices[curLightIndices++] = i;
+					}
+				}
+			}
+		}
+	}
+
+	// flush c_list to _lightIndices - could cause high overhead if too finely subdivide the cluster
+	for (int z = 0; z < CZ; z++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int x = 0; x < CX; x++)
+			{
+				for (int k = 0; k < c_list_count[z][y][x]; k++)
+				{
+					float id = (float)c_list[z][y][x][k] / 255.0f;
+					_lightIndices[curLightIndices++] = id;
+				}
+			}
+		}
+	}
+
+	D3DLOCKED_BOX box;
+	if (m_clustersTex->LockBox(0, &box, NULL, 0) == D3D_OK)
+	{
+		// TODO: could be more efficient to memcpy the whole chunk
+		// but need to make sure mappedData is contiguous in memory
+		BYTE *mappedData = reinterpret_cast<BYTE*>(box.pBits);
+		for (int z = 0; z < CZ; z++)
+		{
+			for (int y = 0; y < CY; y++)
+			{
+				memcpy(mappedData + z * box.SlicePitch
+					+ y * box.RowPitch,
+					_cluster[z][y], CX * sizeof(ClusterDataD3D9));
+			}
+		}
+
+		m_clustersTex->UnlockBox(0);
+	}
+
+	D3DLOCKED_RECT rect;
+	if (m_lightIndicesTex->LockRect(0, &rect, NULL, 0) == D3D_OK)
+	{
+		BYTE *mappedData = reinterpret_cast<BYTE*>(box.pBits);
+		memcpy(mappedData, &_lightIndices[0], MAX_LIGHT_INDICES * sizeof(float));
+	
+		m_lightIndicesTex->UnlockRect(0);
+	}
+
+	_pointLightNum = curPointLight;
+}
+
+
+void EffectManager::uploadClusteredForwardConstantsD3D9()
+{
+	PE::SetClusteredForwardShaderAction pscs(*m_pContext, m_arena);
+	Vector3 size = m_cMax - m_cMin;
+	Vector3 scale = Vector3(float(CX) / size.m_x, float(CY) / size.m_y, float(CZ) / size.m_z);
+	pscs.m_dataClusteredForward.scale.m_x = scale.m_x;
+	pscs.m_dataClusteredForward.scale.m_y = scale.m_y;
+	pscs.m_dataClusteredForward.scale.m_z = scale.m_z;
+
+	Vector3 bias;
+	bias.m_x = -scale.m_x * m_cMin.m_x;
+	bias.m_y = -scale.m_y * m_cMin.m_y;
+	bias.m_z = -scale.m_z * m_cMin.m_z;
+	pscs.m_dataClusteredForward.bias.m_x = bias.m_x;
+	pscs.m_dataClusteredForward.bias.m_y = bias.m_y;
+	pscs.m_dataClusteredForward.bias.m_z = bias.m_z;
+
+	// Convert PE Light to shader Light (huge overhead...; 
+	// but no time to change the fundamental structure of PE)
+
+	for (unsigned int i = 0; i < _pointLightNum; i++)
+	{
+		pscs.m_dataClusteredForward.pointLights[i].pos = _pointLights[i]->m_cbuffer.pos;
+		pscs.m_dataClusteredForward.pointLights[i].color = _pointLights[i]->m_cbuffer.diffuse.asVector3Ref();
+		pscs.m_dataClusteredForward.pointLights[i].radius = _pointLights[i]->m_cbuffer.range;
+		pscs.m_dataClusteredForward.pointLights[i].specPow = _pointLights[i]->m_cbuffer.spotPower;
+	}
+
+	pscs.bindToPipeline(NULL);
+
+	PE::SA_Bind_Resource set3DTextureAction(*m_pContext, m_arena);
+	set3DTextureAction.set(CLUSTERES_3D_SAMPLER_SLOT,
+		SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, m_clustersTex);
+	set3DTextureAction.bindToPipeline(NULL);
+
+	PE::SA_Bind_Resource setIndicesTexAction(*m_pContext, m_arena);
+	setIndicesTexAction.set(LIGHT_INDICES_SAMPLER_SLOT,
+		SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, m_lightIndicesTex);
+	setIndicesTexAction.bindToPipeline(NULL);
+}
+
+void EffectManager::unbindClusteredForwardTextureResources()
+{
+	SA_Bind_Resource sa(*m_pContext, m_arena);
+	sa.set(CLUSTERES_3D_SAMPLER_SLOT,
+		SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, m_clustersTex);
+	sa.unbindFromPipeline(NULL);
+	SA_Bind_Resource sa2(*m_pContext, m_arena);
+	sa2.set(LIGHT_INDICES_SAMPLER_SLOT,
+		SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, m_lightIndicesTex);
+	sa2.unbindFromPipeline(NULL);
+}
+
+
 
 
 }; // namespace PE

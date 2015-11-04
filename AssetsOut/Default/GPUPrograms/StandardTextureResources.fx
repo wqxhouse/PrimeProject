@@ -95,6 +95,7 @@ sampler gWindMapSampler : register(s7);
 
 sampler gRandomMapSampler : register(s7);
 
+
 #else // OGL, CG, PSVITA
 
 API_UNIFORM_CONSTANT sampler2D gShadowMapSampler SAMPLER_REGISTER(1); // : register(s1);
