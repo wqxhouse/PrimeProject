@@ -232,7 +232,18 @@ _Pvt_Extensions
 # PrimeEngine Miscs
 3rdPartyInstallations/**
 AssetsIn/**
-AssetsOut/**
+
+# Exclude AssetsOut except for shaders
+AssetsOut/*
+!AssetsOut/Default/
+AssetsOut/Default/*
+!AssetsOut/Default/GPUPrograms/
+
+# Exclude test level
+!AssetsOut/Basic/
+AssetsOut/Basic/*
+!AssetsOut/Basic/Levels/
+
 External/**
 GlobalConfig/**
 Python25/**
@@ -248,3 +259,17 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj
 Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
+
+Code/CharacterControl/CharacterControl-win32d3d9.vcxproj
+Code/CharacterControl/CharacterControl-win32d3d9.vcxproj.filters
+Code/PEWorkspace-win32d3d9.sln
+Code/PrimeEngine/PrimeEngine-win32d3d9.vcxproj
+Code/PrimeEngine/PrimeEngine-win32d3d9.vcxproj.filters
+Code/lua_dist/lua_dist-win32d3d9.vcxproj
+Code/lua_dist/lua_dist-win32d3d9.vcxproj.filters
+Code/luasocket_dist/luasocket_dist-win32d3d9.vcxproj
+Code/luasocket_dist/luasocket_dist-win32d3d9.vcxproj.filters
+
+*.exe
+*.dll
+*.bat
