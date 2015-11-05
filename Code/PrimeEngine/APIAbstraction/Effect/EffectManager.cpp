@@ -28,6 +28,9 @@
 #include "PrimeEngine/Scene/RootSceneNode.h"
 #include "PrimeEngine/Render/ShaderActions/SetClusteredForwardShaderAction.h"
 
+#include <DxErr.h>
+#pragma comment(lib, "dxerr.lib")
+
 namespace PE {
 
 using namespace Components;
@@ -752,18 +755,6 @@ void EffectManager::assignLightToClustersD3D9()
 
 					if (dx < radius_sqr)
 					{
-						// TOOD: find ways to allocate larger buffer
-						// than max limit of d3d11 of texture1D
-						/*	if (curLightIndices >= MAX_LIGHT_INDICES)
-						{
-						char dbg[512];
-						sprintf_s(dbg, 512, "curLightIndices reached maximum\n");
-						break;
-						}
-
-						*/
-						// printf("Assigned %d, %d, %d\n", x, y, z);
-
 						int curClusterLightCount = c_list_count[z][y][x];
 						if (curClusterLightCount >= 20)
 						{
@@ -772,15 +763,13 @@ void EffectManager::assignLightToClustersD3D9()
 							break;
 						}
 
-						_cluster[z][y][x].offset = curLightIndices;
-
-						int lightCount = (int)_cluster[z][y][x].counts;
-						lightCount++; // prevent ++ = +0.99999...
-						_cluster[z][y][x].counts = (float)lightCount;
+						//_cluster[z][y][x].offset = curLightIndices;
+						int ct = (int)_cluster[z][y][x].counts;
+						ct++;
+						_cluster[z][y][x].counts = (float)ct;
+						// assert(_cluster[z][y][x].counts <= 255);
 
 						c_list[z][y][x][c_list_count[z][y][x]++] = i;
-
-						// _lightIndices[curLightIndices++] = i;
 					}
 				}
 			}
@@ -794,21 +783,42 @@ void EffectManager::assignLightToClustersD3D9()
 		{
 			for (int x = 0; x < CX; x++)
 			{
+				bool hasLight = c_list_count[z][y][x] != 0;
+				if (hasLight)
+				{
+					_cluster[z][y][x].offset = (float)curLightIndices;
+				}
+
 				for (int k = 0; k < c_list_count[z][y][x]; k++)
 				{
-					float id = (float)c_list[z][y][x][k] / 255.0f;
-					_lightIndices[curLightIndices++] = id;
+					// assert(curLightIndices <= 255); // limitation of offset of cluster (8 bit only)
+					assert(curLightIndices <= MAX_LIGHT_INDICES);
+					if (hasLight)
+					{
+						_lightIndices[curLightIndices++] = (unsigned char)c_list[z][y][x][k];
+					}
 				}
 			}
 		}
 	}
 
 	D3DLOCKED_BOX box;
-	if (m_clustersTex->LockBox(0, &box, NULL, 0) == D3D_OK)
+	HRESULT h;
+	// 32 * 8 = 256 bytes -- x
+	// 128  row	    = 8 
+	// 1024 slice   
+	// TODO: now offset is capped at 255, which is very limited
+	// but considering the complexity involved to convert 
+	// 32 bit float to 16 bit float, now just use 8bit
+	// can be modified later
+	// also can modify light count by moving them into edram (if xbox)
+	if ((h = m_clustersTex->LockBox(0, &box, NULL, 0)) == D3D_OK)
 	{
 		// TODO: could be more efficient to memcpy the whole chunk
 		// but need to make sure mappedData is contiguous in memory
 		BYTE *mappedData = reinterpret_cast<BYTE*>(box.pBits);
+		// memcpy(mappedData, _cluster, sizeof(ClusterDataD3D9) * 32 * 8 * 32);
+
 		for (int z = 0; z < CZ; z++)
 		{
 			for (int y = 0; y < CY; y++)
@@ -822,11 +832,17 @@ void EffectManager::assignLightToClustersD3D9()
 		m_clustersTex->UnlockBox(0);
 	}
 
+	if (FAILED(h))
+	{
+		fprintf(stderr, "Error: %s error description: %s\n",
+			DXGetErrorString(h), DXGetErrorDescription(h));
+	}
+
 	D3DLOCKED_RECT rect;
 	if (m_lightIndicesTex->LockRect(0, &rect, NULL, 0) == D3D_OK)
 	{
-		BYTE *mappedData = reinterpret_cast<BYTE*>(box.pBits);
-		memcpy(mappedData, &_lightIndices[0], MAX_LIGHT_INDICES * sizeof(float));
+		BYTE *mappedData = reinterpret_cast<BYTE*>(rect.pBits);
+		memcpy(mappedData, &_lightIndices[0], MAX_LIGHT_INDICES * sizeof(unsigned char));
 	
 		m_lightIndicesTex->UnlockRect(0);
 	}

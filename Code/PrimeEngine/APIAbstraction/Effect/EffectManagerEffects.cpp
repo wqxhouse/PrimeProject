@@ -14,6 +14,10 @@
 #include "EffectManager.h"
 #include "Effect.h"
 
+// debug
+#include <DxErr.h>
+#pragma comment(lib, "dxerr.lib")
+
 namespace PE {
     
     using namespace Components;
@@ -63,19 +67,40 @@ namespace PE {
 		// + Clustered forward
 #if APIABSTRACTION_D3D9
 		_pointLights.resize(POINTLIGHT_NUM_D3D9);
-		_lightIndices.resize(CX*CY*CZ * 20);
+		// _lightIndices.resize(CX*CY*CZ * 20);
+		_lightIndices.resize(4096);
 		_pointLightNum = 0;
+
+		// TODO : calc the bound using MeshCPU
+#if 0
 		m_cMin = Vector3(-500, -250, -500);
 		m_cMax = Vector3(500, 250, 500);
+#else
+		m_cMin = Vector3(-25, -10, -25);
+		m_cMax = Vector3(25, 10, 25);
+#endif
 
 		// m_clustersTex
 		D3D9Renderer *ren = (D3D9Renderer *)m_pContext->getGPUScreen();
 		LPDIRECT3DDEVICE9 device = ren->m_pD3D9Device;
 		HRESULT hr = 
-			device->CreateVolumeTexture(CX, CY, CZ, 0, 0, D3DFMT_G16R16F, D3DPOOL_MANAGED, &m_clustersTex, NULL);
+			// device->CreateVolumeTexture(CX, CY, CZ, 1, 0, D3DFMT_G16R16F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
+			// device->CreateVolumeTexture(CX, CY, CZ, 1, 0, D3DFMT_G16R16F, D3DPOOL_MANAGED, &m_clustersTex, NULL);
+			// device->CreateVolumeTexture(CX, CY, CZ, 1, D3DUSAGE_DYNAMIC, D3DFMT_G16R16F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
+			device->CreateVolumeTexture(CX, CY, CZ, 1, D3DUSAGE_DYNAMIC, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
+		if (FAILED(hr)) {
+			fprintf(stderr, "Error: %s error description: %s\n",
+				DXGetErrorString(hr), DXGetErrorDescription(hr));
+		}
 		assert(SUCCEEDED(hr));
 
-		hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_MANAGED, &m_lightIndicesTex, NULL);
+		 hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
+		// hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
+		// hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_MANAGED, &m_lightIndicesTex, NULL);
+		if (FAILED(hr)) {
+			 fprintf(stderr, "Error: %s error description: %s\n",
+				 DXGetErrorString(hr), DXGetErrorDescription(hr));
+		 }
 		assert(SUCCEEDED(hr));
 
 #endif

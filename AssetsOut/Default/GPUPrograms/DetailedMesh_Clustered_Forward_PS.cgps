@@ -85,9 +85,12 @@ float4 DetailedMesh_Clustered_Forward_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
 	}
 	
 	float3 finalColor = float3(0, 0, 0);
+	// return float4(pIn.iPosW, 1.0);
+	// return float4(cs_bias.xyz, 1.0);
 	
 	// load cluster 
-	float3 cluster_coord = pIn.iPosW * cs_scale.xyz + cs_bias.xyz;
+	
+	float3 cluster_coord = floor(pIn.iPosW * cs_scale.xyz + cs_bias.xyz);
 	float4 normalized_coord = float4(cluster_coord * float3(1.0/32.0, 1.0/8.0, 1.0/32.0), 0.0);
 	float4 data = tex3Dlod(gClusters, normalized_coord);
 	int offset = int(data.r);
@@ -103,6 +106,13 @@ float4 DetailedMesh_Clustered_Forward_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
 		finalColor += renderPointLight(pIn.iPosW, originalColor.rgb, perPixelNormal, light);
 	}
 	
+	
+	// finalColor = renderPointLight(pIn.iPosW, originalColor.rgb, perPixelNormal, cs_pointLights[1]);
+	
+	
+	
+	// alpha correction
+	finalColor = pow(finalColor, 1.0/2.2);
 	return float4(finalColor, 1.0);
 }
 

@@ -176,7 +176,7 @@ public:
 
 #if APIABSTRACTION_D3D9
 	std::vector<PE::Components::Light *> _pointLights;
-	std::vector<float> _lightIndices;
+	std::vector<unsigned char> _lightIndices;
 	Vector3 m_cMin;
 	Vector3 m_cMax;
 	unsigned int _pointLightNum;
@@ -184,8 +184,13 @@ public:
 	// + Deferred cluster data - hard coded cluster size
 	struct ClusterDataD3D9
 	{
-		float offset;
-		float counts;
+		// TOOD: optimize to 16 / 8 bit
+		// Currently G32R32F texture -- bad for xbox
+		float offset; // r - 32
+		float counts; // g - 32
+
+		//unsigned char offset; // g - 8 
+		//unsigned char counts; // r - 8 
 	};
 
 	ClusterDataD3D9 _cluster[CZ][CY][CX];
