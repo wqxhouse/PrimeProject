@@ -270,6 +270,18 @@ Code/lua_dist/lua_dist-win32d3d9.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d9.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d9.vcxproj.filters
 
+Code/Atg/atg-xbox360.vcxproj
+Code/Atg/atg-xbox360.vcxproj.filters
+Code/CharacterControl/CharacterControl-xbox360.vcxproj
+Code/CharacterControl/CharacterControl-xbox360.vcxproj.filters
+Code/PEWorkspace-xbox360.sln
+Code/PrimeEngine/PrimeEngine-xbox360.vcxproj
+Code/PrimeEngine/PrimeEngine-xbox360.vcxproj.filters
+Code/lua_dist/lua_dist-xbox360.vcxproj
+Code/lua_dist/lua_dist-xbox360.vcxproj.filters
+Code/luasocket_dist/luasocket_dist-xbox360.vcxproj
+Code/luasocket_dist/luasocket_dist-xbox360.vcxproj.filters
+
 *.exe
 *.dll
 *.bat
