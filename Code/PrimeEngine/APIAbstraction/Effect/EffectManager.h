@@ -106,6 +106,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 #if APIABSTRACTION_D3D9
 	void assignLightToClustersD3D9();
+	void assignLightToClustersXBOX360();
 	void uploadClusteredForwardConstantsD3D9();
 	void unbindClusteredForwardTextureResources();
 #endif

@@ -281,6 +281,7 @@ Code/lua_dist/lua_dist-xbox360.vcxproj
 Code/lua_dist/lua_dist-xbox360.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-xbox360.vcxproj
 Code/luasocket_dist/luasocket_dist-xbox360.vcxproj.filters
+Code/SRV
 
 *.exe
 *.dll

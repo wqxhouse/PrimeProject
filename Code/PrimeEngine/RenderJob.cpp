@@ -194,11 +194,16 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		//	EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
 
 #if APIABSTRACTION_D3D9
+#if APIABSTRACTION_X360
+		EffectManager::Instance()->assignLightToClustersXBOX360();
+#else
 		EffectManager::Instance()->assignLightToClustersD3D9();
+#endif
 		EffectManager::Instance()->uploadClusteredForwardConstantsD3D9();
 #endif
 
 		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+
 
         DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
 

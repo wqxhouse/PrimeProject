@@ -28,8 +28,8 @@
 #include "PrimeEngine/Scene/RootSceneNode.h"
 #include "PrimeEngine/Render/ShaderActions/SetClusteredForwardShaderAction.h"
 
-#include <DxErr.h>
-#pragma comment(lib, "dxerr.lib")
+//#include <DxErr.h>
+//#pragma comment(lib, "dxerr.lib")
 
 namespace PE {
 
@@ -667,6 +667,201 @@ void EffectManager::debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSe
 	pvbGPU->unbindFromPipeline(&curEffect);
 }
 
+void EffectManager::assignLightToClustersXBOX360()
+{
+	Array<PE::Handle, 0> &lights = PE::RootSceneNode::Instance()->m_lights;
+
+	int curPointLight = 0;
+	int curLightIndices = 0;
+	memset(&_cluster, 0, sizeof(ClusterDataD3D9)*CX*CY*CZ);
+
+	int c_list[CZ][CY][CX][5]; // currently allow each cluster store 5 lights at maximum for xbox 360
+	short c_list_count[CZ][CY][CX];
+
+	memset(c_list, 0, sizeof(c_list));
+	memset(c_list_count, 0, sizeof(c_list_count));
+
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Light *l = lights[i].getObject<Light>();
+		if (l->m_cbuffer.type == 0) // p
+		{
+			_pointLights[curPointLight++] = l;
+		}
+	}
+
+	Vector3 size = m_cMax - m_cMin;
+	Vector3 scale = Vector3(float(CX) / size.m_x, float(CY) / size.m_y, float(CZ) / size.m_z);
+	Vector3 inv_scale = Vector3(1.0f / scale.m_x, 1.0f / scale.m_y, 1.0f / scale.m_z);
+
+	// Directional light treat differently - do not assign to clusters
+
+	// Point light assignment
+	for (int i = 0; i < curPointLight; i++)
+	{
+		Light *pl = _pointLights[i];
+
+		const Vector3 p = (pl->m_cbuffer.pos - m_cMin);
+		const Vector3 pos = pl->m_cbuffer.pos;
+		const Vector3 radiusVec = Vector3(pl->m_cbuffer.range, pl->m_cbuffer.range, pl->m_cbuffer.range);
+
+		Vector3 p_min;
+		Vector3 p_max;
+
+		Vector3 p0 = p - radiusVec;
+		Vector3 p1 = p + radiusVec;
+		p0.m_x *= scale.m_x;
+		p0.m_y *= scale.m_y;
+		p0.m_z *= scale.m_z;
+		p1.m_x *= scale.m_x;
+		p1.m_y *= scale.m_y;
+		p1.m_z *= scale.m_z;
+
+		p_min = p0;
+		p_max = p1;
+
+		// Cluster for the center of the light
+		const int px = (int)floorf(p.m_x * scale.m_x);
+		const int py = (int)floorf(p.m_y * scale.m_y);
+		const int pz = (int)floorf(p.m_z * scale.m_z);
+
+		// Cluster bounds for the light
+		const int x0 = max((int)floorf(p_min.m_x), 0);
+		const int x1 = min((int)ceilf(p_max.m_x), CX);
+		const int y0 = max((int)floorf(p_min.m_y), 0);
+		const int y1 = min((int)ceilf(p_max.m_y), CY);
+		const int z0 = max((int)floorf(p_min.m_z), 0);
+		const int z1 = min((int)ceilf(p_max.m_z), CZ);
+
+		const float radius_sqr = radiusVec.m_x * radiusVec.m_x;
+
+		// Do AABB<->Sphere tests to figure out which clusters are actually intersected by the light
+		for (int z = z0; z < z1; z++)
+		{
+			float dz = (pz == z) ? 0.0f : m_cMin.m_z + (pz < z ? z : z + 1) * inv_scale.m_z - pos.m_z;
+			dz *= dz;
+
+			for (int y = y0; y < y1; y++)
+			{
+				float dy = (py == y) ? 0.0f : m_cMin.m_y + (py < y ? y : y + 1) * inv_scale.m_y - pos.m_y;
+				dy *= dy;
+				dy += dz;
+
+				for (int x = x0; x < x1; x++)
+				{
+					float dx = (px == x) ? 0.0f : m_cMin.m_x + (px < x ? x : x + 1) * inv_scale.m_x - pos.m_x;
+					dx *= dx;
+					dx += dy;
+
+					if (dx < radius_sqr)
+					{
+						int curClusterLightCount = c_list_count[z][y][x];
+						if (curClusterLightCount >= 20)
+						{
+							char dbg[512];
+							sprintf_s(dbg, 512, "curLightIndices reached maximum\n");
+							break;
+						}
+
+						//_cluster[z][y][x].offset = curLightIndices;
+						int ct = (int)_cluster[z][y][x].counts;
+						ct++;
+						_cluster[z][y][x].counts = (float)ct;
+						// assert(_cluster[z][y][x].counts <= 255);
+
+						c_list[z][y][x][c_list_count[z][y][x]++] = i;
+					}
+				}
+			}
+		}
+	}
+
+	// flush c_list to _lightIndices - could cause high overhead if too finely subdivide the cluster
+	for (int z = 0; z < CZ; z++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int x = 0; x < CX; x++)
+			{
+				bool hasLight = c_list_count[z][y][x] != 0;
+				if (hasLight)
+				{
+					_cluster[z][y][x].offset = (float)curLightIndices;
+				}
+
+				for (int k = 0; k < c_list_count[z][y][x]; k++)
+				{
+					// assert(curLightIndices <= 255); // limitation of offset of cluster (8 bit only)
+					assert(curLightIndices <= MAX_LIGHT_INDICES);
+					if (hasLight)
+					{
+						_lightIndices[curLightIndices++] = (unsigned char)c_list[z][y][x][k];
+					}
+				}
+			}
+		}
+	}
+
+	static int _hackCounter = 0;
+	D3DLOCKED_BOX box;
+	HRESULT h;
+	// 32 * 8 = 256 bytes -- x
+	// 128  row	    = 8 
+	// 1024 slice   
+	// TODO: now offset is capped at 255, which is very limited
+	// but considering the complexity involved to convert 
+	// 32 bit float to 16 bit float, now just use 8bit
+	// can be modified later
+	// also can modify light count by moving them into edram (if xbox)
+#if APIABSTRACTION_X360
+	if(_hackCounter == 0) 
+	{
+#endif 
+
+		if ((h = m_clustersTex->LockBox(0, &box, NULL, 0)) == D3D_OK)
+		{
+			// TODO: could be more efficient to memcpy the whole chunk
+			// but need to make sure mappedData is contiguous in memory
+			BYTE *mappedData = reinterpret_cast<BYTE*>(box.pBits);
+			// memcpy(mappedData, _cluster, sizeof(ClusterDataD3D9) * 32 * 8 * 32);
+
+			for (int z = 0; z < CZ; z++)
+			{
+				for (int y = 0; y < CY; y++)
+				{
+					memcpy(mappedData + z * box.SlicePitch
+						+ y * box.RowPitch,
+						_cluster[z][y], CX * sizeof(ClusterDataD3D9));
+				}
+			}
+
+			m_clustersTex->UnlockBox(0);
+		}
+
+		//if (FAILED(h))
+		//{
+		//	fprintf(stderr, "Error: %s error description: %s\n",
+		//		DXGetErrorString(h), DXGetErrorDescription(h));
+		//}
+
+		D3DLOCKED_RECT rect;
+		if (m_lightIndicesTex->LockRect(0, &rect, NULL, 0) == D3D_OK)
+		{
+			BYTE *mappedData = reinterpret_cast<BYTE*>(rect.pBits);
+			memcpy(mappedData, &_lightIndices[0], MAX_LIGHT_INDICES * sizeof(unsigned char));
+
+			m_lightIndicesTex->UnlockRect(0);
+		}
+
+#if APIABSTRACTION_X360
+		_hackCounter++;
+	}
+#endif
+
+	_pointLightNum = curPointLight;
+	
+}
+
 void EffectManager::assignLightToClustersD3D9()
 {
 	auto &lights = PE::RootSceneNode::Instance()->m_lights;
@@ -802,6 +997,7 @@ void EffectManager::assignLightToClustersD3D9()
 		}
 	}
 
+	static int _hackCounter = 0;
 	D3DLOCKED_BOX box;
 	HRESULT h;
 	// 32 * 8 = 256 bytes -- x
@@ -812,6 +1008,11 @@ void EffectManager::assignLightToClustersD3D9()
 	// 32 bit float to 16 bit float, now just use 8bit
 	// can be modified later
 	// also can modify light count by moving them into edram (if xbox)
+#if APIABSTRACTION_X360
+	if(_hackCounter == 0) 
+	{
+#endif 
+
 	if ((h = m_clustersTex->LockBox(0, &box, NULL, 0)) == D3D_OK)
 	{
 		// TODO: could be more efficient to memcpy the whole chunk
@@ -832,11 +1033,11 @@ void EffectManager::assignLightToClustersD3D9()
 		m_clustersTex->UnlockBox(0);
 	}
 
-	if (FAILED(h))
-	{
-		fprintf(stderr, "Error: %s error description: %s\n",
-			DXGetErrorString(h), DXGetErrorDescription(h));
-	}
+	//if (FAILED(h))
+	//{
+	//	fprintf(stderr, "Error: %s error description: %s\n",
+	//		DXGetErrorString(h), DXGetErrorDescription(h));
+	//}
 
 	D3DLOCKED_RECT rect;
 	if (m_lightIndicesTex->LockRect(0, &rect, NULL, 0) == D3D_OK)
@@ -846,6 +1047,11 @@ void EffectManager::assignLightToClustersD3D9()
 	
 		m_lightIndicesTex->UnlockRect(0);
 	}
+
+#if APIABSTRACTION_X360
+		_hackCounter++;
+	}
+#endif
 
 	_pointLightNum = curPointLight;
 }
