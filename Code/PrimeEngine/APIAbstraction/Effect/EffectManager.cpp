@@ -275,6 +275,7 @@ void EffectManager::buildFullScreenBoard()
 	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
 	
+	//Liu
 	createSphere(1,20,20);
 }
 
@@ -953,9 +954,14 @@ void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 }
 
 //Liu
-void EffectManager::drawClassicalLightPass(Vector3 translation, float scale, Vector4 difuss)
+void EffectManager::drawClassicalLightPass( float scale,float angle)
 {
-	Effect &curEffect = *m_hDeferredLightPassEffect.getObject<Effect>();
+	for (int i=0; i<m_lights.m_size;i++)
+	{
+		Vector3 translation = m_lights[i].pos;
+		Vector4 difuss = Vector4(m_lights[i].color.getX(),m_lights[i].color.getY(),m_lights[i].color.getZ(),1);
+		
+		Effect &curEffect = *m_hDeferredLightPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
 
@@ -997,19 +1003,33 @@ void EffectManager::drawClassicalLightPass(Vector3 translation, float scale, Vec
 	//OutputDebugStringA("");
 
 	PE::SetPerObjectConstantsShaderAction objSa;
-	
+	Matrix4x4 scaleM = Matrix4x4();
+	scaleM.loadIdentity();
+	scaleM.importScale(scale,scale,scale);
+
+	Matrix4x4 rotationM = Matrix4x4();
+	rotationM.loadIdentity();
+	rotationM.turnAboutAxis(angle,m_lights[i].obritAxis);//RootSceneNode::Instance()->m_worldTransform.getV()
+
+	Matrix4x4 translationM = Matrix4x4();
+	translationM.loadIdentity();
+	translationM.setPos(translation);
+
 	objSa.m_data.gW = Matrix4x4();
 	objSa.m_data.gW.loadIdentity();
-	objSa.m_data.gW.importScale(scale,scale,scale);
-	objSa.m_data.gW.setPos(translation);
+	//objSa.m_data.gW.importScale(scale,scale,scale);
+	//objSa.m_data.gW.setPos(translation);
+	//objSa.m_data.gW.turnAboutAxis(angle,RootSceneNode::Instance()->m_worldTransform.getU());
+	objSa.m_data.gW = rotationM*scaleM*translationM;//rotationM*
+
 	objSa.m_data.gWVP =  m_currentViewProjMatrix*objSa.m_data.gW;//csn->m_worldToViewTransform ;//*m_currentViewProjMatrix;//
 	//objSa.m_data.gWVPInverse = objSa.m_data.gWVP.inverse();
 	objSa.bindToPipeline(&curEffect);
 
 	SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
-	cb.m_data.gLights[0].pos = translation;
+	cb.m_data.gLights[0].pos = objSa.m_data.gW.getPos();
 	cb.m_data.gLights[0].diffuse = difuss;
-	cb.m_data.gLights[0].range = scale;
+	cb.m_data.gLights[0].range = objSa.m_data.gW.getU().getX();
 	cb.m_data.gLights[0].spotPower = 20;
 	cb.bindToPipeline(&curEffect);
 	//light->d
@@ -1025,6 +1045,25 @@ void EffectManager::drawClassicalLightPass(Vector3 translation, float scale, Vec
 
 	objSa.unbindFromPipeline(&curEffect);
 	cb.unbindFromPipeline(&curEffect);
+	}
+	
+
+}
+
+//Liu
+void EffectManager::randomLightInfo(int num)
+{
+	m_lights.reset(num);
+	for (int i=0;i<num;i++)
+	{
+		LightInfo li;
+		li.pos=Vector3(rand()%5,rand()%5,rand()%5);
+		li.color = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+		li.obritAxis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+		m_lights.add(li);
+
+
+	}
 }
 
 }; // namespace PE

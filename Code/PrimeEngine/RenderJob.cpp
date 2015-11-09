@@ -68,9 +68,12 @@ void runDrawThreadSingleFrameThreaded(PE::GameContext &ctx)
 
 	runDrawThreadSingleFrame(ctx);
 }
+//Liu
+float m_angle = 0;
 
 void runDrawThreadSingleFrame(PE::GameContext &ctx)
 {
+	
 	int threadOwnershipMask = 0;
 	
 	ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
@@ -138,10 +141,14 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		assert(false);
 #endif
 		// 2) Render lights
+		//Timer::TimeType time = t.TickAndGetCurrentTime();
+		
 		//Liu
+		m_angle+=0.01f;
+		
 		EffectManager::Instance()->setClassicalLightTextureRenderTarget();
-		EffectManager::Instance()->drawClassicalLightPass(Vector3(0,1,0),5,Vector4(1,0,0,1));
-		EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1));
+		EffectManager::Instance()->drawClassicalLightPass(5,m_angle);
+		//EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1),m_angle);
 		EffectManager::Instance()->endCurrentRenderTarget();
 		//create sphere;
 		

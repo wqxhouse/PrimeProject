@@ -76,8 +76,9 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
 	//Liu
 	void EffectManager::setClassicalLightTextureRenderTarget();
-	void EffectManager::drawClassicalLightPass(Vector3 translation, float scale, Vector4 diffuse);
+	void EffectManager::drawClassicalLightPass(float scale,float angle);
 	void EffectManager::createSphere(float radius, int sliceCount, int stackCount);
+	void EffectManager::randomLightInfo(int num);
 
 	// void setLightAccumTextureRenderTarget();
 	void setFinalLDRTextureRenderTarget();
@@ -135,8 +136,18 @@ public:
 	Handle m_halbedoTextureGPU;
 	Handle m_hnormalTextureGPU;
 	Handle m_haccumHDRTextureGPU;
+	//Liu
 	Handle m_hpositionTextureGPU;
 	Handle m_hlightTextureGPU;
+	struct LightInfo
+	{
+		Vector3 pos;
+		Vector3 color;
+		Vector3 obritAxis;
+	};
+	//Liu
+	Array<LightInfo> m_lights;
+
 	Handle m_hfinalLDRTextureGPU;
 	// + End deferred 
 	
