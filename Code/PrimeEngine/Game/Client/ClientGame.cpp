@@ -336,7 +336,9 @@ namespace Components {
 
 	context.getNetworkManager()->initNetwork();
 	
+
 	//Liu
+	
 	EffectManager::Instance()->randomLightInfo(200);
 	return 1;
 }

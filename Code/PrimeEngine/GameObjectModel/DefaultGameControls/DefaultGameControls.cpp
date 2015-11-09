@@ -13,7 +13,7 @@
 #include "../../Events/StandardControllerEvents.h"
 
 #include "../../Events/StandardKeyboardEvents.h"
-
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 #if APIABSTRACTION_IOS
 
 	#include "../../Events/StandardIOSEvents.h"
@@ -225,6 +225,22 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 
 		m_pQueueManager->add(h, QT_GENERAL);
 	}
+	//Liu
+	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
+	{
+		//EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums<20? 0: EffectManager::Instance()->m_lightNums-20;
+		EffectManager::Instance()->resizeLightNums(-20);
+
+		//m_pQueueManager->add(h, QT_GENERAL);
+	}
+	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
+	{
+		//EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums>180? 200: EffectManager::Instance()->m_lightNums+20;
+		EffectManager::Instance()->resizeLightNums(20);
+
+		//m_pQueueManager->add(h, QT_GENERAL);
+	}
+
 	else if (Event_KEY_LEFT_HELD::GetClassId() == pEvt->getClassId())
 	{
 

@@ -70,6 +70,20 @@ void runDrawThreadSingleFrameThreaded(PE::GameContext &ctx)
 }
 //Liu
 float m_angle = 0;
+//void handleKeyboardDebugInputEvents(PE::Events::Event *pEvt)
+//{
+//	if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
+//	{
+//		EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums>180? 200: EffectManager::Instance()->m_lightNums+20;
+//		EffectManager::Instance()->randomLightInfo(EffectManager::Instance()->m_lightNums);
+//	}
+//
+//	if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
+//	{
+//		EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums<20? 0: EffectManager::Instance()->m_lightNums-20;
+//		EffectManager::Instance()->randomLightInfo(EffectManager::Instance()->m_lightNums);
+//	}
+//}
 
 void runDrawThreadSingleFrame(PE::GameContext &ctx)
 {
@@ -142,7 +156,13 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 #endif
 		// 2) Render lights
 		//Timer::TimeType time = t.TickAndGetCurrentTime();
-		
+		//Liu
+		/*PE::Handle iqh = PE::Events::EventQueueManager::Instance()->getEventQueueHandle("input");
+		while (!iqh.getObject<PE::Events::EventQueue>()->empty())
+		{
+			PE::Events::Event *pInputEvt = iqh.getObject<PE::Events::EventQueue>()->getFront();
+			handleKeyboardDebugInputEvents(pInputEvt);
+		}*/
 		//Liu
 		m_angle+=0.01f;
 		

@@ -79,6 +79,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void EffectManager::drawClassicalLightPass(float scale,float angle);
 	void EffectManager::createSphere(float radius, int sliceCount, int stackCount);
 	void EffectManager::randomLightInfo(int num);
+	void EffectManager::resizeLightNums(int num);
 
 	// void setLightAccumTextureRenderTarget();
 	void setFinalLDRTextureRenderTarget();
@@ -147,6 +148,7 @@ public:
 	};
 	//Liu
 	Array<LightInfo> m_lights;
+	int m_lightNums;
 
 	Handle m_hfinalLDRTextureGPU;
 	// + End deferred 

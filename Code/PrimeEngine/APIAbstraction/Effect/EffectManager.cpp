@@ -1053,6 +1053,8 @@ void EffectManager::drawClassicalLightPass( float scale,float angle)
 //Liu
 void EffectManager::randomLightInfo(int num)
 {
+	
+	m_lightNums = num;
 	m_lights.reset(num);
 	for (int i=0;i<num;i++)
 	{
@@ -1063,6 +1065,33 @@ void EffectManager::randomLightInfo(int num)
 		m_lights.add(li);
 
 
+	}
+}
+
+//Liu
+void EffectManager::resizeLightNums(int num)
+{
+	m_lightNums += num;
+	if (num<0)
+	{
+		for (int i=0;i<num*(-1);i++)
+		{
+			m_lights.remove(m_lights.m_size-1-i);
+		}
+		
+	}
+	
+	m_lights.reset(m_lightNums,true);
+	if(num>0)
+	{
+		for (int i=0;i<num;i++)
+		{
+			LightInfo li;
+			li.pos=Vector3(rand()%5,rand()%5,rand()%5);
+			li.color = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+			li.obritAxis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+			m_lights.add(li);
+		}
 	}
 }
 
