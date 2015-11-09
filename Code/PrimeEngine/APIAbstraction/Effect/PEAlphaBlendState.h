@@ -88,6 +88,7 @@ enum E_PEAlphaBlendState
 {
     PEAlphaBlendState_NoBlend,
     PEAlphaBlendState_DefaultRGBLerp_A_DestUnchanged,
+	PEAlphaBlendState_OnePlusOne,//Liu
     PEAlphaBlendState_Count
 };
     

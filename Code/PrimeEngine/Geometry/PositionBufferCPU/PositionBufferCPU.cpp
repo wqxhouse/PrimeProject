@@ -67,3 +67,24 @@ void PositionBufferCPU::createNormalizeBillboardCPUBufferXYWithPtOffsets(Primiti
 	m_values.add(-1.0f+dx); m_values.add(1.0f+dy); m_values.add(0.0f);
 	
 }
+//Liu
+void PositionBufferCPU::createSphereForDeferred(float radius, int sliceCount, int stackCount)
+{
+	m_values.reset(401*3);
+	m_values.add(0);m_values.add(radius);m_values.add(0);
+	float phiStep = 3.1415926f/stackCount;
+	float thetaStep = 2.0f*3.1415926f/sliceCount;
+	 for (int i = 1; i <= stackCount-1; i++) 
+	 {
+		 float phi = i*phiStep;
+		 for (int j = 0; j <= sliceCount; j++) 
+		 {
+			 float theta = j*thetaStep;
+			m_values.add(radius*sin(phi)*cos(theta));
+			m_values.add(radius*cos(phi));
+			m_values.add(radius* sin(phi)* sin(theta));
+		 }
+	 }
+	m_values.add(0);m_values.add(-radius);m_values.add(0);
+	
+}

@@ -33,8 +33,6 @@
 #include "PrimeEngine/Scene/Skeleton.h"
 
 
-
-
 #include "SH_DRAW.h"
 
 extern int g_disableSkinRender;
@@ -181,6 +179,34 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	// and this object is current distributor
 	Component *pCaller = pEvt->m_prevDistributor.getObject<Component>();
 	Mesh *pMeshCaller = (Mesh *)pCaller;
+
+	//// + deferred - resolve effects (shaders)
+	//if (pMeshCaller->_type == PEVertexFormat_DetailedMesh)
+	//{
+	//	Handle effect;
+	//	if (m_pContext->_renderMode == 0)
+	//	{
+	//		effect = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_WithPosition_Tech");
+	//	}
+	//	else
+	//	{
+	//		effect = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_Tech");
+	//	}
+
+	//	int index;
+	//	for (PrimitiveTypes::UInt32 i = 0; i < pMeshCaller->m_effects.m_size; i++)
+	//	{
+	//		if (pMeshCaller->m_effects[i] == effect)
+	//		{
+	//			index = i;
+	//		}
+	//	}
+
+	//		Handle effect = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_WithPosition_Tech");
+	//		int index = pMeshCaller->m_effects.indexOf(effect);
+	//	}
+	//}
+
 	if (pMeshCaller->m_instances.m_size == 0)
 		return; // no instances of this mesh
 	Events::Event_GATHER_DRAWCALLS *pDrawEvent = NULL;

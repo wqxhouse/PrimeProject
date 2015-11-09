@@ -52,6 +52,8 @@ struct IndexBufferCPU : PE::PEAllocatableAndDefragmentable
 	void createEmptyCPUBuffer();
 
 	void createBillboardCPUBuffer();
+	//Liu
+	void IndexBufferCPU::createSphereCPUBuffer();
 
 	// start of the index data in memory
 	void *getStartAddress(){return &m_values[0];}

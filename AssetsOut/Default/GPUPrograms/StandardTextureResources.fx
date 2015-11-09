@@ -109,6 +109,4 @@ API_UNIFORM_CONSTANT sampler2D gBlurredGlowMapSampler SAMPLER_REGISTER(6); // : 
 
 #endif
 
-
-
 #endif // file guard

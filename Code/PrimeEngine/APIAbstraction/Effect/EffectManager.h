@@ -29,6 +29,7 @@
 #include <D3DCompiler.h>
 #include <d3d11.h>
 
+#include "math.h"
 
 namespace PE {
 namespace Components{
@@ -81,6 +82,14 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
 	void setLightAccumTextureRenderTarget();
+
+	//Liu
+	// void EffectManager::setClassicalLightTextureRenderTarget();
+	void drawClassicalLightPass(float angle);
+	void createSphere(float radius, int sliceCount, int stackCount);
+	// void EffectManager::randomLightInfo(int num);
+	void randomizeLight(PE::Components::Light *l, Vector3 *axis);
+
 	void setFinalLDRTextureRenderTarget();
 
 	void setTextureAndDepthTextureRenderTargetForDefaultRendering();
@@ -141,6 +150,19 @@ public:
 	Handle m_haccumHDRTextureGPU;
 	Handle m_hfinalLDRTextureGPU;
 	Handle m_hrootDepthBufferTextureGPU;
+
+	//Liu
+	Handle m_hpositionTextureGPU;
+	// Handle m_hlightTextureGPU;
+	struct LightInfo
+	{
+		Vector3 pos;
+		Vector3 color;
+		Vector3 obritAxis;
+	};
+	//Liu
+	// Array<LightInfo> m_lights;
+
 	// + End deferred 
 	
 	Matrix4x4 m_currentViewProjMatrix;
@@ -148,6 +170,10 @@ public:
 
 	Handle m_hVertexBufferGPU;
 	Handle m_hIndexBufferGPU;
+	//Liu
+	Handle m_hLightVertexBufferGPU;
+	Handle m_hLightIndexBufferGPU;
+
 	Handle m_hFirstGlowPassEffect;
 	Handle m_hSecondGlowPassEffect;
 	
@@ -158,6 +184,7 @@ public:
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
 	Handle m_hfinalLDRPassEffect;
+
 	Handle m_hdebugPassEffect;
 
 	// + Deferred cluster data - hard coded cluster size
@@ -190,6 +217,7 @@ public:
 	ID3D11ShaderResourceView *_lightIndicesBufferShaderView;
 
 	// + End
+	Handle m_hDeferredLightPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11

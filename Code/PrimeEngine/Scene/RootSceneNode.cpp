@@ -8,6 +8,7 @@
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 #include "../Lua/LuaEnvironment.h"
 #include "PrimeEngine/Render/ShaderActions/SetPerFrameConstantsShaderAction.h"
+
 // + Deferred
 #include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
 #include "PrimeEngine/Scene/CameraSceneNode.h"
@@ -93,6 +94,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 			  pDrawEvent ? pDrawEvent->m_projectionViewTransform.inverse()
 			: pZOnlyDrawEvent->m_projectionViewTransform.inverse();
 
+
 		psvPerObjectGroup->m_data.gDoMotionBlur = 0;
 		psvPerObjectGroup->m_data.gEyePosW = pDrawEvent ? pDrawEvent->m_eyePos : pZOnlyDrawEvent->m_eyePos;
 
@@ -123,43 +125,6 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 			psvPerObjectGroup->m_data.gLights[iDestLight] = pLight->m_cbuffer;
 			iDestLight++;
 		}
-	}
-
-	// + Deferred
-	if (setGlobalValues)
-	{
-		//Handle &hscs = pDrawList->nextGlobalShaderValue();
-		//hscs = Handle("RAW_DATA", sizeof(SetClusteredShadingConstantsShaderAction));
-		//SetClusteredShadingConstantsShaderAction *pscs = new(hscs)SetClusteredShadingConstantsShaderAction(*m_pContext, m_arena);
-
-		//// pDrawEvent ? pDrawEvent->m_projectionViewTransform : pZOnlyDrawEvent->m_projectionViewTransform;
-
-		//// try camera first
-		//CameraSceneNode *csn = CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<CameraSceneNode>();
-		//float n = csn->m_near;
-		//float f = csn->m_far;
-		//float projA = f / (f - n);
-		//float projB = (-f * n) / (f - n);
-		//Vector3 camPos = csn->m_base.getPos();
-
-		//// TODO: default camera far plane is 2000 (too large, consider make it small to get better depth-pos reconstruction)
-
-		//// cb - near/far/proj
-		//pscs->m_data.csconsts.cNear = n;
-		//pscs->m_data.csconsts.cFar = f;
-		//pscs->m_data.csconsts.cProjA = projA;
-		//pscs->m_data.csconsts.cProjB = projB;
-		//pscs->m_data.camPos = camPos;
-		//pscs->m_data.camZAxisWS = csn->m_base.getN();
-
-		/*
-		Matrix4x4 mview = Matrix4x4();
-			if (pDrawEvent)
-			{
-			mview = pDrawEvent->m_viewInvTransform;
-			mview = mview.inverse();
-			}
-			pscs->m_data.viewToWorldMatrix = mview;*/
 	}
 }
 }; // namespace Components

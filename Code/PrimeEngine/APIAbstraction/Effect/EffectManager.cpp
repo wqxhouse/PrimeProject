@@ -33,6 +33,9 @@
 #include "PrimeEngine/Scene/CameraManager.h"
 #include "PrimeEngine/Scene/Light.h"
 
+#include "PrimeEngine/Scene/MeshInstance.h"
+#include "PrimeEngine/Scene/RootSceneNode.h"
+
 // Sibling/Children includes
 #include "EffectManager.h"
 #include "Effect.h"
@@ -61,6 +64,7 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 {
 	m_arena = arena; m_pContext = &context;
 }
+
 void EffectManager::setupConstantBuffersAndShaderResources()
 {
 #if PE_PLAT_IS_PSVITA
@@ -556,6 +560,7 @@ void EffectManager::buildFullScreenBoard()
 	//	printf("%f ", vbcpu.m_values[i]);
 	//}
 	//
+
 	ColorBufferCPU tcbcpu(*m_pContext, m_arena);
 	tcbcpu.m_values.reset(3 * 4);
 	#if APIABSTRACTION_OGL
@@ -591,6 +596,10 @@ void EffectManager::buildFullScreenBoard()
 	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
 	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
 	m_hdebugPassEffect = getEffectHandle("debug_Tech.fx");
+	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
+	
+	//Liu
+	createSphere(1,20,20);
 }
 
 void EffectManager::setFrameBufferCopyRenderTarget()
@@ -637,17 +646,37 @@ void EffectManager::setTextureAndDepthTextureRenderTargetForGBuffer()
 #endif
 
 	// doesn't matter it deallocates after out of scope
-	const int numRts = 2;
-	TextureGPU* rtts[numRts];
-	rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
-	rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
-	
-	// TODO: make it work for xbox, now only D3D11
-	((D3D11Renderer *)m_pContext->getGPUScreen())->
-		setDeferredShadingRTsAndViewportWithDepth(rtts, numRts, m_pCurDepthTarget, true, true);
+	//const int numRts = 2;
+	//TextureGPU* rtts[numRts];
+	//rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
+	//rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
+
+	if (m_pContext->_renderMode == 0)
+	{
+		const int numRts = 2; // Liu
+		TextureGPU* rtts[numRts];
+		rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
+		rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
+		// TODO: make it work for xbox, now only D3D11
+		((D3D11Renderer *)m_pContext->getGPUScreen())->
+			setDeferredShadingRTsAndViewportWithDepth(rtts, numRts, m_pCurDepthTarget, true, true);
+	}
+	else if (m_pContext->_renderMode == 1)
+	{
+		const int numRts = 3; // Liu
+		TextureGPU* rtts[numRts];
+		rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
+		rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
+		rtts[2] = m_hpositionTextureGPU.getObject<TextureGPU>();
+		// TODO: make it work for xbox, now only D3D11
+		((D3D11Renderer *)m_pContext->getGPUScreen())->
+			setDeferredShadingRTsAndViewportWithDepth(rtts, numRts, m_pCurDepthTarget, true, true);
+	}
 
 	// really not necessary since we use MRT, not a single render target
 	// but for convention... meh...
+
+	// TODO: Actually this seems to be  what debug info resolves to
 	m_pCurRenderTarget = m_halbedoTextureGPU.getObject<TextureGPU>();
 }
 
@@ -658,6 +687,15 @@ void EffectManager::setLightAccumTextureRenderTarget()
 
 	m_pCurRenderTarget = m_haccumHDRTextureGPU.getObject<TextureGPU>();
 }
+
+//Liu
+//void EffectManager::setClassicalLightTextureRenderTarget()
+//{
+//	TextureGPU* clightTex = m_hlightTextureGPU.getObject<TextureGPU>();
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(clightTex, true);
+//
+//	m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
+//}
 
 void EffectManager::setFinalLDRTextureRenderTarget()
 {
@@ -1037,6 +1075,13 @@ void EffectManager::drawDeferredFinalPass()
 		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
 		lightPassHDRTex->m_samplerState,
 		API_CHOOSE_DX11_DX9_OGL(lightPassHDRTex->m_pShaderResourceView, lightPassHDRTex->m_pTexture, lightPassHDRTex->m_texture));
+	//TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
+	//// TextureGPU *normalTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
+
+	//PE::SA_Bind_Resource setTextureAction(
+	//	*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
+	//	albedoTexture->m_samplerState, 
+	//	API_CHOOSE_DX11_DX9_OGL(albedoTexture->m_pShaderResourceView, albedoTexture->m_pTexture, albedoTexture->m_texture));
 
 	setTextureAction.bindToPipeline(&curEffect);
 
@@ -1257,12 +1302,12 @@ void EffectManager::debugDeferredRenderTarget(int which)
 		}
 		else
 		{
-		/*	setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
-				m_hnormalTextureGPU.getObject<TextureGPU>()->m_samplerState,
+			setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+				m_hpositionTextureGPU.getObject<TextureGPU>()->m_samplerState,
 				API_CHOOSE_DX11_DX9_OGL(
-				m_hnormalTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
-				m_hnormalTextureGPU.getObject<TextureGPU>()->m_pTexture,
-				m_hnormalTextureGPU.getObject<TextureGPU>()->m_texture));*/
+				m_hpositionTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
+				m_hpositionTextureGPU.getObject<TextureGPU>()->m_pTexture,
+				m_hpositionTextureGPU.getObject<TextureGPU>()->m_texture));
 		}
 	}
 	else if (which == 3)
@@ -1372,5 +1417,162 @@ void EffectManager::debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSe
 	pvbGPU->unbindFromPipeline(&curEffect);
 }
 
+//Liu
+void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
+{
+	
+
+	PositionBufferCPU vbcpu(*m_pContext, m_arena);
+	vbcpu.createSphereForDeferred(radius,sliceCount,stackCount);
+
+	ColorBufferCPU tcbcpu(*m_pContext, m_arena);
+	tcbcpu.m_values.reset(3 * 401);
+	for (int i=0;i<3*401;i++)
+	{
+		tcbcpu.m_values.add(0.5f);
+	}
+	
+	IndexBufferCPU ibcpu(*m_pContext, m_arena);
+	ibcpu.createSphereCPUBuffer();
+		
+	m_hLightIndexBufferGPU = Handle("INDEX_BUFFER_GPU", sizeof(IndexBufferGPU));
+	IndexBufferGPU *pibgpu = new(m_hLightIndexBufferGPU) IndexBufferGPU(*m_pContext, m_arena);
+	pibgpu->createGPUBuffer(ibcpu);
+	
+
+	m_hLightVertexBufferGPU = Handle("VERTEX_BUFFER_GPU", sizeof(VertexBufferGPU));
+	VertexBufferGPU *pvbgpu = new(m_hLightVertexBufferGPU) VertexBufferGPU(*m_pContext, m_arena);
+	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
+	
+	
+
+	
+}
+
+//Liu
+void EffectManager::drawClassicalLightPass(float angle)
+{
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Light *l = lights[i].getObject<Light>();
+		if (l->m_cbuffer.type != 0) continue;
+
+		//Vector3 translation = m_lights[i].pos;
+		//Vector4 difuss = Vector4(m_lights[i].color.getX(), m_lights[i].color.getY(), m_lights[i].color.getZ(), 1);
+		Vector3 randomAxis;
+		randomizeLight(l, &randomAxis);
+		float scale = l->m_cbuffer.range;
+
+		Vector3 translation = l->m_base.getPos();
+		Vector4 &difuss = l->m_cbuffer.diffuse;
+
+		Effect &curEffect = *m_hDeferredLightPassEffect.getObject<Effect>();
+		if (!curEffect.m_isReady)
+			return;
+
+		IndexBufferGPU *pibGPU = m_hLightIndexBufferGPU.getObject<IndexBufferGPU>();
+		pibGPU->setAsCurrent();
+		pibGPU->setAsCurrent();
+
+		VertexBufferGPU *pvbGPU = m_hLightVertexBufferGPU.getObject<VertexBufferGPU>();
+		pvbGPU->setAsCurrent(&curEffect);
+		pvbGPU->setAsCurrent(&curEffect);
+		curEffect.setCurrent(pvbGPU);
+
+
+		TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
+		TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
+		TextureGPU *positionTexture = m_hpositionTextureGPU.getObject<TextureGPU>();
+
+		PE::SA_Bind_Resource setTextureActionAlbedo(
+			*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+			albedoTexture->m_samplerState,
+			API_CHOOSE_DX11_DX9_OGL(albedoTexture->m_pShaderResourceView, albedoTexture->m_pTexture, albedoTexture->m_texture));
+		setTextureActionAlbedo.bindToPipeline(&curEffect);
+
+
+		PE::SA_Bind_Resource setTextureActionNormal(
+			*m_pContext, m_arena, ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+			normalTexture->m_samplerState,
+			API_CHOOSE_DX11_DX9_OGL(normalTexture->m_pShaderResourceView, normalTexture->m_pTexture, normalTexture->m_texture));
+		setTextureActionNormal.bindToPipeline(&curEffect);
+
+		PE::SA_Bind_Resource setTextureActionPosition(
+			*m_pContext, m_arena, WIND_TEXTURE_2D_SAMPLER_SLOT,
+			positionTexture->m_samplerState,
+			API_CHOOSE_DX11_DX9_OGL(positionTexture->m_pShaderResourceView, positionTexture->m_pTexture, positionTexture->m_texture));
+		setTextureActionPosition.bindToPipeline(&curEffect);
+
+		CameraSceneNode *csn = CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<CameraSceneNode>();
+
+		//OutputDebugStringA("");
+
+		PE::SetPerObjectConstantsShaderAction objSa;
+		Matrix4x4 scaleM = Matrix4x4();
+		scaleM.loadIdentity();
+		scaleM.importScale(scale, scale, scale);
+
+		Matrix4x4 rotationM = Matrix4x4();
+		rotationM.loadIdentity();
+		// rotationM.turnAboutAxis(angle, m_lights[i].obritAxis);//RootSceneNode::Instance()->m_worldTransform.getV()
+		// rotationM.turnAboutAxis(angle, randomAxis);//RootSceneNode::Instance()->m_worldTransform.getV()
+
+		Matrix4x4 translationM = Matrix4x4();
+		translationM.loadIdentity();
+		translationM.setPos(translation);
+
+		objSa.m_data.gW = Matrix4x4();
+		objSa.m_data.gW.loadIdentity();
+		// objSa.m_data.gW = rotationM*scaleM*translationM;
+		objSa.m_data.gW = translationM * rotationM * scaleM;
+
+		objSa.m_data.gWVP = m_currentViewProjMatrix*objSa.m_data.gW;//csn->m_worldToViewTransform ;//*m_currentViewProjMatrix;//
+		//objSa.m_data.gWVPInverse = objSa.m_data.gWVP.inverse();
+		objSa.bindToPipeline(&curEffect);
+
+		SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
+		// cb.m_data.gLights[0].pos = objSa.m_data.gW.getPos();
+		cb.m_data.gLights[0].pos = l->m_base.getPos();
+		cb.m_data.gLights[0].diffuse = difuss;
+		cb.m_data.gLights[0].range = scale;
+		cb.m_data.gLights[0].spotPower = l->m_cbuffer.spotPower;
+		cb.bindToPipeline(&curEffect);
+
+		pibGPU->draw(1, 0);
+
+		pibGPU->unbindFromPipeline();
+		pvbGPU->unbindFromPipeline(&curEffect);
+
+		setTextureActionAlbedo.unbindFromPipeline(&curEffect);
+		setTextureActionNormal.unbindFromPipeline(&curEffect);
+		setTextureActionPosition.unbindFromPipeline(&curEffect);
+
+		objSa.unbindFromPipeline(&curEffect);
+		cb.unbindFromPipeline(&curEffect);
+	}
+}
+
+//Liu
+//void EffectManager::randomLightInfo(int num)
+//{
+//	m_lights.reset(num);
+//	for (int i=0;i<num;i++)
+//	{
+//		LightInfo li;
+//		li.pos=Vector3(rand()%5,rand()%5,rand()%5);
+//		li.color = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+//		li.obritAxis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+//		m_lights.add(li);
+//	}
+//}
+
+void EffectManager::randomizeLight(Light *l, Vector3 *axis)
+{
+	l->m_base.setPos(Vector3(rand() % 5, rand() % 5, rand() % 5));
+	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
+	*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+}
 
 }; // namespace PE

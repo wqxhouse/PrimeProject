@@ -290,14 +290,13 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_PERIOD_HELD::GetClassId() == pEvt->getClassId())
 	{
 		m_pContext->_debugMode++;
-		m_pContext->_debugMode = min(m_pContext->_debugMode, 3);
+		m_pContext->_debugMode = m_pContext->_debugMode % 5;
 	}
 	else
 	{
 		Component::handleEvent(pEvt);
 	}
 }
-
 
 
 void DefaultGameControls::handleControllerDebugInputEvents(Event *pEvt)

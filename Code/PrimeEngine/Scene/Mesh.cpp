@@ -208,6 +208,10 @@ void Mesh::loadFromMeshCPU_needsRC(MeshCPU &mcpu, int &threadOwnershipMask)
 	// Draw controls -------------------------------------------------------
 	m_bDrawControl = true;
 	EPEVertexFormat format = updateGeoFromMeshCPU_needsRC(mcpu, threadOwnershipMask);
+
+	// + Deferred
+	_type = format;
+
 	/*
 	// Index Buffer --------------------------------------------------------
 	m_hIndexBufferGPU = VertexBufferGPUManager::Instance()->createIndexGPUBuffer(mcpu.m_hIndexBufferCPU, !mcpu.m_manualBufferManagement);

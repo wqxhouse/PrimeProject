@@ -139,6 +139,13 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 		#endif
 				
 		pMainSN->addComponent(hSN);
+
+		/*PE::Handle hMeshInstance1("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pMeshInstance1 = new(hMeshInstance1) MeshInstance(*m_pContext, m_arena, hMeshInstance1);
+		pMeshInstance1->addDefaultComponents();
+
+		pMeshInstance1->initFromFile("pSphere1.mesha", "Default",pEvt->m_threadOwnershipMask);
+		pMainSN->addComponent(hMeshInstance1);*/
 	}
 
 	m_pContext->getGPUScreen()->ReleaseRenderContextOwnership(pEvt->m_threadOwnershipMask);

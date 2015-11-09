@@ -127,6 +127,7 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	char m_name[256];
 };
 
+
 }; // namespace PE
 
 #endif

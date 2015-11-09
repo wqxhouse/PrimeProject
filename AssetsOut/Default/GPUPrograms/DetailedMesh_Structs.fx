@@ -110,6 +110,13 @@ struct DETAILED_MESH_SHADOWED_PS_IN
     float3 iTangentW API_SEMANTIC(PSIN_TANGENT);
 };
 
+struct DETAILED_MESH_GBUFFER_WITHPOSITION_PS_OUT
+{
+	float4 Albedo 	: SV_Target0;
+	float4 Normal   : SV_Target1;
+	float4 PosW		: SV_Target2;
+};
+
 struct DETAILED_MESH_GBUFFER_PS_OUT
 {
 	float4 Albedo 	: SV_Target0;
@@ -164,6 +171,13 @@ struct DETAILED_MESH_GBUFFER_PS_OUT
         { \
             return func(pIn); \
         }
+		
+	#define PS_wrapper_DETAILED_MESH_GBUFFER_WITHPOSITION(func) \
+        DETAILED_MESH_GBUFFER_WITHPOSITION_PS_OUT main(DETAILED_MESH_SHADOWED_PS_IN pIn) \
+        { \
+            return func(pIn); \
+        }
+		
 		
 #endif
 

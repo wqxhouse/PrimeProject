@@ -264,8 +264,8 @@ void D3D11Renderer::setDeferredShadingRTsAndViewportWithDepth(TextureGPU **pTexA
 
 	m_pD3DContext->OMSetRenderTargets(nRTs, renderTargets, 
 		pDestDepthTex ? pDestDepthTex->m_DepthStencilView : m_pDepthStencilView);
-
-	float color[] = { 0.1f, 0.6f, 0.3f, 0.0f };
+	//Liu
+	float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 	D3D11_VIEWPORT vp;
 	vp.TopLeftX = 0;
