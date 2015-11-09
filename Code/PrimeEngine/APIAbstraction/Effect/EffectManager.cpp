@@ -590,6 +590,7 @@ void EffectManager::buildFullScreenBoard()
 
 	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
 	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
+	m_hdebugPassEffect = getEffectHandle("debug_Tech.fx");
 }
 
 void EffectManager::setFrameBufferCopyRenderTarget()
@@ -1198,8 +1199,8 @@ void EffectManager::drawDeferredFinalToBackBuffer()
 // + Deferred
 void EffectManager::debugDeferredRenderTarget(int which)
 {
-	// use motion blur for now since it doesnt do anything but draws the surface
-	Effect &curEffect = *m_hfinalLDRPassEffect.getObject<Effect>();
+	// Effect &curEffect = *m_hfinalLDRPassEffect.getObject<Effect>();
+	Effect &curEffect = *m_hdebugPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
 
@@ -1242,14 +1243,38 @@ void EffectManager::debugDeferredRenderTarget(int which)
 	}
 	else if (which == 2)
 	{
-		setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-			m_hAccumulationHDRPassEffect.getObject<TextureGPU>()->m_samplerState, 
-			API_CHOOSE_DX11_DX9_OGL(
-			m_hAccumulationHDRPassEffect.getObject<TextureGPU>()->m_pShaderResourceView, 
-			m_hAccumulationHDRPassEffect.getObject<TextureGPU>()->m_pTexture,
-			m_hAccumulationHDRPassEffect.getObject<TextureGPU>()->m_texture));
+		// TODO: currently depth texture not working
+		if (m_pContext->_renderMode == 0)
+		{
+			auto tex = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
+			setTextureAction.set(DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+				//tex->m_samplerState,
+				SamplerState_NotNeeded,
+				API_CHOOSE_DX11_DX9_OGL(
+				tex->m_pDepthShaderResourceView,
+				tex->m_pTexture,
+				tex->m_texture));
+		}
+		else
+		{
+		/*	setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+				m_hnormalTextureGPU.getObject<TextureGPU>()->m_samplerState,
+				API_CHOOSE_DX11_DX9_OGL(
+				m_hnormalTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
+				m_hnormalTextureGPU.getObject<TextureGPU>()->m_pTexture,
+				m_hnormalTextureGPU.getObject<TextureGPU>()->m_texture));*/
+		}
 	}
 	else if (which == 3)
+	{
+		setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+			m_haccumHDRTextureGPU.getObject<TextureGPU>()->m_samplerState,
+			API_CHOOSE_DX11_DX9_OGL(
+			m_haccumHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
+			m_haccumHDRTextureGPU.getObject<TextureGPU>()->m_pTexture,
+			m_haccumHDRTextureGPU.getObject<TextureGPU>()->m_texture));
+	}
+	else if (which == 4)
 	{
 		setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
 			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState, 

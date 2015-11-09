@@ -41,6 +41,11 @@ void DX9_KeyboardMouse::generateButtonEvents()
 	if(GetFocus() == pWinApp->getWindowHandle())
 #endif
 	{
+		static bool udown = false;
+		static bool idown = false;
+		static bool kdown = false;
+		static bool ldown = false;
+
 		//Check for Button Down events
 
 		//Check for Button Up events
@@ -94,29 +99,55 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			new (h) Event_KEY_UP_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		if(GetAsyncKeyState(',') & 0x8000)
+		if(GetAsyncKeyState('U') & 0x8000)
+		{
+			udown = true;
+		}
+		else if (udown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_COMMA_HELD));
-			new (h) Event_KEY_COMMA_HELD;
+			new (h)Event_KEY_COMMA_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
+			udown = false;
 		}
-		if(GetAsyncKeyState('.') & 0x8000)
+
+		if(GetAsyncKeyState('I') & 0x8000)
+		{
+			idown = true;
+		}
+		else if (idown == true)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_PERIOD_HELD));
-			new (h) Event_KEY_PERIOD_HELD;
+			new (h)Event_KEY_PERIOD_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			idown = false;
 		}
+
 		if(GetAsyncKeyState('K') & 0x8000)
 		{
-			Handle h("EVENT", sizeof(Event_KEY_K_HELD));
-			new (h) Event_KEY_K_HELD;
-			m_pQueueManager->add(h, Events::QT_INPUT);
+			kdown = true;
 		}
+		else if (kdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_K_HELD));
+			new (h)Event_KEY_K_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			kdown = false;
+		}
+
 		if(GetAsyncKeyState('L') & 0x8000)
+		{
+			ldown = true;
+		}
+		else if (ldown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_L_HELD));
 			new (h) Event_KEY_L_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			ldown = false;
 		}
 	}
 #endif

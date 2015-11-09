@@ -356,6 +356,23 @@ namespace PE {
 		m_map.add("DeferredLightPass_Clustered_Tech", hLightHDRClusteredFx);
 	}
 
+	// + Debug Pass
+	{
+		Handle hDebugPass("EFFECT", sizeof(Effect));
+		Effect *pFihDebugPassnalLDRFx = new(hDebugPass)Effect(*m_pContext, m_arena, hDebugPass);
+		pFihDebugPassnalLDRFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DebugPass_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"debug_Tech");
+		pFihDebugPassnalLDRFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("debug_Tech.fx", hDebugPass);
+	}
+
 	// + Deferred final LDR Pass
 	{
 		Handle hFinalLDRFx("EFFECT", sizeof(Effect));

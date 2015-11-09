@@ -146,14 +146,17 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		EffectManager::Instance()->endCurrentRenderTarget();
 	
 		// 3) Render post process & final pass
-#if 1 
 		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
-		EffectManager::Instance()->drawDeferredFinalPass();
+		if (ctx._debugMode == 0)
+		{
+			EffectManager::Instance()->drawDeferredFinalPass();
+
+		}
+		else
+		{
+			EffectManager::Instance()->debugDeferredRenderTarget(ctx._debugMode - 1);
+		}
 		EffectManager::Instance()->endCurrentRenderTarget();
-#else  
-		EffectManager::Instance()->debugDeferredRenderTarget(1);
-		EffectManager::Instance()->endCurrentRenderTarget();
-#endif
 
 		//// set render target: GlowTargetTextureGPU
   //      EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGlow();

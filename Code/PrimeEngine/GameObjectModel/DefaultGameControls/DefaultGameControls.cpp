@@ -274,15 +274,28 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		m_pQueueManager->add(h, QT_GENERAL);
 
 	}
-
-	else
-
+	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
 	{
-
-		Component::handleEvent(pEvt);
-
+		m_pContext->_renderMode = 0;
 	}
-
+	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_renderMode = 1;
+	}
+	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_debugMode--;
+		m_pContext->_debugMode = max(m_pContext->_debugMode, 0);
+	}
+	else if (Event_KEY_PERIOD_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_debugMode++;
+		m_pContext->_debugMode = min(m_pContext->_debugMode, 3);
+	}
+	else
+	{
+		Component::handleEvent(pEvt);
+	}
 }
 
 

@@ -158,6 +158,7 @@ public:
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
 	Handle m_hfinalLDRPassEffect;
+	Handle m_hdebugPassEffect;
 
 	// + Deferred cluster data - hard coded cluster size
 	struct ClusterData
