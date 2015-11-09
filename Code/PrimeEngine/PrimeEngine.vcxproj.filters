@@ -1,0 +1,1429 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction">
+      <UniqueIdentifier>{7ebe4f52-5f06-42bf-adb1-366567f29d08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9">
+      <UniqueIdentifier>{703fb868-9448-4fd3-b60f-431e7f7b518c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9\DX9_MainFunction">
+      <UniqueIdentifier>{7dfa33d2-deae-4632-a948-cc288bafe356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9\DX9_Timer">
+      <UniqueIdentifier>{453609d0-a1de-4b3c-8c1d-8e5bf0023c4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9\D3D9_GPUBuffers">
+      <UniqueIdentifier>{d5148b48-808d-4cce-be0e-eeebcfa3224e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9\DX9_XInput">
+      <UniqueIdentifier>{d54b6e18-17da-4a2c-81e1-71c273067ea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9\DX9_KeyboardMouse">
+      <UniqueIdentifier>{a5e53a68-c783-498f-b4c9-a43083aa7ed7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX9\D3D9_GPUScreen">
+      <UniqueIdentifier>{72aa6ca0-14c3-42b2-a259-5865d845fd68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\OGL">
+      <UniqueIdentifier>{22d2ccfb-38c7-4b16-a9f4-52a21e28fe1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\OGL\OGL_GPUScreen">
+      <UniqueIdentifier>{1e012462-c3f5-4c8d-b232-7b754ae8e07e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\OGL\OGL_GPUBuffers">
+      <UniqueIdentifier>{d34d1dd6-ec6e-4085-ba02-8f1bdc8b3daf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\PS3">
+      <UniqueIdentifier>{13b2d63c-331e-4dd3-a032-98add7f25e62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\PS3\PS3_GPUScreen">
+      <UniqueIdentifier>{828974c6-055d-4710-8c9d-059ac7b51cee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\GPUScreen">
+      <UniqueIdentifier>{4ddc0755-c341-4fc1-a53a-57ecfcc2295b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\MainFunction">
+      <UniqueIdentifier>{8ea7f905-f50e-4c80-9267-487abf599444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\Timer">
+      <UniqueIdentifier>{743317c0-0589-4197-93c6-3ef305bdbaa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\FileReader">
+      <UniqueIdentifier>{ffdd9620-cdf2-4544-aebb-ffb7d77e9d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\GPUBuffers">
+      <UniqueIdentifier>{dc80c077-ee77-4d20-96a9-52cb57fefd2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\StringOps">
+      <UniqueIdentifier>{fd44f0d3-8623-4cb3-b52e-ed92b5042837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\Effect">
+      <UniqueIdentifier>{1444cad2-4992-489e-b7c3-3fef96d76bbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\CameraOps">
+      <UniqueIdentifier>{562f701d-f790-4da0-9640-0f2ed0539bca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\Texture">
+      <UniqueIdentifier>{90c63ea3-009e-4dfe-9a09-c8f34694b0e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\GPUMaterial">
+      <UniqueIdentifier>{15923611-45bd-40f3-ae9a-3f4ad4767f47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\FileWriter">
+      <UniqueIdentifier>{01dfcdb9-55b0-466a-b87c-de62c4528504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX11">
+      <UniqueIdentifier>{3735ae2e-6bb3-4243-9a3b-74487569acf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX11\D3D11_GPUScreen">
+      <UniqueIdentifier>{50362640-25d3-4c91-bba8-f74984e8a17b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers">
+      <UniqueIdentifier>{e5108f74-97c0-4e48-95c4-04bd78e7770b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\Threading">
+      <UniqueIdentifier>{ac5eaea8-d9ba-4edc-9a11-52804ae35b7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\Input">
+      <UniqueIdentifier>{44205c6e-d358-4f59-966e-9c07087bae82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PrimitiveTypes">
+      <UniqueIdentifier>{afb80a2e-1844-43ec-95a5-0ade0ffcd90f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MemoryManagement">
+      <UniqueIdentifier>{250a03f3-06ea-4060-ac34-0631d63a5a93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{45ac5311-89a0-4644-8006-683986c0cb8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry">
+      <UniqueIdentifier>{1cd03783-a25f-4b61-9367-442ded0649d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\PositionBufferCPU">
+      <UniqueIdentifier>{cba2fa41-7e14-493d-b334-b5cb8c6db6ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\SkeletonCPU">
+      <UniqueIdentifier>{2a12f18a-a87a-4daa-b5d1-9eee7db444c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\IndexBufferCPU">
+      <UniqueIdentifier>{0e975ab0-d590-4636-b775-e8520d394307}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\TexCoordBufferCPU">
+      <UniqueIdentifier>{20896402-3049-43cf-a9c7-08956566e429}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\MaterialCPU">
+      <UniqueIdentifier>{3aac8aa2-b8a2-47e5-8d1c-02de7eb774d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\TangentBufferCPU">
+      <UniqueIdentifier>{b5e8849a-1a84-4c5c-8b0d-ca57d0e0d7fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\MeshCPU">
+      <UniqueIdentifier>{784f7c59-85a7-47db-bd34-9205417470b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\NormalBufferCPU">
+      <UniqueIdentifier>{ec7effa1-282f-411b-b087-a0b6f6b2d353}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geometry\ParticleSystemCPU">
+      <UniqueIdentifier>{69685d03-68e6-4bae-9ce1-8eba400eab70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{98295181-8384-452a-b302-f06bcda184c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils\Array">
+      <UniqueIdentifier>{8ffdf109-124e-4f25-84dc-0a46e8b81a36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Events">
+      <UniqueIdentifier>{9274a2b1-5cee-4ef0-aabc-d742bc3613da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{6713eedc-c859-4c26-a6cb-d320d1846a93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PhysX">
+      <UniqueIdentifier>{b7b59c4b-0ab1-4cdc-85f4-859927634b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GameObjectModel">
+      <UniqueIdentifier>{dc7eef85-43c3-46c7-87f3-5e7246e0e0ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GameObjectModel\DefaultGameControls">
+      <UniqueIdentifier>{9f8f3540-8fef-44ef-a25b-a7ad9fae8141}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Sound">
+      <UniqueIdentifier>{feb3e573-cd3a-4360-b712-45cad8446ac5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Lua">
+      <UniqueIdentifier>{e446488c-c979-4299-88fa-1c36a41f7a54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Lua\EventGlue">
+      <UniqueIdentifier>{46a6ab4b-0991-4d2d-84ec-e06e75c80045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Lua\Client">
+      <UniqueIdentifier>{29afdb8f-c713-4e38-ab7c-d15c5c983538}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Lua\Server">
+      <UniqueIdentifier>{eb974575-98c3-4571-b2e3-e6978723554a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Logging">
+      <UniqueIdentifier>{44c430dc-2abf-4914-8599-fb9d8b1800d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render">
+      <UniqueIdentifier>{28033abc-5acc-4a88-8ff4-7c11f1f429c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render\ShaderActions">
+      <UniqueIdentifier>{fea808c4-c33f-4ad3-8e3b-1d3b3b695ef5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Profiling">
+      <UniqueIdentifier>{07429462-9010-4b78-a997-47c73fde480f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Networking">
+      <UniqueIdentifier>{5e061420-b1f8-45e8-a34e-03fd3b6f3d22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Networking\Client">
+      <UniqueIdentifier>{ae17dbf1-0220-4bd2-a4a9-ce4d727f72ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Networking\Server">
+      <UniqueIdentifier>{234bff3f-4e8e-47b3-acaa-531359aec5d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{75436045-77bc-408c-9327-e150111e6527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Common">
+      <UniqueIdentifier>{1b2bc275-3899-4b1f-ab12-a27548fbb89d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Client">
+      <UniqueIdentifier>{78c3c476-36c3-4cbc-947e-405dad7954ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Server">
+      <UniqueIdentifier>{c6a1fdfc-f3d7-4327-a27c-f4f576e84b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="CG">
+      <UniqueIdentifier>{61e8b60a-fc52-41d5-9cea-cb2d08c9a865}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unified">
+      <UniqueIdentifier>{a86ab601-45eb-4cff-a1c2-06f8842b8890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unified\StdMesh">
+      <UniqueIdentifier>{731b4d03-5180-4abc-b840-e7099f1ef53c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unified\DetailedMesh">
+      <UniqueIdentifier>{d5b5edd5-5d55-4c9b-9169-50a926142e35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unified\DetailedSkin">
+      <UniqueIdentifier>{c23779c6-cab2-4821-8fd1-59a05c1cc9a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unified\ReducedMesh">
+      <UniqueIdentifier>{819d8b68-7c33-42e6-9f4f-8c26487454ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Unified\ColoredMinimalMesh">
+      <UniqueIdentifier>{aeda87e3-f83f-492d-bd46-a6853fb5c18f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX">
+      <UniqueIdentifier>{871908cb-ddb2-40de-a3aa-fa3c141d32b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APIAbstraction\DirectX\D3D_GPUScreen">
+      <UniqueIdentifier>{84df7452-6d77-4cc1-8084-b6f9f0d78015}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RenderJob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\APIAbstraction_Master0.cpp">
+      <Filter>Source Files\APIAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\DX9_MainFunction\DX9_MainFunctionArgs.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_MainFunction</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\DX9_Timer\DX9_Timer.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\D3D9_GPUBuffers\D3D9_IndexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\D3D9_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\D3D9_GPUBuffers\D3D9_VertexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\D3D9_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\DX9_XInput\DX9_XInput.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_XInput</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\DX9_KeyboardMouse\DX9_KeyboardMouse.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_KeyboardMouse</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX9\D3D9_GPUScreen\D3D9_GPUScreen.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX9\D3D9_GPUScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\OGL\OGL_GPUScreen\OGL_GPUScreen.cpp">
+      <Filter>Source Files\APIAbstraction\OGL\OGL_GPUScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\OGL\OGL_GPUBuffers\OGL_IndexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\OGL\OGL_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\OGL\OGL_GPUBuffers\OGL_VertexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\OGL\OGL_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUScreen\GPUScreen.cpp">
+      <Filter>Source Files\APIAbstraction\GPUScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\MainFunction\MainFunctionArgs.cpp">
+      <Filter>Source Files\APIAbstraction\MainFunction</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Timer\Timer.cpp">
+      <Filter>Source Files\APIAbstraction\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\FileReader\FileReader.cpp">
+      <Filter>Source Files\APIAbstraction\FileReader</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\BufferInfo.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\IndexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\ResourceBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\VertexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\VertexBufferGPUInputGeoDescs.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\VertexBufferGPUManager.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\Effect.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\EffectManager.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\EffectManagerBlendStates.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\EffectManagerEffects.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\CameraOps\CameraOps.cpp">
+      <Filter>Source Files\APIAbstraction\CameraOps</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\GPUTextureManager.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\SamplerState.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DrawableIntoColorTexture.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DrawableIntoColorTextureWithDepth.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DrawableIntoDepthTexture.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUMaterial\GPUMaterial.cpp">
+      <Filter>Source Files\APIAbstraction\GPUMaterial</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX11\D3D11_GPUScreen\D3D11_GPUScreen.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX11\D3D11_GPUBuffers\D3D11_IndexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX11\D3D11_GPUBuffers\D3D11_ResourceBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX11\D3D11_GPUBuffers\D3D11_VertexBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Input\Input.cpp">
+      <Filter>Source Files\APIAbstraction\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManagement\MemoryManager.cpp">
+      <Filter>Source Files\MemoryManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManagement\MemoryPool.cpp">
+      <Filter>Source Files\MemoryManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ColorBufferCPU.cpp">
+      <Filter>Source Files\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\Geometry_Master0.cpp">
+      <Filter>Source Files\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\PositionBufferCPU\PositionBufferCPU.cpp">
+      <Filter>Source Files\Geometry\PositionBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\PositionBufferCPU\PositionBufferCPUManager.cpp">
+      <Filter>Source Files\Geometry\PositionBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\SkeletonCPU\AnimationSetCPU.cpp">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\SkeletonCPU\AnimationSetCPUManager.cpp">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\SkeletonCPU\SkeletonCPU.cpp">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\SkeletonCPU\SkinCPU.cpp">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\IndexBufferCPU\IndexBufferCPU.cpp">
+      <Filter>Source Files\Geometry\IndexBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\TexCoordBufferCPU\TexCoordBufferCPU.cpp">
+      <Filter>Source Files\Geometry\TexCoordBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\TexCoordBufferCPU\TexCoordBufferCPUManager.cpp">
+      <Filter>Source Files\Geometry\TexCoordBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\MaterialCPU\MaterialCPU.cpp">
+      <Filter>Source Files\Geometry\MaterialCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\MaterialCPU\MaterialSetCPU.cpp">
+      <Filter>Source Files\Geometry\MaterialCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\TangentBufferCPU\TangentBuferCPU.cpp">
+      <Filter>Source Files\Geometry\TangentBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\MeshCPU\MeshCPU.cpp">
+      <Filter>Source Files\Geometry\MeshCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\MeshCPU\PointListCPU.cpp">
+      <Filter>Source Files\Geometry\MeshCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\NormalBufferCPU\NormalBufferCPU.cpp">
+      <Filter>Source Files\Geometry\NormalBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\NormalBufferCPU\NormalBufferCPUManager.cpp">
+      <Filter>Source Files\Geometry\NormalBufferCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\BladeFireParticleSystemCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\ExplosionParticleSystemCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\FireParticleSystemCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\ParticleBufferCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\ParticleSystemCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\RainParticleSystemCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ParticleSystemCPU\SmokeParticleSystemCPU.cpp">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Dir.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\ErrorHandling.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Networkable.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\PEString.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\Component.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\Event.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\EventQueue.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\EventQueueManager.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\Events_Master0.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\StandardControllerEvents.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\StandardEvents.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\StandardGameEvents.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Events\StandardKeyboardEvents.cpp">
+      <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\CameraManager.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\CameraSceneNode.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DebugRenderer.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DefaultAnimationSM.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawList.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Light.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\LineMesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Mesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\RootSceneNode.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Scene_Master0.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneNode.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SH_DRAW.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Skin.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SkyVolumeMesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\TextMesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\TextSceneNode.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysX\Physics.cpp">
+      <Filter>Source Files\PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectModel\Camera.cpp">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectModel\GameObjectManager.cpp">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectModel\GameObjectModel_Master0.cpp">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectModel\PhysXComponent.cpp">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjectModel\DefaultGameControls\DefaultGameControls.cpp">
+      <Filter>Source Files\GameObjectModel\DefaultGameControls</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound\SoundManager.cpp">
+      <Filter>Source Files\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaEnvironment.cpp">
+      <Filter>Source Files\Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\EventGlue\EventDataCreators.cpp">
+      <Filter>Source Files\Lua\EventGlue</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\Client\ClientLuaEnvironment.cpp">
+      <Filter>Source Files\Lua\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\Server\ServerLuaEnvironment.cpp">
+      <Filter>Source Files\Lua\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Logging\Log.cpp">
+      <Filter>Source Files\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\MiscShaderActions.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SetPerFrameConstantsShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SetPerMaterialConstantsShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SetPerObjectConstantsShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SetPerObjectGroupConstantsShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\ShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiling\Profiling.cpp">
+      <Filter>Source Files\Profiling</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\ConnectionManager.cpp">
+      <Filter>Source Files\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\EventManager.cpp">
+      <Filter>Source Files\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\NetworkManager.cpp">
+      <Filter>Source Files\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\StreamManager.cpp">
+      <Filter>Source Files\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Client\ClientConnectionManager.cpp">
+      <Filter>Source Files\Networking\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Client\ClientNetworkManager.cpp">
+      <Filter>Source Files\Networking\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Server\ServerConnectionManager.cpp">
+      <Filter>Source Files\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Server\ServerNetworkManager.cpp">
+      <Filter>Source Files\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Common\GameContext.cpp">
+      <Filter>Source Files\Game\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Common\GlobalRegistry.cpp">
+      <Filter>Source Files\Game\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Client\ClientGame.cpp">
+      <Filter>Source Files\Game\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Server\ServerGame.cpp">
+      <Filter>Source Files\Game\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DDS_Loader_Common.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DrawableIntoColorTextureArray.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DDS_Loader_GL.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Texture\Texture_DDS_Loader_D3D.cpp">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="GameThreadJob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\DirectX\D3D_GPUScreen\D3D_GPUScreen.cpp">
+      <Filter>Source Files\APIAbstraction\DirectX\D3D_GPUScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\Effect_D3D9.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\Effect_D3D11.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\Effect_GL.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\Effect_Lua.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\GLSLAttributes.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\ExternalPerTechniqueData.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\PEAlphaBlendState.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\Effect\PERasterizerState.cpp">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\InstancingSceneNode.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\MeshInstance.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\MeshManager.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="APIAbstraction\GPUBuffers\AnimSetBufferGPU.cpp">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SetInstanceControlConstantsShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\SkeletonCPU\SkinWeightsCPU.cpp">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SetInstancesTransformsConstantsShaderAction.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SA_SetAndBind_ConstResource_SingleObjectAnimationPalette.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SA_Bind_Resource.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SA_Bind_UAVandConstResource_InstancedAnimCSReduce.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SA_SetAndBind_ConstResource_InstancedObjectsAnimationPalettes.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SA_ComputeInto_SysMem_ComputeReduceFromInstancedAnimCSMapResults.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShaderActions\SA_CopyInto_SysMem_FromInstancedObjectsAnimationCSReduceResult.cpp">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\GlobalConfig\GlobalConfig.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimeEngineIncludes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderJob.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\APIAbstractionDefines.h">
+      <Filter>Source Files\APIAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\DX9_MainFunction\DX9_MainFunctionArgs.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_MainFunction</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\DX9_Timer\DX9_Timer.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\D3D9_GPUBuffers\D3D9_IndexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\D3D9_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\D3D9_GPUBuffers\D3D9_VertexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\D3D9_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\DX9_XInput\DX9_XInput.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_XInput</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\DX9_KeyboardMouse\DX9_KeyboardMouse.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\DX9_KeyboardMouse</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX9\D3D9_GPUScreen\D3D9_GPUScreen.h">
+      <Filter>Source Files\APIAbstraction\DirectX9\D3D9_GPUScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\OGL\OGL_GPUScreen\OGL_GPUScreen.h">
+      <Filter>Source Files\APIAbstraction\OGL\OGL_GPUScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\OGL\OGL_GPUBuffers\OGL_IndexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\OGL\OGL_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\OGL\OGL_GPUBuffers\OGL_VertexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\OGL\OGL_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUScreen\GPUScreen.h">
+      <Filter>Source Files\APIAbstraction\GPUScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\MainFunction\MainFunctionArgs.h">
+      <Filter>Source Files\APIAbstraction\MainFunction</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\MainFunction\MainFunctionBegin.h">
+      <Filter>Source Files\APIAbstraction\MainFunction</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\MainFunction\MainFunctionEnd.h">
+      <Filter>Source Files\APIAbstraction\MainFunction</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Timer\Timer.h">
+      <Filter>Source Files\APIAbstraction\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\FileReader\FileReader.h">
+      <Filter>Source Files\APIAbstraction\FileReader</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUBuffers\BufferInfo.h">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUBuffers\IndexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUBuffers\ResourceBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUBuffers\VertexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUBuffers\VertexBufferGPUManager.h">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\StringOps\StringOps.h">
+      <Filter>Source Files\APIAbstraction\StringOps</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\Effect.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\EffectEnums.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\EffectManager.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\SpeShader.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\CameraOps\CameraOps.h">
+      <Filter>Source Files\APIAbstraction\CameraOps</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Texture\GPUTextureManager.h">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Texture\SamplerState.h">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Texture\Texture.h">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUMaterial\GPUMaterial.h">
+      <Filter>Source Files\APIAbstraction\GPUMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUMaterial\GPUMaterialSet.h">
+      <Filter>Source Files\APIAbstraction\GPUMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\FileWriter\FileWriter.h">
+      <Filter>Source Files\APIAbstraction\FileWriter</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX11\D3D11_GPUScreen\D3D11_GPUScreen.h">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX11\D3D11_GPUBuffers\D3D11_IndexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX11\D3D11_GPUBuffers\D3D11_ResourceBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX11\D3D11_GPUBuffers\D3D11_VertexBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\DirectX11\D3D11_GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Threading\Threading.h">
+      <Filter>Source Files\APIAbstraction\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Input\Input.h">
+      <Filter>Source Files\APIAbstraction\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimitiveTypes\PrimitiveTypes.h">
+      <Filter>Source Files\PrimitiveTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManagement\Handle.h">
+      <Filter>Source Files\MemoryManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManagement\MemoryManager.h">
+      <Filter>Source Files\MemoryManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManagement\MemoryPool.h">
+      <Filter>Source Files\MemoryManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\MathHelpers.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix3x3.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix4x4.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Quaternion.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\TSQ.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector3.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector4.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ColorBufferCPU.h">
+      <Filter>Source Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\PositionBufferCPU\PositionBufferCPU.h">
+      <Filter>Source Files\Geometry\PositionBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\PositionBufferCPU\PositionBufferCPUManager.h">
+      <Filter>Source Files\Geometry\PositionBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\SkeletonCPU\AnimationCPU.h">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\SkeletonCPU\AnimationSetCPU.h">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\SkeletonCPU\AnimationSetCPUManager.h">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\SkeletonCPU\SkeletonCPU.h">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\SkeletonCPU\SkinCPU.h">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\SkeletonCPU\SkinWeightsCPU.h">
+      <Filter>Source Files\Geometry\SkeletonCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\IndexBufferCPU\IndexBufferCPU.h">
+      <Filter>Source Files\Geometry\IndexBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\TexCoordBufferCPU\TexCoordBufferCPU.h">
+      <Filter>Source Files\Geometry\TexCoordBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\TexCoordBufferCPU\TexCoordBufferCPUManager.h">
+      <Filter>Source Files\Geometry\TexCoordBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\MaterialCPU\MaterialCPU.h">
+      <Filter>Source Files\Geometry\MaterialCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\MaterialCPU\MaterialSetCPU.h">
+      <Filter>Source Files\Geometry\MaterialCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\TangentBufferCPU\TangentBufferCPU.h">
+      <Filter>Source Files\Geometry\TangentBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\MeshCPU\MeshCPU.h">
+      <Filter>Source Files\Geometry\MeshCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\MeshCPU\PointListCPU.h">
+      <Filter>Source Files\Geometry\MeshCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\NormalBufferCPU\NormalBufferCPU.h">
+      <Filter>Source Files\Geometry\NormalBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\NormalBufferCPU\NormalBufferCPUManager.h">
+      <Filter>Source Files\Geometry\NormalBufferCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\BladeFireParticleSystemCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\ExplosionParticleSystemCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\FireParticleSystemCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\ParticleBufferCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\ParticleSystemCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\RainParticleSystemCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ParticleSystemCPU\SmokeParticleSystemCPU.h">
+      <Filter>Source Files\Geometry\ParticleSystemCPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Dir.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ErrorHandling.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\HandlesToHandleMap.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Networkable.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\PEClassDecl.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\PEMap.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\PEString.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\PEUUID.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Queue.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\StrToHandleMap.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Array\Array.h">
+      <Filter>Source Files\Utils\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\Component.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\Event.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\EventQueue.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\EventQueueManager.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\StandardControllerEvents.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\StandardEvents.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\StandardGameEvents.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\StandardKeyboardEvents.h">
+      <Filter>Source Files\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\CameraManager.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\CameraSceneNode.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DebugRenderer.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DefaultAnimationSM.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawList.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Light.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\LineMesh.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Mesh.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\RootSceneNode.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneNode.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SH_DRAW.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Skin.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SkyVolumeMesh.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\TextMesh.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\TextSceneNode.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysX\Physics.h">
+      <Filter>Source Files\PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectModel\Camera.h">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectModel\GameObjectManager.h">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectModel\PhysXComponent.h">
+      <Filter>Source Files\GameObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectModel\DefaultGameControls\DefaultGameControls.h">
+      <Filter>Source Files\GameObjectModel\DefaultGameControls</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound\SoundManager.h">
+      <Filter>Source Files\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaEnvironment.h">
+      <Filter>Source Files\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\typedefs.h">
+      <Filter>Source Files\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\EventGlue\EventDataCreators.h">
+      <Filter>Source Files\Lua\EventGlue</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\Client\ClientLuaEnvironment.h">
+      <Filter>Source Files\Lua\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\Server\ServerLuaEnvironment.h">
+      <Filter>Source Files\Lua\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Logging\Log.h">
+      <Filter>Source Files\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\MiscShaderActions.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SetPerFrameConstantsShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SetPerMaterialConstantsShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SetPerObjectConstantsShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SetPerObjectGroupConstantsShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\ShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\Profiling.h">
+      <Filter>Source Files\Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\ConnectionManager.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\EventManager.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\NetworkContext.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\NetworkManager.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\Packet.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\StreamManager.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\Client\ClientConnectionManager.h">
+      <Filter>Source Files\Networking\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\Client\ClientNetworkManager.h">
+      <Filter>Source Files\Networking\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\Server\ServerConnectionManager.h">
+      <Filter>Source Files\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\Server\ServerNetworkManager.h">
+      <Filter>Source Files\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Common\GameContext.h">
+      <Filter>Source Files\Game\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Common\GlobalRegistry.h">
+      <Filter>Source Files\Game\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Client\ClientGame.h">
+      <Filter>Source Files\Game\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Server\ServerGame.h">
+      <Filter>Source Files\Game\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Texture\Texture_DDS_Loader_Common.h">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Texture\Texture_DDS_Loader_GL.h">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Texture\Texture_DDS_Loader_D3D.h">
+      <Filter>Source Files\APIAbstraction\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="GameThreadJob.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\EventTransmissionData.h">
+      <Filter>Source Files\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\DirectX\D3D_GPUScreen\D3D_GPUScreen.h">
+      <Filter>Source Files\APIAbstraction\DirectX\D3D_GPUScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\GLSLAttributes.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\ExternalPerTechniqueData.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\PEAlphaBlendState.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\Effect\PERasterizerState.h">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\InstancingSceneNode.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\MeshInstance.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\MeshManager.h">
+      <Filter>Source Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="APIAbstraction\GPUBuffers\AnimSetBufferGPU.h">
+      <Filter>Source Files\APIAbstraction\GPUBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SetInstanceControlConstantsShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h" />
+    <ClInclude Include="testfunc_c_stdcall.h" />
+    <ClInclude Include="Render\ShaderActions\SetInstancesTransformsConstantsShaderAction.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SA_SetAndBind_ConstResource_SingleObjectAnimationPalette.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SA_Bind_Resource.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SA_Bind_UAVandConstResource_InstancedAnimCSReduce.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SA_SetAndBind_ConstResource_InstancedObjectsAnimationPalettes.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SA_ComputeInto_SysMem_ComputeReduceFromInstancedAnimCSMapResults.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShaderActions\SA_CopyInto_SysMem_FromInstancedObjectsAnimationCSReduceResult.h">
+      <Filter>Source Files\Render\ShaderActions</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="APIAbstraction\Effect\Effect.lua">
+      <Filter>Source Files\APIAbstraction\Effect</Filter>
+    </None>
+    <None Include="Events\Component.lua">
+      <Filter>Source Files\Events</Filter>
+    </None>
+    <None Include="Scene\Skin.lua">
+      <Filter>Source Files\Scene</Filter>
+    </None>
+    <None Include="Lua\CommandServer.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\HierarchyBuilder.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\int32.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\LevelLoader.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\LuaEnvironment.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\LuahParser.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\peuuid.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="Lua\ServerLuaEnvironment.lua">
+      <Filter>Source Files\Lua</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\ZBuffer_DSS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMeshBlendShapes_ZOnly_VS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMeshBlendShapes_ZOnly_Tech.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMeshBlendShapes_Structs.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMeshBlendShapes_Shadowed_VS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMeshBlendShapes_Shadowed_Tech.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_ZOnly_Tech.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Shadowed_VS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Shadowed_Tech.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Shadowed_PS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh.Impl.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\SolidBackCullZBias_RS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\SolidBackCullNoBias_RS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\SkyBox.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\Replace_BS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\rasterizerhelper.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\Flash.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\depthstencilhelper.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\combined.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\blendhelper.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\ZBufferLookup_DSS.fx">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\shadowmaphelper.fx">
+      <Filter>Unified</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\DetailedSkin_Instanced_CS.cgcs">
+      <Filter>Unified\DetailedSkin</Filter>
+    </None>
+    <None Include="..\..\AssetsOut\Default\GPUPrograms\DetailedSkin_Reduce_Instanced_CS.cgcs">
+      <Filter>Unified\DetailedSkin</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\blurhelper.fx">
+      <Filter>Unified</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\lighthelper.fx">
+      <Filter>Unified</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\samplerhelper.fx">
+      <Filter>Unified</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\StandardConstants.fx">
+      <Filter>Unified</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\StandardTextureResources.fx">
+      <Filter>Unified</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Structs.fx">
+      <Filter>Unified\StdMesh</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\DetailedSkin_Structs.fx">
+      <Filter>Unified\DetailedSkin</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_Structs.fx">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\DetailedMesh_Structs.fx">
+      <Filter>Unified\DetailedMesh</Filter>
+    </fxbuild_dx11>
+    <fxbuild_dx11 Include="..\..\AssetsOut\Default\GPUPrograms\StandardInstancingConstants.fx">
+      <Filter>Unified</Filter>
+    </fxbuild_dx11>
+  </ItemGroup>
+  <ItemGroup>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_2D_VS.cgvs">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_VS.cgvs">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_ZOnly_VS.cgvs">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\DetailedMesh_ZOnly_VS.cgvs">
+      <Filter>Unified\DetailedMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\DetailedSkin_VS.cgvs">
+      <Filter>Unified\DetailedSkin</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\DetailedSkin_ZOnly_VS.cgvs">
+      <Filter>Unified\DetailedSkin</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_2D_VS.cgvs">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_VS.cgvs">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\DetailedMesh_VS.cgvs">
+      <Filter>Unified\DetailedMesh</Filter>
+    </cgbuild_ps3_vs>
+    <cgbuild_ps3_vs Include="..\..\AssetsOut\Default\GPUPrograms\DetailedSkin_Instanced_VS.cgvs">
+      <Filter>Unified\DetailedSkin</Filter>
+    </cgbuild_ps3_vs>
+  </ItemGroup>
+  <ItemGroup>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Diffuse_A_0_PS.cgps">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Diffuse_A_RGBIntensity_PS.cgps">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_Diffuse_PS.cgps">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_PS.cgps">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\StdMesh_ZOnly_PS.cgps">
+      <Filter>Unified\StdMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\DetailedMesh_Glow_PS.cgps">
+      <Filter>Unified\DetailedMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\DetailedMesh_ZOnly_PS.cgps">
+      <Filter>Unified\DetailedMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_GlowSeparation_PS.cgps">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_HorizontalBlur_PS.cgps">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_MotionBlur_PS.cgps">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_PS.cgps">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_ps>
+    <cgbuild_ps3_ps Include="..\..\AssetsOut\Default\GPUPrograms\ColoredMinimalMesh_VertBlurCombine_PS.cgps">
+      <Filter>Unified\ColoredMinimalMesh</Filter>
+    </cgbuild_ps3_ps>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuildStep Include="..\..\AssetsOut\Default\GPUPrograms\APIAbstraction.gpu">
+      <Filter>Unified</Filter>
+    </CustomBuildStep>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="test.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+  </ItemGroup>
+</Project>
