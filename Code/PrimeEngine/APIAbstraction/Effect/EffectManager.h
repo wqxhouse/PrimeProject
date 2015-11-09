@@ -158,6 +158,7 @@ public:
 		// Volume texture
 		LPDIRECT3DVOLUMETEXTURE9 m_clustersTex;
 		LPDIRECT3DTEXTURE9 m_lightIndicesTex;
+		void *m_volumeBuffer;
 
 #	elif APIABSTRACTION_OGL
 	PEMap<GLuint> m_vertexShaders;

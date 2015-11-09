@@ -14,6 +14,8 @@
 #include "EffectManager.h"
 #include "Effect.h"
 
+#include <xgraphics.h>
+
 // debug
 //#include <DxErr.h>
 //#pragma comment(lib, "dxerr.lib")
@@ -83,7 +85,7 @@ namespace PE {
 		// m_clustersTex
 		D3D9Renderer *ren = (D3D9Renderer *)m_pContext->getGPUScreen();
 		LPDIRECT3DDEVICE9 device = ren->m_pD3D9Device;
-		HRESULT hr = 
+		//HRESULT hr = 
 			// device->CreateVolumeTexture(CX, CY, CZ, 1, 0, D3DFMT_G16R16F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
 			// device->CreateVolumeTexture(CX, CY, CZ, 1, 0, D3DFMT_G16R16F, D3DPOOL_MANAGED, &m_clustersTex, NULL);
 			// device->CreateVolumeTexture(CX, CY, CZ, 1, D3DUSAGE_DYNAMIC, D3DFMT_G16R16F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
@@ -91,18 +93,46 @@ namespace PE {
 			device->CreateVolumeTexture(CX, CY, CZ, 1, D3DUSAGE_DYNAMIC, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
 #else
 
-			device->CreateVolumeTexture(CX, CY, CZ, 1, 0, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
+			//device->CreateVolumeTexture(CX, CY, CZ, 1, 0, D3DFMT_G32R32F, D3DPOOL_DEFAULT, &m_clustersTex, NULL);
+		m_clustersTex = new D3DVolumeTexture;
+
+		DWORD dwTextureSize = XGSetVolumeTextureHeader( 
+			CX, CY, CZ,
+			1, 
+			0,
+			// D3DFMT_G32R32F,
+			D3DFMT_LIN_G32R32F,
+			D3DPOOL_DEFAULT,
+			0,
+			0,
+			m_clustersTex,
+			NULL,
+			NULL ); 
+
+		void* pBuffer = XPhysicalAlloc( dwTextureSize, MAXULONG_PTR, 0, PAGE_READWRITE | PAGE_WRITECOMBINE );
+		XGOffsetResourceAddress( m_clustersTex, pBuffer ); 
+		m_volumeBuffer = pBuffer;
+
+		BYTE *bt = (BYTE *)pBuffer;
+		//for(int i = 0; i < dwTextureSize; i++)
+		//{
+		//	*(bt + i) = 0;
+		//}
+		memset(bt, 0, dwTextureSize);
+
 #endif
 		//if (FAILED(hr)) {
 		//	fprintf(stderr, "Error: %s error description: %s\n",
 		//		DXGetErrorString(hr), DXGetErrorDescription(hr));
 		//}
-		assert(SUCCEEDED(hr));
+		//assert(SUCCEEDED(hr));
 
 #if !APIABSTRACTION_X360
 		hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, D3DUSAGE_DYNAMIC, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
 #else
-		hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
+		//hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
+		// device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
+		device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_LIN_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
 #endif
 		// hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_DEFAULT, &m_lightIndicesTex, NULL);
 		// hr = device->CreateTexture(MAX_LIGHT_INDICES, 1, 1, 0, D3DFMT_A8, D3DPOOL_MANAGED, &m_lightIndicesTex, NULL);
@@ -110,7 +140,7 @@ namespace PE {
 		//	 fprintf(stderr, "Error: %s error description: %s\n",
 		//		 DXGetErrorString(hr), DXGetErrorDescription(hr));
 		// }
-		assert(SUCCEEDED(hr));
+		//assert(SUCCEEDED(hr));
 
 #endif
 

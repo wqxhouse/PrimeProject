@@ -696,10 +696,24 @@ void EffectManager::assignLightToClustersXBOX360()
 
 	// Directional light treat differently - do not assign to clusters
 
+	static float frameTime = 0.0f;
+
 	// Point light assignment
 	for (int i = 0; i < curPointLight; i++)
 	{
 		Light *pl = _pointLights[i];
+
+		{
+			// randomize the movement and radius of lights
+			//Quaternion qRot(Vector3(0, 1, 0), 0.16);
+			//Matrix4x4 mRot(qRot);
+			// pl->m_cbuffer.pos = mRot * pl->m_cbuffer.pos;
+
+			//pl->m_cbuffer.diffuse.m_x *= cos(frameTime);
+			//pl->m_cbuffer.diffuse.m_y *= cos(frameTime);
+			//pl->m_cbuffer.diffuse.m_z *= cos(frameTime);
+			// pl->m_cbuffer.range *= cos(frameTime);
+		}
 
 		const Vector3 p = (pl->m_cbuffer.pos - m_cMin);
 		const Vector3 pos = pl->m_cbuffer.pos;
@@ -756,7 +770,7 @@ void EffectManager::assignLightToClustersXBOX360()
 					if (dx < radius_sqr)
 					{
 						int curClusterLightCount = c_list_count[z][y][x];
-						if (curClusterLightCount >= 20)
+						if (curClusterLightCount >= 5)
 						{
 							char dbg[512];
 							sprintf_s(dbg, 512, "curLightIndices reached maximum\n");
@@ -802,7 +816,7 @@ void EffectManager::assignLightToClustersXBOX360()
 		}
 	}
 
-	static int _hackCounter = 0;
+	// static int _hackCounter = 0;
 	D3DLOCKED_BOX box;
 	HRESULT h;
 	// 32 * 8 = 256 bytes -- x
@@ -814,8 +828,8 @@ void EffectManager::assignLightToClustersXBOX360()
 	// can be modified later
 	// also can modify light count by moving them into edram (if xbox)
 #if APIABSTRACTION_X360
-	if(_hackCounter == 0) 
-	{
+	//if(_hackCounter == 0) 
+	//{
 #endif 
 
 		if ((h = m_clustersTex->LockBox(0, &box, NULL, 0)) == D3D_OK)
@@ -854,12 +868,13 @@ void EffectManager::assignLightToClustersXBOX360()
 		}
 
 #if APIABSTRACTION_X360
-		_hackCounter++;
-	}
+	//	_hackCounter++;
+	//}
 #endif
 
 	_pointLightNum = curPointLight;
-	
+
+	frameTime += 0.016;
 }
 
 void EffectManager::assignLightToClustersD3D9()
@@ -870,7 +885,7 @@ void EffectManager::assignLightToClustersD3D9()
 	int curLightIndices = 0;
 	memset(&_cluster, 0, sizeof(ClusterDataD3D9)*CX*CY*CZ);
 
-	int c_list[CZ][CY][CX][20]; // currently allow each cluster store 20 lights at maximum
+	int c_list[CZ][CY][CX][5]; // currently allow each cluster store 20 lights at maximum
 	short c_list_count[CZ][CY][CX];
 
 	memset(c_list, 0, sizeof(c_list));
@@ -891,7 +906,7 @@ void EffectManager::assignLightToClustersD3D9()
 
 	// Directional light treat differently - do not assign to clusters
 
-	// Point light assignment
+	//// Point light assignment
 	for (int i = 0; i < curPointLight; i++)
 	{
 		Light *pl = _pointLights[i];
@@ -1009,8 +1024,8 @@ void EffectManager::assignLightToClustersD3D9()
 	// can be modified later
 	// also can modify light count by moving them into edram (if xbox)
 #if APIABSTRACTION_X360
-	if(_hackCounter == 0) 
-	{
+	//if(_hackCounter == 0) 
+	//{
 #endif 
 
 	if ((h = m_clustersTex->LockBox(0, &box, NULL, 0)) == D3D_OK)
@@ -1049,8 +1064,8 @@ void EffectManager::assignLightToClustersD3D9()
 	}
 
 #if APIABSTRACTION_X360
-		_hackCounter++;
-	}
+		//_hackCounter++;
+	//}
 #endif
 
 	_pointLightNum = curPointLight;
