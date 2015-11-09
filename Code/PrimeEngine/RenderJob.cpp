@@ -138,7 +138,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		assert(false);
 #endif
 		// 2) Render lights
-
+		//Liu
 		EffectManager::Instance()->setClassicalLightTextureRenderTarget();
 		EffectManager::Instance()->drawClassicalLightPass(Vector3(0,1,0),5,Vector4(1,0,0,1));
 		EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1));

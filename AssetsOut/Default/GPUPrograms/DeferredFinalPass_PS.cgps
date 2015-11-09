@@ -12,6 +12,7 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
 	// Get the initial color at this pixel.
 	float4 color = sample2D(gDiffuseMapSampler, pIn.iColor.xy, gDiffuseMap);
+	//Liu
 	color = pow(color, 1.0 / 2.2);
 	return color;
 }
