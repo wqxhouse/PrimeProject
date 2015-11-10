@@ -36,6 +36,7 @@ Mesh::Mesh(PE::GameContext &context, PE::MemoryArena arena, Handle hMyself)
 {
 	m_processShowEvt = true;
     m_performBoundingVolumeCulling = false;
+	_isTextMesh = false;
 }
 
 

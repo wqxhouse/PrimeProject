@@ -103,6 +103,7 @@ struct Mesh : public Component
 
 	// + Deferred
 	EPEVertexFormat _type;
+	bool _isTextMesh;
 };
 
 }; // namespace Components

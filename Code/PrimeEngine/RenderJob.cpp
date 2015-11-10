@@ -175,6 +175,13 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		{
 			EffectManager::Instance()->debugDeferredRenderTarget(ctx._debugMode - 1);
 		}
+
+		// Draw text & hud & etc.
+		DrawList::ZOnlyInstanceReadOnly()->optimize();
+		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+		DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+
     }
     else
     {
