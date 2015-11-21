@@ -68,26 +68,12 @@ void runDrawThreadSingleFrameThreaded(PE::GameContext &ctx)
 
 	runDrawThreadSingleFrame(ctx);
 }
+
 //Liu
 float m_angle = 0;
-//void handleKeyboardDebugInputEvents(PE::Events::Event *pEvt)
-//{
-//	if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
-//	{
-//		EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums>180? 200: EffectManager::Instance()->m_lightNums+20;
-//		EffectManager::Instance()->randomLightInfo(EffectManager::Instance()->m_lightNums);
-//	}
-//
-//	if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
-//	{
-//		EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums<20? 0: EffectManager::Instance()->m_lightNums-20;
-//		EffectManager::Instance()->randomLightInfo(EffectManager::Instance()->m_lightNums);
-//	}
-//}
 
 void runDrawThreadSingleFrame(PE::GameContext &ctx)
 {
-	
 	int threadOwnershipMask = 0;
 	
 	ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
@@ -154,98 +140,49 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 #else
 		assert(false);
 #endif
-		// 2) Render lights
-		//Timer::TimeType time = t.TickAndGetCurrentTime();
+
 		//Liu
-		/*PE::Handle iqh = PE::Events::EventQueueManager::Instance()->getEventQueueHandle("input");
-		while (!iqh.getObject<PE::Events::EventQueue>()->empty())
+		m_angle+=1;
+
+		EffectManager::Instance()->rotateLight(0.01,m_angle);
+		if (ctx._renderMode == 0)
 		{
-			PE::Events::Event *pInputEvt = iqh.getObject<PE::Events::EventQueue>()->getFront();
-			handleKeyboardDebugInputEvents(pInputEvt);
-		}*/
-		//Liu
-		m_angle+=0.01f;
-		
-		EffectManager::Instance()->setClassicalLightTextureRenderTarget();
-		EffectManager::Instance()->drawClassicalLightPass(5,m_angle);
-		//EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1),m_angle);
-		EffectManager::Instance()->endCurrentRenderTarget();
-		//create sphere;
-		
+			// 2.1) Assign light to clusters
+			EffectManager::Instance()->assignLightToClusters();
+			//EffectManager::Instance()->rotateLight(m_angle);
+			// 2.2) Render lights
+			EffectManager::Instance()->setLightAccumTextureRenderTarget();
+			EffectManager::Instance()->drawClusteredLightHDRPass();
+			EffectManager::Instance()->endCurrentRenderTarget();
+		}
+		else
+		{
+			// EffectManager::Instance()->setClassicalLightTextureRenderTarget();
+			//EffectManager::Instance()->rotateLight(0.01);
+			EffectManager::Instance()->setLightAccumTextureRenderTarget();
+			EffectManager::Instance()->drawClassicalLightPass(0.01);
+			//EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1),m_angle);
+			EffectManager::Instance()->endCurrentRenderTarget();
+		}
+
 		// 3) Render post process & final pass
-	/*	EffectManager::Instance()->setFinalLDRTextureRenderTarget();
+		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
+		if (ctx._debugMode == 0)
 		{
 			EffectManager::Instance()->drawDeferredFinalPass();
+
 		}
-		EffectManager::Instance()->endCurrentRenderTarget();*/
-#if 0
-		EffectManager::Instance()->drawDeferredFinalToBackBuffer();
-		EffectManager::Instance()->endCurrentRenderTarget();
-#else  
-		EffectManager::Instance()->debugDeferredRenderTarget(5);
-		EffectManager::Instance()->endCurrentRenderTarget();
-		
-#endif
+		else
+		{
+			EffectManager::Instance()->debugDeferredRenderTarget(ctx._debugMode - 1);
+		}
 
-		//// set render target: GlowTargetTextureGPU
-  //      EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGlow();
-  //       
-  //      assert(DrawList::InstanceReadOnly() != DrawList::Instance());
-  //      DrawList::InstanceReadOnly()->optimize();
-  //              
-		//// set global shader value (applied to all draw calls) for shadow map texture
-		//if (renderShadowMap)
-		//	EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
+		// Draw text & hud & etc.
+		DrawList::ZOnlyInstanceReadOnly()->optimize();
+		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+		DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 
-		//ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
-
-		//DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
-		//ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
-
-		//EffectManager::Instance()->endCurrentRenderTarget();
-
-		//#if APIABSTRACTION_D3D9
-		//	//IRenderer::Instance()->getDevice()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//#elif APIABSTRACTION_D3D11
-		//	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//#endif
-
-		//// sets render target to separated glow texture
-		//EffectManager::Instance()->drawGlowSeparationPass();
-		//EffectManager::Instance()->endCurrentRenderTarget();
-
-  //      // First glow path into another texture with horizontal glow
-  //              
-  //      // Draw Effects
-  //      // horizontal glow into 2nd glow target
-  //      EffectManager::Instance()->drawFirstGlowPass();
-		//EffectManager::Instance()->endCurrentRenderTarget();
-
-  //      // from second glow target to FinishedGlowTargetTexture
-
-		//EffectManager::Instance()->drawSecondGlowPass();
-		//EffectManager::Instance()->endCurrentRenderTarget();
-
-		//bool drawMotionBlur = renderMode == IRenderer::RenderMode_DefaultGlow;
-		//if (drawMotionBlur)
-		//{
-		//	//draw back into main back buffer render target
-		//	EffectManager::Instance()->drawMotionBlur();
-		//	EffectManager::Instance()->endCurrentRenderTarget();
-		//}
-		//else
-		//{
-		//	bool debugGlowRenderTarget = renderMode == IRenderer::RenderMode_DebugGlowRT;
-		//	bool drawSeparatedGlow = renderMode == IRenderer::RenderMode_DebugSeparatedGlow;
-		//	bool drawGlow1stPass = renderMode == IRenderer::RenderMode_DebugGlowHorizontalBlur;
-		//	bool drawGlow2ndPass = renderMode == IRenderer::RenderMode_DebugGlowVerticalBlurCombine;
-		//	bool drawShadowRenderTarget = renderMode == IRenderer::RenderMode_DebugShadowRT;
-
-		//	EffectManager::Instance()->debugDrawRenderTarget(debugGlowRenderTarget, drawSeparatedGlow, drawGlow1stPass, drawGlow2ndPass, drawShadowRenderTarget);
-		//	EffectManager::Instance()->endCurrentRenderTarget();
-		//}
-
-		
     }
     else
     {

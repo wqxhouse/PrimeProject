@@ -44,9 +44,16 @@ namespace PE {
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 2); // mipmap for normal ?
-		m_hlightTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		/*m_hlightTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
 		TextureGPU *plightRTTGPU = new (m_hlightTextureGPU)TextureGPU(*m_pContext, m_arena);
 		plightRTTGPU->createDrawableIntoColorTexture(
+			m_pContext->getGPUScreen()->getWidth(),
+			m_pContext->getGPUScreen()->getHeight(),
+			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);*/
+
+		m_hmaterialTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *pMaterialRTTGPU = new (m_hmaterialTextureGPU)TextureGPU(*m_pContext, m_arena);
+		pMaterialRTTGPU->createDrawableIntoColorTexture(
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);
@@ -68,47 +75,26 @@ namespace PE {
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp);
-		// + End
 
-// 
-//		m_hGlowTargetTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
-//		TextureGPU *pGlowTargetTextureGPU = new(m_hGlowTargetTextureGPU) TextureGPU(*m_pContext, m_arena);
-//		//todo: once mipmaps are generated for this RT enable SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp
-//		// if donwsampling doesnt look good
-//		// for now stick with because we dont have cross platform mipmap generation, should work fine
-//		pGlowTargetTextureGPU->createDrawableIntoColorTextureWithDepth(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
-//#ifndef _XBOX
-//		m_frameBufferCopyTexture.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
-//#endif
-//#if 0
-//		// enable when readable textures for DX 9 are available
-//		m_readableTexture.createReadableColorTexture(IRenderer::Instance()->getWidth(), IRenderer::Instance()->getHeight());
-//#endif
-//
-//		// 1/4 scren texture blur
-//		PEINFO("PE: PROGRESS: Creating m_glowSeparatedTextureGPU\n");
-//		// no need to magnification filtering for this texture since we render it into same size texture
-//		m_glowSeparatedTextureGPU.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth() / 2, m_pContext->getGPUScreen()->getHeight() / 2, SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
-//
-//		PEINFO("PE: PROGRESS: Creating m_2ndGlowTargetTextureGPU\n");
-//		// need magnification filtering since we render this small texture onto larger result RT
-//		m_2ndGlowTargetTextureGPU.createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth() / 2, m_pContext->getGPUScreen()->getHeight() / 2, SamplerState_NoMips_NoMinTexelLerp_MagTexelLerp_Clamp);
-//		
-//		PEINFO("PE: PROGRESS: Creating pFinishedGlowTargetTextureGPU\n");
-//		m_hFinishedGlowTargetTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
-//		TextureGPU *pFinishedGlowTargetTextureGPU = new(m_hFinishedGlowTargetTextureGPU) TextureGPU(*m_pContext, m_arena);
-//		// need to use mag texel lerp since will be upscaled and put on result
-//		pFinishedGlowTargetTextureGPU->createDrawableIntoColorTexture(m_pContext->getGPUScreen()->getWidth(), m_pContext->getGPUScreen()->getHeight(), SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp);
-//
-//#if APIABSTRACTION_IOS || APIABSTRACTION_X360
-//		PEINFO("PE: PROGRESS: Creating m_shadowMapDepthTexture 128x128\n");
-//		// need to lerp minimization and at this point we dont lerp magnification
-//		m_shadowMapDepthTexture.createDrawableIntoDepthTexture(128, 128, SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
-//#else
-//		PEINFO("PE: PROGRESS: Creating m_shadowMapDepthTexture 2048x2048\n");
-//		// need to lerp minimization and at this point we dont lerp magnification
-//		m_shadowMapDepthTexture.createDrawableIntoDepthTexture(2048,2048, SamplerState_NoMips_MinTexelLerp_NoMagTexelLerp_Clamp);
-//#endif
+		// Root Depth buffer TextureGPU
+		m_hrootDepthBufferTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *pRootDepthBufferGPU = new (m_hrootDepthBufferTextureGPU)TextureGPU(*m_pContext, m_arena);
+
+#if APIABSTRACTION_D3D11
+		D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
+		pRootDepthBufferGPU->m_samplerState = SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp;
+		pRootDepthBufferGPU->m_viewport.TopLeftX = 0;
+		pRootDepthBufferGPU->m_viewport.TopLeftY = 0;
+		pRootDepthBufferGPU->m_viewport.Width = pD3D11Renderer->getWidth();
+		pRootDepthBufferGPU->m_viewport.Height = pD3D11Renderer->getHeight();
+		pRootDepthBufferGPU->m_viewport.MinDepth = 0.0f;
+		pRootDepthBufferGPU->m_viewport.MaxDepth = 1.0f;
+		pRootDepthBufferGPU->m_DepthStencilView = pD3D11Renderer->m_pDepthStencilView;
+		pRootDepthBufferGPU->m_pDepthShaderResourceView = pD3D11Renderer->m_pDepthStencilShaderView;
+#else 
+		assert(false);
+#endif
+		// + End
 
 		m_pixelShaderSubstitutes.reset(EffectPSInputFamily::Count);
 
@@ -333,9 +319,62 @@ namespace PE {
 		m_map.add("DetailedMesh_GBuffer_Tech", hEffect);
 	}
 
+	// Gbuffer with position
+	{
+		Handle hEffect("EFFECT", sizeof(Effect));
+		Effect *pEffect = new(hEffect)Effect(*m_pContext, m_arena, hEffect);
+		pEffect->loadTechnique(
+			"DetailedMesh_Shadowed_VS", "main",
+			NULL, NULL,
+			"DetailedMesh_GBuffer_WithPosition_PS", "main",
+			NULL, NULL,
+			PERasterizerState_SolidTriBackCull,
+			PEDepthStencilState_ZBuffer,
+			PEAlphaBlendState_NoBlend,
+			"DetailedMesh_GBuffer_WithPosition_Tech");
+
+		pEffect->m_psInputFamily = EffectPSInputFamily::DETAILED_MESH_PS_IN;
+		pEffect->m_effectDrawOrder = EffectDrawOrder::First;
+		m_map.add("DetailedMesh_GBuffer_WithPosition_Tech", hEffect);
+	}
+
 	// TODO: Light Pass - classical deferred and clustered will be different here
-	// Classical Deferred pass render geometry + additive blending
+	// Classical Deferred pass render sphere/cone geometry + additive blending
 	// Clustered Deferred pass render quad... (no additive blending, implied in one-pass shader)
+	{
+		Handle hLightHDRClusteredFx("EFFECT", sizeof(Effect));
+		Effect *pLightHDRClusteredFx = new(hLightHDRClusteredFx)Effect(*m_pContext, m_arena, hLightHDRClusteredFx);
+		pLightHDRClusteredFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"Deferred_LightPassClustered_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"DeferredLightPass_Clustered_Tech");
+		pLightHDRClusteredFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DeferredLightPass_Clustered_Tech", hLightHDRClusteredFx);
+	}
+
+	// + Debug Pass
+	{
+		Handle hDebugPass("EFFECT", sizeof(Effect));
+		Effect *pFihDebugPassnalLDRFx = new(hDebugPass)Effect(*m_pContext, m_arena, hDebugPass);
+		pFihDebugPassnalLDRFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DebugPass_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"debug_Tech");
+		pFihDebugPassnalLDRFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("debug_Tech.fx", hDebugPass);
+	}
+
+	// classical deferred
 	{
 		//Liu
 		Handle hLightClassicalFx("EFFECT", sizeof(Effect));

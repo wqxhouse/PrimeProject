@@ -100,6 +100,10 @@ struct Mesh : public Component
 	bool m_bDrawControl;
     
     bool m_performBoundingVolumeCulling;
+
+	// + Deferred
+	EPEVertexFormat _type;
+	bool _isTextMesh;
 };
 
 }; // namespace Components

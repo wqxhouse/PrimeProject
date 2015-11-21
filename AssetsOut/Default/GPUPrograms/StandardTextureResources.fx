@@ -48,7 +48,6 @@ SamplerState gWindMapSampler : register(s7);
 Texture1D gRandomMap : register(t7);
 SamplerState gRandomMapSampler : register(s7);
 
-
 // DX compute
 struct BufferStruct
 {
@@ -109,7 +108,5 @@ API_UNIFORM_CONSTANT sampler2D gSpecularMapSampler SAMPLER_REGISTER(5); // : reg
 API_UNIFORM_CONSTANT sampler2D gBlurredGlowMapSampler SAMPLER_REGISTER(6); // : register(s6);
 
 #endif
-
-
 
 #endif // file guard

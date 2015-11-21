@@ -7,6 +7,8 @@
 #include "PrimeEngine/GameThreadJob.h"
 #include "PrimeEngine/Application/Application.h"
 #include "PrimeEngine/APIAbstraction/Effect/PEDepthStencilState.h"
+#include "PrimeEngine/Scene/Light.h"
+
 
 #ifdef _XBOX
 #include <xbdm.h>
@@ -336,10 +338,9 @@ namespace Components {
 
 	context.getNetworkManager()->initNetwork();
 	
-
 	//Liu
-	
-	EffectManager::Instance()->randomLightInfo(200);
+	EffectManager::Instance()->randomLightInfo(50);
+
 	return 1;
 }
         

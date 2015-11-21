@@ -16,6 +16,8 @@ struct COLORED_MINIMAL_MESH_PS_IN
 {
     float4 iPosH	API_SEMANTIC(PIPELINE_POSITION);
     float3 iPosW	API_SEMANTIC(PSIN_EXTRA_POSITION);
+	// + Deferred
+	float3 viewRay	: HELLOWORLD;
     float3 iColor   API_SEMANTIC(PSIN_COLOR);
 };
 
@@ -84,7 +86,6 @@ struct COLORED_MINIMAL_MESH_PS_IN
         { \
             return func(pIn); \
         }
-
 #endif
 
 #endif // file guard

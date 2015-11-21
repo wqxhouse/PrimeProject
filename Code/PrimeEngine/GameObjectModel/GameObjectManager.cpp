@@ -85,32 +85,33 @@ void GameObjectManager::do_CREATE_LIGHT(Events::Event *pEvt)
 
 	if (!haveObject)
 	{
-		Handle hLight("LIGHT", sizeof(Light));
+		//Liu
+		//Handle hLight("LIGHT", sizeof(Light));
 
-		Light *pLight = new(hLight) Light(
-			*m_pContext,
-			m_arena,
-			hLight,
-			pRealEvt->m_pos, //Position
-			pRealEvt->m_u, 
-			pRealEvt->m_v, 
-			pRealEvt->m_n, //Direction (z-axis)
-			pRealEvt->m_ambient, //Ambient
-			pRealEvt->m_diffuse, //Diffuse
-			pRealEvt->m_spec, //Specular
-			pRealEvt->m_att, //Attenuation (x, y, z)
-			pRealEvt->m_spotPower, // Spot Power
-			pRealEvt->m_range, //Range
-			pRealEvt->m_isShadowCaster, //Whether or not it casts shadows
-			(PrimitiveTypes::Int32)(pRealEvt->m_type) //0 = point, 1 = directional, 2 = spot
-		);
-		pLight->addDefaultComponents();
+		//Light *pLight = new(hLight) Light(
+		//	*m_pContext,
+		//	m_arena,
+		//	hLight,
+		//	pRealEvt->m_pos, //Position
+		//	pRealEvt->m_u, 
+		//	pRealEvt->m_v, 
+		//	pRealEvt->m_n, //Direction (z-axis)
+		//	pRealEvt->m_ambient, //Ambient
+		//	pRealEvt->m_diffuse, //Diffuse
+		//	pRealEvt->m_spec, //Specular
+		//	pRealEvt->m_att, //Attenuation (x, y, z)
+		//	pRealEvt->m_spotPower, // Spot Power
+		//	pRealEvt->m_range, //Range
+		//	pRealEvt->m_isShadowCaster, //Whether or not it casts shadows
+		//	(PrimitiveTypes::Int32)(pRealEvt->m_type) //0 = point, 1 = directional, 2 = spot
+		//);
+		//pLight->addDefaultComponents();
 
-		RootSceneNode::Instance()->m_lights.add(hLight);
-		RootSceneNode::Instance()->addComponent(hLight);
+		//RootSceneNode::Instance()->m_lights.add(hLight);
+		//RootSceneNode::Instance()->addComponent(hLight);
 
-		m_pContext->getLuaEnvironment()->pushHandleAsFieldAndSet(pRealEvt->m_peuuid, hLight);
-		m_lastAddedObjHandle = hLight;
+		//m_pContext->getLuaEnvironment()->pushHandleAsFieldAndSet(pRealEvt->m_peuuid, hLight);
+		//m_lastAddedObjHandle = hLight;
 	}
 	else
 	{

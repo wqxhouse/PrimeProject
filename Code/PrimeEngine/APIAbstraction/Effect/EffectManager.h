@@ -23,12 +23,19 @@
 #include "PEAlphaBlendState.h"
 #include "PERasterizerState.h"
 #include "PEDepthStencilState.h"
+
+#include <vector>
+#include <D3DCommon.h>
+#include <D3DCompiler.h>
+#include <d3d11.h>
+
 #include "math.h"
 
 namespace PE {
 namespace Components{
 struct Effect;
 struct DrawList;
+struct Light;
 };
 
 struct EffectManager : public PE::PEAllocatableAndDefragmentable
@@ -74,14 +81,17 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
-	//Liu
-	void EffectManager::setClassicalLightTextureRenderTarget();
-	void EffectManager::drawClassicalLightPass(float scale,float angle);
-	void EffectManager::createSphere(float radius, int sliceCount, int stackCount);
-	void EffectManager::randomLightInfo(int num);
-	void EffectManager::resizeLightNums(int num);
+	void setLightAccumTextureRenderTarget();
 
-	// void setLightAccumTextureRenderTarget();
+	//Liu
+	// void EffectManager::setClassicalLightTextureRenderTarget();
+	void drawClassicalLightPass(float angle);
+	void createSphere(float radius, int sliceCount, int stackCount);
+	void randomLightInfo(int num);
+	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
+	void rotateLight(float angle,int counter);
+	
+
 	void setFinalLDRTextureRenderTarget();
 
 	void setTextureAndDepthTextureRenderTargetForDefaultRendering();
@@ -104,8 +114,11 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawFrameBufferCopy();
 
 	// + Deferred
+	void drawClusteredLightHDRPass();
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();
+
+	void assignLightToClusters();
 
 	void debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSeparatedGlow, bool drawGlow1stPass, bool drawGlow2ndPass, bool drawShadowRenderTarget);
 	void debugDeferredRenderTarget(int which);
@@ -137,9 +150,13 @@ public:
 	Handle m_halbedoTextureGPU;
 	Handle m_hnormalTextureGPU;
 	Handle m_haccumHDRTextureGPU;
+	Handle m_hfinalLDRTextureGPU;
+	Handle m_hrootDepthBufferTextureGPU;
+
 	//Liu
 	Handle m_hpositionTextureGPU;
-	Handle m_hlightTextureGPU;
+	Handle m_hmaterialTextureGPU;
+	// Handle m_hlightTextureGPU;
 	struct LightInfo
 	{
 		Vector3 pos;
@@ -147,10 +164,8 @@ public:
 		Vector3 obritAxis;
 	};
 	//Liu
-	Array<LightInfo> m_lights;
-	int m_lightNums;
+	// Array<LightInfo> m_lights;
 
-	Handle m_hfinalLDRTextureGPU;
 	// + End deferred 
 	
 	Matrix4x4 m_currentViewProjMatrix;
@@ -172,6 +187,39 @@ public:
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
 	Handle m_hfinalLDRPassEffect;
+
+	Handle m_hdebugPassEffect;
+
+	// + Deferred cluster data - hard coded cluster size
+	struct ClusterData
+	{
+		unsigned int offset;
+		unsigned int counts;
+		// short pointLightCount;
+		// short spotLightCount;
+	};
+
+	Vector3 m_cMin;
+	Vector3 m_cMax;
+	static const int CX = 32;
+	static const int CY = 8;
+	static const int CZ = 32;
+	std::vector<PE::Components::Light *> _dirLights;
+	std::vector<PE::Components::Light *> _pointLights;
+	std::vector<PE::Components::Light *> _spotLights;
+	int _dirLightNum, _pointLightNum, _spotLightNum;
+	// std::vector<short> _lightIndices;
+	std::vector<unsigned int> _lightIndices;
+	ClusterData _cluster[CZ][CY][CX];
+
+	// DX11 resources - did not bother impl for TextureCPU
+	ID3D11Texture3D *_clusterTex;
+	ID3D11ShaderResourceView *_clusterTexShaderView;
+	ID3D11Buffer *_lightIndicesBuffer;
+	// ID3D11Texture1D *_lightIndicesTex;
+	ID3D11ShaderResourceView *_lightIndicesBufferShaderView;
+
+	// + End
 	Handle m_hDeferredLightPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
@@ -192,7 +240,7 @@ public:
 #	if APIABSTRACTION_D3D11
 		PEMap<ID3D11Buffer *> m_cbuffers; // only DX 11 has constant buffers. DX9 just has constant registers
 #	endif
-		
+
 	bool m_doMotionBlur;
 
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;

@@ -8,6 +8,13 @@
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 #include "../Lua/LuaEnvironment.h"
 #include "PrimeEngine/Render/ShaderActions/SetPerFrameConstantsShaderAction.h"
+
+// + Deferred
+#include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
+#include "PrimeEngine/Scene/CameraSceneNode.h"
+#include "PrimeEngine/Scene/CameraManager.h"
+#include "PrimeEngine/Math/Matrix4x4.h"
+
 namespace PE {
 namespace Components {
 
@@ -77,10 +84,16 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	
 		psvPerObjectGroup->m_data.gViewProj = pDrawEvent ? pDrawEvent->m_projectionViewTransform : pZOnlyDrawEvent->m_projectionViewTransform;
 
+		// psvPerObjectGroup->m_data.gViewInv = pDrawEvent ? pDrawEvent->m_viewInvTransform : Matrix4x4();
 		psvPerObjectGroup->m_data.gViewInv = pDrawEvent ? pDrawEvent->m_viewInvTransform : Matrix4x4();
 		// TODO: fill these in for motion blur
 		psvPerObjectGroup->m_data.gPreviousViewProjMatrix = Matrix4x4();
-		psvPerObjectGroup->m_data.gViewProjInverseMatrix = Matrix4x4();
+
+		// + Deferred
+		psvPerObjectGroup->m_data.gViewProjInverseMatrix = 
+			  pDrawEvent ? pDrawEvent->m_projectionViewTransform.inverse()
+			: pZOnlyDrawEvent->m_projectionViewTransform.inverse();
+
 
 		psvPerObjectGroup->m_data.gDoMotionBlur = 0;
 		psvPerObjectGroup->m_data.gEyePosW = pDrawEvent ? pDrawEvent->m_eyePos : pZOnlyDrawEvent->m_eyePos;
@@ -104,7 +117,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 				}
 			}
 		}
-		for (PrimitiveTypes::UInt32 iLight = 0;iLight < pRoot->m_lights.m_size; iLight++)
+		for (PrimitiveTypes::UInt32 iLight = 0;iLight < 8; iLight++)//pRoot->m_lights.m_size
 		{
 			Light *pLight = pRoot->m_lights[iLight].getObject<Light>();
 			if(pLight->castsShadow())
@@ -112,8 +125,6 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 			psvPerObjectGroup->m_data.gLights[iDestLight] = pLight->m_cbuffer;
 			iDestLight++;
 		}
-
-		
 	}
 }
 }; // namespace Components

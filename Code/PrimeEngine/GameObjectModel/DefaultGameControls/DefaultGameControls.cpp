@@ -5,7 +5,7 @@
 // Sibling/Children Includes
 
 #include "DefaultGameControls.h"
-
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 
 
 // definitions of keyboard and controller events. s.a. Button pressed, etc
@@ -13,7 +13,7 @@
 #include "../../Events/StandardControllerEvents.h"
 
 #include "../../Events/StandardKeyboardEvents.h"
-#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
+
 #if APIABSTRACTION_IOS
 
 	#include "../../Events/StandardIOSEvents.h"
@@ -225,22 +225,6 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 
 		m_pQueueManager->add(h, QT_GENERAL);
 	}
-	//Liu
-	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
-	{
-		//EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums<20? 0: EffectManager::Instance()->m_lightNums-20;
-		EffectManager::Instance()->resizeLightNums(-20);
-
-		//m_pQueueManager->add(h, QT_GENERAL);
-	}
-	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
-	{
-		//EffectManager::Instance()->m_lightNums = EffectManager::Instance()->m_lightNums>180? 200: EffectManager::Instance()->m_lightNums+20;
-		EffectManager::Instance()->resizeLightNums(20);
-
-		//m_pQueueManager->add(h, QT_GENERAL);
-	}
-
 	else if (Event_KEY_LEFT_HELD::GetClassId() == pEvt->getClassId())
 	{
 
@@ -290,17 +274,31 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		m_pQueueManager->add(h, QT_GENERAL);
 
 	}
-
-	else
-
+	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
 	{
-
-		Component::handleEvent(pEvt);
-
+		m_pContext->_renderMode = 0;
+		//EffectManager::Instance()->resizeLightNums(10);
 	}
-
+	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_renderMode = 1;
+		//EffectManager::Instance()->resizeLightNums(-10);
+	}
+	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_debugMode--;
+		m_pContext->_debugMode = max(m_pContext->_debugMode, 0);
+	}
+	else if (Event_KEY_PERIOD_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_debugMode++;
+		m_pContext->_debugMode = m_pContext->_debugMode % 5;
+	}
+	else
+	{
+		Component::handleEvent(pEvt);
+	}
 }
-
 
 
 void DefaultGameControls::handleControllerDebugInputEvents(Event *pEvt)

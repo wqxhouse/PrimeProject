@@ -79,8 +79,7 @@ namespace PE {
 			}
         };
         
-		
-
+        
         struct ClientGame : public Component
         {
 			struct EngineInitParams

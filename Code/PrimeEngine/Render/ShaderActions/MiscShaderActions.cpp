@@ -14,6 +14,9 @@
 #include "PrimeEngine/Render/ShaderActions/SA_SetAndBind_ConstResource_SingleObjectAnimationPalette.h"
 #include "PrimeEngine/Render/ShaderActions/SA_SetAndBind_ConstResource_InstancedObjectsAnimationPalettes.h"
 
+// + Deferred
+#include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
+
 // Sibling/Children includes
 #include "MiscShaderActions.h"
 namespace PE {
@@ -29,6 +32,9 @@ void * SetPerMaterialConstantsShaderAction::s_pBuffer = NULL;
 ID3D11Buffer * SetPerFrameConstantsShaderAction::s_pBuffer = NULL;
 ID3D11Buffer * SetPerObjectGroupConstantsShaderAction::s_pBuffer = NULL;
 ID3D11Buffer * SetPerObjectConstantsShaderAction::s_pBuffer = NULL;
+// + Deferred
+ID3D11Buffer * SetClusteredShadingConstantsShaderAction::s_pBuffer = NULL;
+
 ID3D11Buffer * SA_SetAndBind_ConstResource_PerInstanceData::s_pBuffer = NULL;
 ID3D11ShaderResourceView * SA_SetAndBind_ConstResource_PerInstanceData::s_pShaderResourceView = NULL;
 ID3D11Buffer * SetPerMaterialConstantsShaderAction::s_pBuffer = NULL;

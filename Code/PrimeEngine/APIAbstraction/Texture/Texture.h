@@ -26,10 +26,6 @@ namespace TextureFamily
 		GLOW_MAP,
 		COLOR_MAP_ARRAY,
 		COLOR_CUBE,
-
-		// +Deferred
-		ALBEDO, 
-		WORLD_NORMAL,
 	};
 };
 
@@ -130,6 +126,7 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;
 	char m_name[256];
 };
+
 
 }; // namespace PE
 

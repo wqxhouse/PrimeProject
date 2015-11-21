@@ -13,10 +13,8 @@ namespace PE {
 
 	void runDrawThreadSingleFrameThreaded(PE::GameContext &ctx);
 
-	void handleKeyboardDebugInputEvents(PE::Events::Event *pEvt);
-	
-	
 
 }; // namespace PE
+
 
 #endif
