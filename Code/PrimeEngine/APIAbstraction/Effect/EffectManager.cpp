@@ -32,6 +32,7 @@
 #include "PrimeEngine/Scene/CameraSceneNode.h"
 #include "PrimeEngine/Scene/CameraManager.h"
 #include "PrimeEngine/Scene/Light.h"
+#include "PrimeEngine/Scene/SceneNode.h"
 
 #include "PrimeEngine/Scene/MeshInstance.h"
 #include "PrimeEngine/Scene/RootSceneNode.h"
@@ -1143,11 +1144,12 @@ void EffectManager::drawDeferredFinalPass()
 	pscs.m_data.camZAxisWS = csn->m_base.getN();
 	pscs.bindToPipeline(&curEffect);
 
-	/*SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
-	cb.m_data.gViewInv = csn->m_worldToViewTransform.inverse();
-	cb.m_data.gPreviousViewProjMatrix = m_previousViewProjMatrix;
-	cb.m_data.gViewProjInverseMatrix = m_currentViewProjMatrix.inverse();
-	cb.bindToPipeline(&curEffect);*/
+	SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
+	cb.m_data.gViewInv = csn->m_worldToViewTransform;
+	cb.m_data.gViewProj = csn->m_viewToProjectedTransform;
+	//cb.m_data.gPreviousViewProjMatrix = m_previousViewProjMatrix;
+	//cb.m_data.gViewProjInverseMatrix = m_currentViewProjMatrix.inverse();
+	cb.bindToPipeline(&curEffect);
 
 	pibGPU->draw(1, 0);
 
@@ -1161,7 +1163,7 @@ void EffectManager::drawDeferredFinalPass()
 	setTextureActionPosition.unbindFromPipeline(&curEffect);
 	objSa.unbindFromPipeline(&curEffect);
 	pscs.unbindFromPipeline(&curEffect);
-	//cb.unbindFromPipeline(&curEffect);
+	cb.unbindFromPipeline(&curEffect);
 }
 
 void EffectManager::drawMotionBlur()
@@ -1673,6 +1675,15 @@ void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
 //Liu
 void EffectManager::rotateLight(float angle, int counter)
 {
+	
+	int a = PE::RootSceneNode::Instance()->getComponentCount();
+	for (int b = 0; b < a;b++)
+	{
+		if (PE::RootSceneNode::Instance()->getComponentByIndex(b).getObject<SceneNode>() != NULL)
+			PE::RootSceneNode::Instance()->getComponentByIndex(b).getObject<SceneNode>()->m_base.turnRight(0.1f);
+	}
+	//int b = 0;
+	/*
 	auto &lights = PE::RootSceneNode::Instance()->m_lights;
 	for (int i = 0; i < lights.m_size; i++)
 	{
@@ -1690,6 +1701,8 @@ void EffectManager::rotateLight(float angle, int counter)
 		//}
 		
 	}
+
+	*/
 }
 
 

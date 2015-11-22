@@ -9,6 +9,9 @@
 #include "ColoredMinimalMesh_Structs.fx"
 #include "DeferredLightCommon.fx"
 
+#define MAX_STEPS 300
+#define MAX_INTERSECT_DIST 0.04
+
 float getPointLightAtt(float radius, float dist) 
 {
     // Soft transition
@@ -77,9 +80,30 @@ float3 renderPointLight(float3 posWS, float3 albedo, float3 normal, cbPointLight
 				   light.cColor, zero, light.cSpecPow, 
 				   albedo, one, one, att);
 }
+/*
+float getReflZ(int2 coord, float3 viewRay)
+{
+	float perspectiveZ = gDepthMap.Load(uint3(coord.xy, 0)).x;
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+	return v0.z;
+}
+
+float2 NormalizedDeviceCoordToScreenCoord(float2 ndc, float2 dim)
+{
+   float2 screenCoord;
+   screenCoord.x = dim.x * ((ndc.x * 0.5)+0.5);
+   screenCoord.y = dim.y * (1.0f - ((ndc.y * 0.5)+0.5));
+   return screenCoord;
+}
+*/
 
 float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
+
+
 	uint4 fragCoord = pIn.iPosH;
 
 	float4 albedo = gDiffuseMap.Load(uint3(fragCoord.xy, 0));
@@ -92,6 +116,96 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
 	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
 	
+	/*
+	//Liu
+	
+	//get screen dimension
+	uint width;
+	uint height;
+	gDiffuseMap.GetDimensions(width, height);
+	float2 dim = float2(width, height);
+
+	//test coord
+	float2 coord;
+
+	//step counter;
+	float t = 1;
+
+	//get CS reflection ray
+	float3 n = normal.xyz;
+	float3 d = viewRay;
+	float3 refl = normalize(reflect(d, n));
+	float3 ScreenRefl = mul( refl, (float3x3)gView);
+
+	//get reflactivity
+	float reflectivity = posWS.y>0?0:0.5;
+
+	float4 reflColor = float4(0, 0, 0, 0);
+
+	//CS ray start & end point
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+
+	//float rayLength = ((csOrig.z + ScreenRefl.z * cs_far) > cs_near) ? (cs_near - csOrig.z) / ScreenRefl.z : cs_far;
+
+	float3 v1 = v0 + ScreenRefl * cs_far;
+
+	//NDCS  ray start & end point
+	float4 p0 = mul( float4(v0,1.0), gViewProj );
+	float4 p1 = mul( float4(v1,1.0), gViewProj );
+
+	//projection factor
+	float k0 = 1.0f / p0.w;
+	float k1 = 1.0f / p1.w;
+
+	p0 *= k0; 
+	p1 *= k1;
+
+	//get screen space coord
+	p0.xy = NormalizedDeviceCoordToScreenCoord(p0.xy,dim);
+	p1.xy = NormalizedDeviceCoordToScreenCoord(p1.xy,dim);
+
+	v0 *= k0;
+	v1 *= k1;
+
+
+	float divisions = length(p1 - p0);
+	float3 dV = (v1 - v0) / divisions;
+	float dK = (k1 - k0) / divisions;
+	float2 traceDir = (p1 - p0) / divisions;
+
+
+	float maxSteps = min(MAX_STEPS, divisions);
+
+	if (reflectivity > 0.0f)
+	{
+       while( t < maxSteps)
+       {
+			coord = fragCoord + traceDir * t;
+
+			if(coord.x >= dim.x || coord.y >= dim.y || coord.x < 0 || coord.y < 0)
+			{
+				//reflColor = float4(gDiffuseMap.Load(uint3(fragCoord.xy, 0)).xyz,1.0);
+				break;
+			} 
+
+			float curDepth = (v0 + dV * t).z;
+			curDepth /= k0 + dK * t; // Reverse the perspective divide back to view space
+
+			float storedDepth =  getReflZ(coord,viewRay);//getReflZ(coord,viewRay);//gWindMap.Load(uint3(coord.xy, 0)).z;
+
+			if( curDepth > storedDepth && curDepth - storedDepth < MAX_INTERSECT_DIST)
+			{
+				reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
+				break;
+			}
+			t++;
+	   }
+	}
+
+	//end liu
+	*/
+
+	/*
 	// Lighting 
 	float3 finalColor = float3(0, 0, 0);
 	
@@ -103,28 +217,7 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	
 	int4 cluster_coord = int4(posWS * cs_scale + cs_bias, 0);
 	
-	// int4 cluster_coord = int4((posWS - cs_bias) * cs_scale, 0);
-	//if(dot(cluster_coord, int4(15, 3, 15, 0)) == 1)
-	/*
-	if(cluster_coord.x == 15 && cluster_coord.y == 3 && cluster_coord.z == 15)
-	{
-		return float4(1, 1, 1, 1);
-	}
-	if(cluster_coord.x == 16 && cluster_coord.y == 3 && cluster_coord.z == 15)
-	{
-		return float4(0.1, 0.3, 0.7, 1.0);
-	}
 	
-	if(cluster_coord.x == 15 && cluster_coord.y == 4 && cluster_coord.z == 15)
-	{
-		return float4(0.7, 0.3, 0.1, 1.0);
-	}
-	
-	if(cluster_coord.x == 16 && cluster_coord.y == 4 && cluster_coord.z == 15)
-	{
-		return float4(0.7, 0.7, 0.1, 1.0);
-	}
-	*/
 	
 	ClusterData data = gClusters.Load(cluster_coord);
 	uint offset = data.offset;
@@ -140,84 +233,12 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 		uint lightIndex = gLightIndices[offset + i];
 		finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, cs_pointLights[lightIndex]);
 	}
-	
-	/*
-	Light light = gLight1;
-	
-	float3 E = normalize(cs_camPos - posWS);
-	float3 L = normalize(light.xyzDir_w.xyz);
-	float3 N = normal.xyz;
-	float3 kd = albedo.rgb;
-	float3 ks = light.spec.rgb;
-	const float3 ka = float3(1.0, 1.0, 1.0);
-	float3 la = light.ambient.rgb;
-	float3 le = light.diffuse.rgb;
-	float  sp = 40;// light.xyzAtt_wSpotPwr.w; // hardcode for now
-	float  att = 1.0f;
-	
-	float3 color = blinn_phong(N, L, E,
-				   le, la, sp, 
-				   kd, ks, ka, att);
-				   
-	Light lightPoint = gLight0;
-	float3 E1 = normalize(cs_camPos - posWS);
-	float3 L1 = (lightPoint.xyzPos_w.xyz - posWS);
-	float dist = length(L1);
-	float radius = lightPoint.xRange_yType_zw.x;
-	L1 = normalize(L1);
-	float3 N1 = normal.xyz;
-	float3 kd1 = albedo.rgb;
-	float3 ks1 = lightPoint.spec.rgb;
-	const float3 ka1 = float3(1.0, 1.0, 1.0);
-	float3 la1 = lightPoint.ambient.rgb;
-	float3 le1 = lightPoint.diffuse.rgb;
-	float  sp1 = lightPoint.xyzAtt_wSpotPwr.w; 
-	//float att1 = getPointLightAtt(radius, dist);
-	float att1 = 1.0;
-	
-	color += blinn_phong(N1, L1, E1,
-				   le1, la1, sp1, 
-				   kd1, ks1, ka1, att1);
-				   
-	
-	finalColor += color;
 	*/
+	//return float4(reflectivity,0,0,1.0);
 	
-	/*
-	cbPointLight test;
-	test.cRadius = gLight0.xRange_yType_zw.x;
-	test.cPos = gLight0.xyzPos_w.xyz;
-	test.cSpecPow = gLight0.xyzAtt_wSpotPwr.w;
-	test.cColor = gLight0.diffuse.rgb;
-	
-	finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, test);
-	*/
-	
-	return float4(finalColor, 1.0);
-	
-	// float3 quadPosWS = pIn.iQuadPosW; 
-	// float3 viewRay = quadPosWS - cs_camPos;
-    // float3 viewRay = float3(quadPos.xy  / quadPos.z, 1.0f);
-	
-	//float3 viewRay = pIn.viewRay;
-    //float3 posWS = cs_camPos + linearZ * viewRay;
-	
-	//float3 normViewRay = normalize(viewRay);
-	//float linZ = linearZ * cs_far;
-	//float3 posWS = cs_camPos + normViewRay * linZ;
-	
-	//float3 posVS = mul(posWS, gView);
-	
-	// float3 viewRay = float3(quadVSPos.xy * (cs_far / quadVSPos.z), cs_far);
-	// float3 posVS = viewRay * (linearZ * cs_far);
+	return  float4(albedo.xyz,1.0); // * (1.0f - reflectivity)+ float4(reflColor.xyz,1.0) * reflectivity;
 	
 	
-	// return float4(1.0, 1.0, 0.8 ,1.0);
-	// return float4(posWS, 1.0);
-	// return float4(linearZ, linearZ, linearZ, 1.0);
-	// return float4(perspectiveZ, perspectiveZ, perspectiveZ, 1.0);
-	// return float4(0.3, 0.7, 0.3, 1.0);
-	 //return normal;
 }
 
 PS_wrapper_COLORED_MINIMAL_MESH(DeferredLightPass_Clustered_PS)

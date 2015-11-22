@@ -114,6 +114,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 	//	EffectManager::Instance()->endCurrentRenderTarget();
 	//}
 
+		
+
 	IRenderer::checkForErrors("renderjob update start\n");
 
 	IRenderer::RenderMode renderMode = ctx.getGPUScreen()->m_renderMode;
@@ -140,11 +142,11 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 #else
 		assert(false);
 #endif
-
 		//Liu
-		m_angle+=1;
+		m_angle += 1;
 
-		EffectManager::Instance()->rotateLight(0.01,m_angle);
+		//EffectManager::Instance()->rotateLight(0.01, m_angle);
+		
 		if (ctx._renderMode == 0)
 		{
 			// 2.1) Assign light to clusters
@@ -160,7 +162,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			// EffectManager::Instance()->setClassicalLightTextureRenderTarget();
 			//EffectManager::Instance()->rotateLight(0.01);
 			EffectManager::Instance()->setLightAccumTextureRenderTarget();
-			EffectManager::Instance()->drawClassicalLightPass(0.01);
+			EffectManager::Instance()->drawClassicalLightPass(0.01); //0.01
 			//EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1),m_angle);
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
@@ -170,6 +172,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		if (ctx._debugMode == 0)
 		{
 			EffectManager::Instance()->drawDeferredFinalPass();
+			EffectManager::Instance()->endCurrentRenderTarget();
 
 		}
 		else

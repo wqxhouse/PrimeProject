@@ -339,7 +339,7 @@ namespace Components {
 	context.getNetworkManager()->initNetwork();
 	
 	//Liu
-	EffectManager::Instance()->randomLightInfo(50);
+	EffectManager::Instance()->randomLightInfo(20);
 
 	return 1;
 }

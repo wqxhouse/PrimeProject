@@ -281,6 +281,7 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	if (hParentSN.isValid())
 		worldMatrix = hParentSN.getObject<SceneNode>()->m_worldTransform;
 	
+	//worldMatrix.turnRight(0.1f);
 	projectionViewWorldMatrix = projectionViewWorldMatrix * worldMatrix;
 
 	// draw all pixel ranges with different materials

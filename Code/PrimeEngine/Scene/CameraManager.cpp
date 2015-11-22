@@ -19,9 +19,9 @@ CameraManager::CameraManager(PE::GameContext &context, PE::MemoryArena arena, Ha
 
 	SceneNode *pCamSN = debugCamera->getCamSceneNode();
 	
-	pCamSN->m_base.setPos(Vector3(0.0f,0.0f,-5.0f));
-	pCamSN->m_base.setPos(Vector3(-5.0f,4.0f,-7.0f));
-	pCamSN->m_base.turnInDirection(Vector3(0.0f, 1.0f, -1.1f) - Vector3(-5.0f,4.0f,-7.0f));
+	pCamSN->m_base.setPos(Vector3(0.0f,0.0f,0.0f)); //0.0f,0.0f,-5.0f
+	pCamSN->m_base.setPos(Vector3(0.0f,4.0f,-15.0f)); //-5.0f,4.0f,-7.0f
+	//pCamSN->m_base.turnInDirection(Vector3(0.0f, 1.0f, -1.1f) - Vector3(-5.0f,4.0f,-7.0f));
 }
 
 void CameraManager::Construct(PE::GameContext &context, PE::MemoryArena arena)
