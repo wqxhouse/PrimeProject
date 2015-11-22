@@ -205,7 +205,7 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	//end liu
 	*/
 
-	/*
+	
 	// Lighting 
 	float3 finalColor = float3(0, 0, 0);
 	
@@ -233,10 +233,10 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 		uint lightIndex = gLightIndices[offset + i];
 		finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, cs_pointLights[lightIndex]);
 	}
-	*/
-	//return float4(reflectivity,0,0,1.0);
 	
-	return  float4(albedo.xyz,1.0); // * (1.0f - reflectivity)+ float4(reflColor.xyz,1.0) * reflectivity;
+	return float4(finalColor.xyz,1.0);
+	
+	//return  float4(albedo.xyz,1.0); // * (1.0f - reflectivity)+ float4(reflColor.xyz,1.0) * reflectivity;
 	
 	
 }
