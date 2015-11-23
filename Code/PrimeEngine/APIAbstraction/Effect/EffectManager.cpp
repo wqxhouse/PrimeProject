@@ -462,7 +462,7 @@ void EffectManager::assignLightToClusters()
 							break;
 						}
 
-						_cluster[z][y][x].offset = curLightIndices;
+						//_cluster[z][y][x].offset = curLightIndices;
 						 
 						// _cluster[z][y][x].pointLightCount++;
 						int curPtCount = _cluster[z][y][x].counts >> 16;
@@ -481,6 +481,7 @@ void EffectManager::assignLightToClusters()
 		}
 	}
 
+	
 	// flush c_list to _lightIndices - could cause high overhead if too finely subdivide the cluster
 	for (int z = 0; z < CZ; z++)
 	{
@@ -488,6 +489,8 @@ void EffectManager::assignLightToClusters()
 		{
 			for (int x = 0; x < CX; x++)
 			{
+				_cluster[z][y][x].offset = curLightIndices;
+
 				for (int k = 0; k < c_list_count[z][y][x]; k++)
 				{
 					_lightIndices[curLightIndices++] = c_list[z][y][x][k];
@@ -1147,8 +1150,7 @@ void EffectManager::drawDeferredFinalPass()
 	SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
 	cb.m_data.gViewInv = csn->m_worldToViewTransform;
 	cb.m_data.gViewProj = csn->m_viewToProjectedTransform;
-	//cb.m_data.gPreviousViewProjMatrix = m_previousViewProjMatrix;
-	//cb.m_data.gViewProjInverseMatrix = m_currentViewProjMatrix.inverse();
+	cb.m_data.gViewProjInverseMatrix = (csn->m_viewToProjectedTransform * csn->m_worldToViewTransform).inverse();
 	cb.bindToPipeline(&curEffect);
 
 	pibGPU->draw(1, 0);

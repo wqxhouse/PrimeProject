@@ -9,7 +9,7 @@
 #include "ColoredMinimalMesh_Structs.fx"
 #include "DeferredLightCommon.fx"
 
-#define MAX_STEPS 1000
+#define MAX_STEPS 300
 #define MAX_INTERSECT_DIST 0.04
 
 float getReflZ(int2 coord, float3 viewRay)
@@ -34,23 +34,23 @@ float2 NormalizedDeviceCoordToScreenCoord(float2 ndc, float2 dim)
 
 float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
-
-	//float4 shading = sample2D(gDiffuseMapSampler, pIn.iColor.xy, gDiffuseMap);
+	/*
+	float4 shading = sample2D(gDiffuseMapSampler, pIn.iColor.xy, gDiffuseMap);
 	// Gamma correction
-	//shading = pow(shading, (1.0 / 2.2));
-	//return shading;
-	
+	shading = pow(shading, (1.0 / 2.2));
+	return shading;
+	*/
 	
 	//get world pos
 	uint4 fragCoord = pIn.iPosH;
 	
-	//float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
-	//float3 viewRay = normalize(pIn.viewRay);
-	//float linearZ = cs_projB / (perspectiveZ - cs_projA);
-	//float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
-	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
 	
-	float3 posWS = gWindMap.Load(uint3(fragCoord.xy, 0)).xyz;
+	//float3 posWS = gWindMap.Load(uint3(fragCoord.xy, 0)).xyz;
 
 	//Liu
 	
@@ -68,9 +68,9 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 
 	//get CS reflection ray
 	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
-	float3 d = normalize(posWS.xyz - cs_camPos.xyz);//viewRay
+	float3 d = viewRay;//normalize(posWS.xyz - cs_camPos.xyz);//viewRay
 	float3 refl = normalize(reflect(d, n));
-	float3 ScreenRefl = mul( refl, (float3x3)gView);
+	float3 ScreenRefl = mul( float4(refl,0), gView);
 
 	//get reflactivity
 	float reflectivity = posWS.y>0?0:0.5;
@@ -119,17 +119,18 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 			
 			if(coord.x >= dim.x || coord.y >= dim.y || coord.x < 0 || coord.y < 0)
 			{
+				
 				//reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
-				break;
+				//break;
 			} 
 			
 			float curDepth = (v0 + dV * t).z;
 			curDepth /= k0 + dK * t; // Reverse the perspective divide back to view space
 			
-			float3 curPosWS = gWindMap.Load(uint3(coord.xy, 0)).xyz;
-			float storedDepth = mul(float4(curPosWS,1.0),gView).z; //getReflZ(coord,viewRay);//gWindMap.Load(uint3(coord.xy, 0)).z;
+			//float3 curPosWS = gWindMap.Load(uint3(coord.xy, 0)).xyz;
+			float storedDepth = getReflZ(coord,viewRay); //getReflZ(coord,viewRay);//gWindMap.Load(uint3(coord.xy, 0)).z;
 
-			if( curDepth > storedDepth && curDepth - storedDepth < MAX_INTERSECT_DIST)
+			if( curDepth > storedDepth && curDepth - storedDepth < MAX_INTERSECT_DIST&& t>15)
 			{
 				reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
 				break;
@@ -141,6 +142,8 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	//end liu
 
 	//return float4(reflColor.xyz,1.0);
+
+	
 
 	return  gDiffuseMap.Load(uint3(fragCoord.xy, 0)) * (1.0f - reflectivity) +reflColor * reflectivity;
 	
