@@ -80,7 +80,7 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	//CS ray start & end point
 	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
 
-	//float rayLength = ((csOrig.z + ScreenRefl.z * cs_far) > cs_near) ? (cs_near - csOrig.z) / ScreenRefl.z : cs_far;
+	//float rayLength = ((v0.z + mul( float4(d,0), gView).z * cb_maxDistance) < cb_nearPlaneZ) ? (cb_nearPlaneZ - csOrig.z) / csDir.z : cb_maxDistance;
 
 	float3 v1 = v0 + ScreenRefl * cs_far;
 
@@ -130,7 +130,7 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 			//float3 curPosWS = gWindMap.Load(uint3(coord.xy, 0)).xyz;
 			float storedDepth = getReflZ(coord,viewRay); //getReflZ(coord,viewRay);//gWindMap.Load(uint3(coord.xy, 0)).z;
 
-			if( curDepth > storedDepth && curDepth - storedDepth < MAX_INTERSECT_DIST&& t>15)
+			if( curDepth > storedDepth && curDepth - storedDepth < MAX_INTERSECT_DIST&& t > 15)
 			{
 				reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
 				break;

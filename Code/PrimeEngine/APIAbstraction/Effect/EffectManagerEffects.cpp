@@ -67,6 +67,7 @@ namespace PE {
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp, 1);
+		
 
 		// 32bit unorm
 		m_hfinalLDRTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
@@ -390,6 +391,23 @@ namespace PE {
 		pLightClassicalFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
 
 		m_map.add("DeferredLightPass_Classical_Tech", hLightClassicalFx);
+	}
+	
+	// create mipmaps
+	{
+		Handle hLightMipsFx("EFFECT", sizeof(Effect));
+		Effect *pLightMipsFx = new(hLightMipsFx)Effect(*m_pContext, m_arena, hLightMipsFx);
+		pLightMipsFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"LightMipsPass_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"LightMipsPassTech");
+		pLightMipsFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("LightMipsPassTech", hLightMipsFx);
 	}
 
 	// + Deferred final LDR Pass

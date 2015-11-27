@@ -600,8 +600,9 @@ void EffectManager::buildFullScreenBoard()
 	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
 	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
 	m_hdebugPassEffect = getEffectHandle("debug_Tech.fx");
+	//Liu
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
-	
+	m_hLightMipsPassEffect = getEffectHandle("LightMipsPassTech");
 	//Liu
 	createSphere(1,20,20);
 }
@@ -696,13 +697,65 @@ void EffectManager::setLightAccumTextureRenderTarget()
 }
 
 //Liu
-//void EffectManager::setClassicalLightTextureRenderTarget()
-//{
-//	TextureGPU* clightTex = m_hlightTextureGPU.getObject<TextureGPU>();
-//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(clightTex, true);
-//
-//	m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
-//}
+void EffectManager::setLightMipsTextureRenderTarget(int level)
+{
+	//create new buffer
+	
+	m_htempMipsTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+	TextureGPU *ptempMipsRTTGPU = new (m_htempMipsTextureGPU)TextureGPU(*m_pContext, m_arena);
+	ptempMipsRTTGPU->createDrawableIntoColorTexture(
+		m_pContext->getGPUScreen()->getWidth(),
+		m_pContext->getGPUScreen()->getHeight(),
+		SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);	
+
+	HRESULT hr = S_OK;
+	D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
+	ID3D11Device *pDevice = pD3D11Renderer->m_pD3DDevice;
+	ID3D11DeviceContext *pDeviceContext = pD3D11Renderer->m_pD3DContext;
+
+	TextureGPU* accumTex = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+	TextureGPU* tempTex = m_htempMipsTextureGPU.getObject<TextureGPU>();
+
+	//Create a render target view
+	D3D11_RENDER_TARGET_VIEW_DESC DescRT;
+	DescRT.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	DescRT.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	DescRT.Texture2D.MipSlice = level;
+	hr = pDevice->CreateRenderTargetView(accumTex->m_pTexture, &DescRT, &accumTex->m_pMipsRenderTargetView);
+
+	
+	// Get the mip level and create the SRV
+	//ID3D11Resource* MipRes;
+	//accumTex->m_pMipsRenderTargetView->GetResource(&MipRes);
+	
+
+	// Create the resource view
+	D3D11_SHADER_RESOURCE_VIEW_DESC DescRV;
+	DescRV.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	DescRV.Texture2D.MipLevels = 1;	
+	DescRV.Texture2D.MostDetailedMip = 0; //mip0
+	
+	hr = pDevice->CreateShaderResourceView(accumTex->m_pTexture, &DescRV, &accumTex->m_pMipsShaderResourceView);
+	
+	//MipRes->Release();
+
+	ID3D11Resource* srcRes;
+	ID3D11Resource*	desRes;
+	accumTex->m_pMipsShaderResourceView->GetResource(&srcRes);
+	tempTex->m_pRenderTargetView->GetResource(&desRes);
+	pDeviceContext->CopyResource(desRes, srcRes);
+	srcRes->Release(); desRes->Release();
+
+
+	((D3D11Renderer *)m_pContext->getGPUScreen())->
+		setMipsRenderTargetsAndViewportWithNoDepth(accumTex, true);
+	m_pCurRenderTarget = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+
+	//m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(clightTex, true);
+
+	//m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
+}
 
 void EffectManager::setFinalLDRTextureRenderTarget()
 {
@@ -1622,6 +1675,71 @@ void EffectManager::drawClassicalLightPass(float angle)
 		objSa.unbindFromPipeline(&curEffect);
 		cb.unbindFromPipeline(&curEffect);
 	}
+}
+
+void EffectManager::drawLightMipsPass(int curlevel, bool isSecBlur = false)
+{
+
+	Effect &curEffect = *m_hLightMipsPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	//m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);
+
+	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+
+	
+
+	TextureGPU *lightPassHDRTex = m_htempMipsTextureGPU.getObject<TextureGPU>();
+	/*
+	ID3D11ShaderResourceView *temp;
+	if (isSecBlur)
+	{
+		temp = lightPassHDRTex->m_pShaderResourceView;
+	}
+	else
+	{
+		temp = lightPassHDRTex->m_pMipsShaderResourceView;
+	}
+	*/
+	PE::SA_Bind_Resource setTextureActionLight(
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		lightPassHDRTex->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(lightPassHDRTex->m_pShaderResourceView, lightPassHDRTex->m_pTexture, lightPassHDRTex->m_texture));
+	setTextureActionLight.bindToPipeline(&curEffect);
+
+	// Quad MVP
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
+	objSa.bindToPipeline(&curEffect);
+
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	if (isSecBlur)
+	{
+		pscs.m_data.csconsts.cNear = 1;
+	}
+	else
+	{
+		pscs.m_data.csconsts.cNear = 0;
+	}
+	pscs.m_data.csconsts.cFar = curlevel;
+	pscs.bindToPipeline(&curEffect);
+
+	pibGPU->draw(1, 0);
+
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureActionLight.unbindFromPipeline(&curEffect);
+	objSa.unbindFromPipeline(&curEffect);
+	pscs.unbindFromPipeline(&curEffect);
 }
 
 //Liu

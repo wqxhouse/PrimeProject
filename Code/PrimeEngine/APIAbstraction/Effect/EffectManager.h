@@ -17,12 +17,15 @@
 #include "../Texture/Texture.h"
 #include "../GPUBuffers/VertexBufferGPU.h"
 #include "../GPUBuffers/IndexBufferGPU.h"
+//Liu
+#include "PrimeEngine/Render/D3D11Renderer.h"
 
 // Sibling/Children includes
 #include "EffectEnums.h"
 #include "PEAlphaBlendState.h"
 #include "PERasterizerState.h"
 #include "PEDepthStencilState.h"
+
 
 #include <vector>
 #include <D3DCommon.h>
@@ -90,7 +93,9 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void randomLightInfo(int num);
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
-	
+	//Liu
+	void drawLightMipsPass(int curlevel, bool isSecBlur);
+	void setLightMipsTextureRenderTarget(int level);
 
 	void setFinalLDRTextureRenderTarget();
 
@@ -152,10 +157,12 @@ public:
 	Handle m_haccumHDRTextureGPU;
 	Handle m_hfinalLDRTextureGPU;
 	Handle m_hrootDepthBufferTextureGPU;
+	
 
 	//Liu
 	Handle m_hpositionTextureGPU;
 	Handle m_hmaterialTextureGPU;
+	Handle m_htempMipsTextureGPU;
 	// Handle m_hlightTextureGPU;
 	struct LightInfo
 	{
@@ -220,7 +227,10 @@ public:
 	ID3D11ShaderResourceView *_lightIndicesBufferShaderView;
 
 	// + End
+
+	//Liu
 	Handle m_hDeferredLightPassEffect;
+	Handle m_hLightMipsPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11

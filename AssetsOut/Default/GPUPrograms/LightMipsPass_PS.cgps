@@ -1,0 +1,61 @@
+#ifndef LIGHT_MIPS_PASS_PS
+#define LIGHT_MIPS_PASS_PS
+
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "lighthelper.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
+
+static const int2 offsets[7] = {{-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0}, {3, 0}};
+
+static const int2 offsets1[7] = {{0, -3}, {0, -2}, {0, -1}, {0, 0}, {0, 1}, {0, 2}, {0, 3}};
+
+static const float weights[7] = {0.001f, 0.028f, 0.233f, 0.474f, 0.233f, 0.028f, 0.001f};
+
+static const float2 dimension[11] = {{1280, 720}, {640, 360}, {320, 180}, {160, 90}, {80, 45}, {40, 22}, {20, 11}, {10, 5}, {5, 2}, {2, 1}, {1, 1}};
+
+float4 LightMipsPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float blur = cs_near;
+
+	uint4 fragCoord = pIn.iPosH;
+	float2 uvs;
+	if(blur == 0)
+	{
+		float tx = dimension[0].x * fragCoord.x / dimension[cs_far].x;
+		float ty = dimension[0].y * fragCoord.y / dimension[cs_far].y;
+		uvs = float2(tx,ty);
+	}else
+	{
+		float tx =	fragCoord.x;
+		float ty =	fragCoord.y;
+		uvs = float2(tx,ty);
+	}
+	
+	int3 loadPos = int3(uvs, 0);
+	float4 color = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	[unroll]
+	if(blur == 0)
+	{
+		for(uint i = 0u; i < 7u; ++i)
+		{
+			color += gDiffuseMap.Load(uint3(uvs.xy, 0), offsets[i]) * weights[i];
+		}
+	}else
+	{
+		for(uint i = 0u; i < 7u; ++i)
+		{
+			color += gDiffuseMap.Load(uint3(uvs.xy, cs_far), offsets1[i]) * weights[i];
+		}
+	}
+	
+	return float4(color.rgb, 1.0f);
+
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(LightMipsPass_PS)
+
+#endif

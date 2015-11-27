@@ -167,6 +167,20 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
 
+		//create mipmaps for lightTexture
+		{
+			for (int i = 1; i < 2; i++)
+			{
+				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+				EffectManager::Instance()->drawLightMipsPass(i, false);
+				EffectManager::Instance()->endCurrentRenderTarget();
+
+				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+				EffectManager::Instance()->drawLightMipsPass(i, true);
+				EffectManager::Instance()->endCurrentRenderTarget();
+			}
+			
+		}
 		// 3) Render post process & final pass
 		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
 		if (ctx._debugMode == 0)
