@@ -43,6 +43,9 @@ public:
 
 	virtual void setRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex = 0, bool clear = false);
 
+	//Liu
+	virtual void setMipsRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex = 0, bool clear = false);
+
 	D3D11Renderer(PE::GameContext &context, unsigned int width, unsigned int height);
 
 	virtual void swap(bool vsync = 0) {m_pSwapChain->Present(vsync ? 1 : 0, 0);}
@@ -70,6 +73,9 @@ public:
 	ID3D11Texture2D *m_pDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pDepthStencilView;
 	ID3D11RenderTargetView *m_pRenderTargetView;
+
+	// + Deferred 
+	ID3D11ShaderResourceView *m_pDepthStencilShaderView;
 	
 public:
 	ID3D11ShaderResourceView *m_pSRV;

@@ -7,6 +7,8 @@
 #include "../Lua/LuaEnvironment.h"
 #include "../Profiling/Profiling.h"
 
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
+
 namespace PE {
 namespace Components {
 
@@ -359,6 +361,31 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 			m_pCurEffect = hEffect.getObject<Effect>();
 			newEffect = true;
 		}
+
+		// + Deferred - resolve different shader for the same mesh type - PE has bad design here
+		Effect *gbufferEff= NULL;
+		Effect *gbufferWPosEff= NULL;
+
+		Handle hg = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_Tech");
+		Handle hgPos = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_WithPosition_Tech");
+
+		gbufferEff = hg.getObject<Effect>();
+		gbufferWPosEff = hgPos.getObject<Effect>();
+
+		if (m_pCurEffect == gbufferEff || m_pCurEffect == gbufferWPosEff)
+		{
+			if (m_pContext->_renderMode == 0)
+			{
+				m_pCurEffect = gbufferEff;
+			}
+			else
+			{
+				m_pCurEffect = gbufferWPosEff;
+			}
+		}
+		// + End
+		
+
 #if DEBUG_DRAW_CALLS
 		PEINFO("Draw call[%d] DbgName: %s tech %s vs %s ps %s cs %s\n", i, dbgName ? dbgName : "none", m_pCurEffect->m_techName,
 			m_pCurEffect->m_vsFilename[0] == '\0' ? "none" : m_pCurEffect->m_vsFilename,

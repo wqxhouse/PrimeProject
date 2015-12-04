@@ -61,6 +61,9 @@ struct GameContext
 	void * m_pGameSpecificContext; // used to extend this structure
 	Components::DefaultGameControls *m_pDefaultGameControls;
 	int m_gameThreadThreadOwnershipMask;
+
+	int _renderMode;
+	int _debugMode;
 };
 
 

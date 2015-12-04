@@ -204,3 +204,57 @@ void IndexBufferCPU::createBillboardCPUBuffer()
 	m_primitiveTopology = PEPrimitveTopology_TRIANGLES;
 	m_verticesPerPolygon = 3;
 }
+
+//Liu
+void IndexBufferCPU::createSphereCPUBuffer()
+{
+	m_indexRanges.reset(1);
+	m_vertsPerFacePerRange.reset(1);
+	IndexRange range(*m_pContext, m_arena);
+	range.m_start = 0;
+	range.m_end = 2279;
+	range.m_minVertIndex = 0;
+	range.m_maxVertIndex = 399;
+	m_indexRanges.add(range);
+	m_vertsPerFacePerRange.add(3);
+	m_values.reset(2280);
+
+		
+	for (int i = 1; i <= 20; i++) {
+		m_values.add(0); m_values.add(i+1); m_values.add(i);
+	}
+	float baseIndex = 1;
+	float ringVertexCount = 20 + 1;
+
+	for (int i = 0; i < 20-2; i++) {
+		for (int j = 0; j < 20; j++) {
+			m_values.add(baseIndex + i*ringVertexCount + j);
+			m_values.add(baseIndex + i*ringVertexCount + j+1);
+			m_values.add(baseIndex + (i+1)*ringVertexCount + j);
+
+			m_values.add(baseIndex + (i+1)*ringVertexCount + j);
+			m_values.add(baseIndex + i*ringVertexCount + j+1);
+			m_values.add(baseIndex + (i+1)*ringVertexCount + j + 1);
+		}
+	}
+
+	float southPoleIndex = 401 - 1;
+	baseIndex = southPoleIndex - ringVertexCount;
+	for (int i = 0; i < 20; i++) {
+		m_values.add(southPoleIndex);
+		m_values.add(baseIndex+i);
+		m_values.add(baseIndex+i+1);
+	}
+
+
+	m_minVertexIndex = range.m_minVertIndex;
+	m_maxVertexIndex = range.m_maxVertIndex;
+
+	m_primitiveTopology = PEPrimitveTopology_TRIANGLES;
+	m_verticesPerPolygon = 3;
+
+//	OutputDebugStringA("lalala"+counttri);//760
+	//OutputDebugStringA("lalala1"+countindi);//2280
+	//OutputDebugStringA("lal");
+	
+}

@@ -43,7 +43,8 @@ struct Light : public Component
 		PrimitiveTypes::Float32 spotPow,
 		PrimitiveTypes::Float32 range,
 		PrimitiveTypes::Bool isShadowCaster,
-		PrimitiveTypes::Int32 type) : Component(context, arena, hMyself)
+		PrimitiveTypes::Int32 type
+		) : Component(context, arena, hMyself)
 	{
 		memset(&m_cbuffer, 0, sizeof(m_cbuffer));
 		m_base.setPos(pos);
@@ -60,6 +61,43 @@ struct Light : public Component
 		m_cbuffer.range = range;
 		isTheShadowCaster = isShadowCaster;
 		m_cbuffer.type = (PrimitiveTypes::Float32)(type);
+		
+	}
+
+	Light(
+		PE::GameContext &context,
+		PE::MemoryArena arena,
+		Handle hMyself,
+		Vector3 pos,
+		Vector3 xdir,
+		Vector3 ydir,
+		Vector3 zdir,
+		Vector4 ambient,
+		Vector4 diffuse,
+		Vector4 specular,
+		Vector3 att,
+		PrimitiveTypes::Float32 spotPow,
+		PrimitiveTypes::Float32 range,
+		PrimitiveTypes::Bool isShadowCaster,
+		PrimitiveTypes::Int32 type,
+		Vector3 axis) : Component(context, arena, hMyself)
+	{
+		memset(&m_cbuffer, 0, sizeof(m_cbuffer));
+		m_base.setPos(pos);
+		m_cbuffer.pos = pos;
+		m_cbuffer.dir = zdir;
+		m_base.setU(xdir);
+		m_base.setV(ydir);
+		m_base.setN(zdir);
+		m_cbuffer.ambient = ambient;
+		m_cbuffer.diffuse = diffuse;
+		m_cbuffer.spec = specular;
+		m_cbuffer.att = att;
+		m_cbuffer.spotPower = spotPow;
+		m_cbuffer.range = range;
+		isTheShadowCaster = isShadowCaster;
+		m_cbuffer.type = (PrimitiveTypes::Float32)(type);
+		m_oribitAxis = axis;
 	}
 
 	virtual ~Light(){}
@@ -80,7 +118,7 @@ struct Light : public Component
 	Matrix4x4 m_worldTransform; // is calculated before every draw via Events::CALULCATE_TRANSFORMATIONS
 	Matrix4x4 m_worldToViewTransform; // objects in world space are multiplied by this to get them into camera's coordinate system (view space)
 	Matrix4x4 m_viewToProjectedTransform; // objects in local (view) space are multiplied by this to get them to screen space
-
+	Vector3 m_oribitAxis;
 	SetPerObjectGroupConstantsShaderAction::hlsl_Light m_cbuffer; // gpu mirror : values that will be set into gpu registers vi shader action hlsl_cbPerObjectGroup_c1
 };
 

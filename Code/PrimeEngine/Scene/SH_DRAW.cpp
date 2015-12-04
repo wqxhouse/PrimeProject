@@ -32,7 +32,7 @@
 #include "PrimeEngine/Render/ShaderActions/SA_SetAndBind_ConstResource_InstancedObjectsAnimationPalettes.h"
 #include "PrimeEngine/Scene/Skeleton.h"
 
-
+#include "PrimeEngine/Scene/TextMesh.h"
 
 
 #include "SH_DRAW.h"
@@ -181,6 +181,13 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	// and this object is current distributor
 	Component *pCaller = pEvt->m_prevDistributor.getObject<Component>();
 	Mesh *pMeshCaller = (Mesh *)pCaller;
+		/*if (pMeshCaller->GetClassId() == TextMesh::GetClassId())
+		{
+		return;
+		}*/
+
+	bool isTextMesh = pMeshCaller->_isTextMesh;
+
 	if (pMeshCaller->m_instances.m_size == 0)
 		return; // no instances of this mesh
 	Events::Event_GATHER_DRAWCALLS *pDrawEvent = NULL;
@@ -216,8 +223,15 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
         }
     }
     
+	if (isTextMesh)
+	{
+		printf("");
+	}
 
-	DrawList *pDrawList = pDrawEvent ? DrawList::Instance() : DrawList::ZOnlyInstance();
+	// DrawList *pDrawList = pDrawEvent ? DrawList::Instance() : DrawList::ZOnlyInstance();
+	// TODO: here is a hugh hack to defer text rendering
+
+	DrawList *pDrawList = !isTextMesh ? DrawList::Instance() : DrawList::ZOnlyInstance();
 	
     //dbg
     //SceneNode *pRoot = RootSceneNode::Instance();
@@ -267,6 +281,7 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	if (hParentSN.isValid())
 		worldMatrix = hParentSN.getObject<SceneNode>()->m_worldTransform;
 	
+	//worldMatrix.turnRight(0.1f);
 	projectionViewWorldMatrix = projectionViewWorldMatrix * worldMatrix;
 
 	// draw all pixel ranges with different materials

@@ -155,7 +155,8 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 	D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
 	ID3D11Device *pDevice = pD3D11Renderer->m_pD3DDevice;
 	ID3D11DeviceContext *pDeviceContext = pD3D11Renderer->m_pD3DContext;
-
+	
+	
 	//ID3D11Texture2D *pColorMap = 0;
 
 	D3D11_TEXTURE2D_DESC texDesc;
@@ -180,10 +181,10 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 		texDesc.SampleDesc.Quality = 0;
 		texDesc.Usage = D3D11_USAGE_DEFAULT;
 		texDesc.BindFlags = D3D11_BIND_RENDER_TARGET |
-		                    D3D11_BIND_SHADER_RESOURCE;
+		                    D3D11_BIND_SHADER_RESOURCE ;
 		texDesc.CPUAccessFlags = 0;
 		texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
+		
 		HRESULT hr = pDevice->CreateTexture2D(&texDesc, 0, &m_pTexture);
 		assert(SUCCEEDED(hr));
 
@@ -193,6 +194,9 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 		assert(SUCCEEDED(hr));
 		hr = pDevice->CreateShaderResourceView(m_pTexture, 0, &m_pShaderResourceView);
 		assert(SUCCEEDED(hr));
+		
+		//pDeviceContext->GenerateMips(m_pShaderResourceView);
+		
 
 #endif
 }

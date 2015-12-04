@@ -1,0 +1,362 @@
+#ifndef RAY_TRACING_PASS_PS
+#define RAY_TRACING_PASS_PS
+
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "lighthelper.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
+
+#define MAX_STEPS 1000
+#define MAX_INTERSECT_DIST 0.04
+#define STRIDE 1
+#define ZTHICKNESS 1
+//////
+/*
+float2 NormalizedDeviceCoordToScreenCoord(float2 ndc, float2 dim)
+{
+   float2 screenCoord;
+   screenCoord.x = dim.x * ((ndc.x * 0.5)+0.5);
+   screenCoord.y = dim.y * (1.0f - ((ndc.y * 0.5)+0.5));
+   return screenCoord;
+}
+
+float distanceSquared(float2 a, float2 b)
+{
+	a -= b;
+	return dot(a, a);
+}
+
+void swap(inout float a, inout float b)
+{
+	float t = a;
+	a = b;
+	b = t;
+}
+
+float linearDepthTexelFetch(int2 hitPixel ,float3 viewRay)
+{
+	float perspectiveZ = gDepthMap.Load(uint3(hitPixel.xy, 0)).x;
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float convFromDeviceZ = 1.0f / (perspectiveZ * cs_bias.z - cs_pad3);
+	depthVS = convFromDeviceZ;
+	posWS = camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+	return v0.z;
+}
+
+bool traceScreenSpaceRay(
+ // Camera-space ray origin, which must be within the view volume
+ float3 csOrig,
+ // Unit length camera-space ray direction
+ float3 csDir,
+ // Number between 0 and 1 for how far to bump the ray in stride units
+ // to conceal banding artifacts. Not needed if stride == 1.
+ float jitter, float2 dim, float3 viewRay,
+ // Pixel coordinates of the first intersection with the scene
+ out float2 hitPixel,
+ // Camera space location of the ray hit
+ out float3 hitPoint)
+{
+	// Clip to the near plane
+	float rayLength = ((csOrig.z + csDir.z * cs_far) < cs_near) ?
+	(cs_near - csOrig.z) / csDir.z : cs_far;
+	float3 csEndPoint = csOrig + csDir * rayLength;
+
+	//NDCS  ray start & end point
+	float4 H0 = mul( float4(csOrig,1.0), gViewProj );
+	float4 H1 = mul( float4(csEndPoint,1.0), gViewProj );
+
+	//projection factor
+	float k0 = 1.0f / H0.w;
+	float k1 = 1.0f / H1.w;
+
+	// The interpolated homogeneous version of the camera-space points
+	float3 Q0 = csOrig * k0;
+	float3 Q1 = csEndPoint * k1;
+
+	 // Screen-space endpoints
+	float2 P0 = H0.xy * k0;
+	float2 P1 = H1.xy * k1;
+
+	P0.xy = NormalizedDeviceCoordToScreenCoord(P0.xy,dim);
+	P1.xy = NormalizedDeviceCoordToScreenCoord(P1.xy,dim);
+
+
+	 // If the line is degenerate, make it cover at least one pixel
+	// to avoid handling zero-pixel extent as a special case later
+	P1 += (distanceSquared(P0, P1) < 0.0001f) ? float2(0.01f, 0.01f) : 0.0f;
+	float2 delta = P1 - P0;
+
+	// Permute so that the primary iteration is in x to collapse
+	// all quadrant-specific DDA cases later
+	bool permute = false;
+	if(abs(delta.x) < abs(delta.y))
+	{
+		// This is a more-vertical line
+		permute = true;
+		delta = delta.yx;
+		P0 = P0.yx;
+		P1 = P1.yx;
+	}
+	float stepDir = sign(delta.x);
+	float invdx = stepDir / delta.x;
+
+	// Track the derivatives of Q and k
+	float3 dQ = (Q1 - Q0) * invdx;
+	float dk = (k1 - k0) * invdx;
+	float2 dP = float2(stepDir, delta.y * invdx);
+
+	float stride = STRIDE;
+	dP *= stride;
+	dQ *= stride;
+	dk *= stride;
+ 
+	P0 += dP * jitter;
+	Q0 += dQ * jitter;
+	k0 += dk * jitter;
+
+	// Slide P from P0 to P1, (now-homogeneous) Q from Q0 to Q1, k from k0 to k1
+	float4 PQk = float4(P0, Q0.z, k0);
+	float4 dPQk = float4(dP, dQ.z, dk);
+	float3 Q = Q0; 
+	// Adjust end condition for iteration direction
+	float end = P1.x * stepDir;
+
+	float stepCount = 0.0f;
+	float prevZMaxEstimate = csOrig.z;
+	float rayZMin = prevZMaxEstimate;
+	float rayZMax = prevZMaxEstimate;
+	float sceneZMax = rayZMax + 100.0f;
+
+	for(;
+	((PQk.x * stepDir) <= end) && (stepCount < MAX_STEPS) &&
+	!((rayZMax >= sceneZMax + ZTHICKNESS) && (rayZMin <= sceneZMax)) &&
+	(sceneZMax != 0.0f);
+	++stepCount)
+	{
+		 rayZMin = prevZMaxEstimate;
+		rayZMax = (dPQk.z * 0.5f + PQk.z) / (dPQk.w * 0.5f + PQk.w);
+		prevZMaxEstimate = rayZMax;
+		if(rayZMin > rayZMax)
+		{
+			swap(rayZMin, rayZMax);
+		}
+
+		hitPixel = permute ? PQk.yx : PQk.xy;
+
+		sceneZMax = linearDepthTexelFetch(int2(hitPixel), viewRay);
+
+		PQk += dPQk;
+	}
+
+	// Advance Q based on the number of steps
+	Q.xy += dQ.xy * stepCount;
+	hitPoint = Q * (1.0f / PQk.w);
+	return (rayZMax >= sceneZMax + ZTHICKNESS) && (rayZMin <= sceneZMax);
+}
+
+float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	uint4 fragCoord = pIn.iPosH;
+	
+	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float convFromDeviceZ = 1.0f / (perspectiveZ * cs_bias.z - cs_pad3);
+	depthVS = convFromDeviceZ;
+	posWS = camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
+
+	//get screen dimension
+	uint width;
+	uint height;
+	gDiffuseMap.GetDimensions(width, height);
+	float2 dim = float2(width, height);
+
+	//get CS reflection ray
+	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
+	float3 d = viewRay;//normalize(posWS.xyz - cs_camPos.xyz);//viewRay
+	float3 refl = normalize(reflect(d, n));
+	float3 rayDirectionVS = mul( float4(refl,0), gView).xyz;
+	
+	//cone
+	float3 rayOriginVS = mul(float4(posWS,1.0),gView).xyz;
+	
+	float3 viewRayVS = mul( float4(d,0), gView);
+	float rDotv = dot(normalize(rayDirectionVS),normalize(viewRayVS));
+
+	// out parameters
+	float2 hitPixel = float2(0.0f, 0.0f);
+	float3 hitPoint = float3(0.0f, 0.0f, 0.0f);
+
+	float jitter = STRIDE > 1.0f ? float(int(fragCoord.x + fragCoord.y) & 1) * 0.5f : 0.0f;
+
+	bool intersection = traceScreenSpaceRay(rayOriginVS, rayDirectionVS, jitter, dim, viewRay, hitPixel, hitPoint);
+	
+	float depthofhit = gDepthMap.Load(uint3(hitPixel.xy, 0)).x;
+
+	if(hitPixel.x > dim.x || hitPixel.x < 0.0f || hitPixel.y > dim.y || hitPixel.y < 0.0f)
+	{
+		intersection = false;
+	}
+
+	return float4(hitPixel.xy, depthofhit, rDotv) * (intersection ? 1.0f : 0.0f);
+	//return float4(n.xyz,1.0f);
+	//return float4(intersection ? 1.0f : 0.0f,0,0,1.0f);
+}
+*/
+
+
+//////
+float getReflZ(int2 coord, float3 viewRay)
+{
+	float perspectiveZ = gDepthMap.Load(uint3(coord.xy, 0)).x;
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+	return v0.z;
+}
+
+
+float2 NormalizedDeviceCoordToScreenCoord(float2 ndc, float2 dim)
+{
+   float2 screenCoord;
+   screenCoord.x = dim.x * ((ndc.x * 0.5)+0.5);
+   screenCoord.y = dim.y * (1.0f - ((ndc.y * 0.5)+0.5));
+   return screenCoord;
+}
+
+
+float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{	
+	//get world pos
+	uint4 fragCoord = pIn.iPosH;
+	
+	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	
+	float lengthOfViewRay = length(viewRay);
+
+	float aa = lengthOfViewRay/10;
+	//float3 posWS = gWindMap.Load(uint3(fragCoord.xy, 0)).xyz;
+
+	//Liu
+	
+	//get screen dimension
+	uint width;
+	uint height;
+	gDiffuseMap.GetDimensions(width, height);
+	float2 dim = float2(width, height);
+
+	//test coord
+	float2 coord;
+
+	//step counter;
+	float t = 1;
+
+	//get CS reflection ray
+	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
+	float3 d = viewRay;//normalize(posWS.xyz - cs_camPos.xyz);//viewRay
+	float3 refl = normalize(reflect(d, n));
+	float3 ScreenRefl = mul( float4(refl,0), gView);
+	
+	//cone
+	float3 viewRayVS = mul( float4(d,0), gView);
+	float rDotv = dot(normalize(ScreenRefl),normalize(viewRayVS));
+	bool intersection = false;
+	float depthofhit;
+	float2 hitPixel = float2(0.0f, 0.0f);
+	//end
+
+	//get reflactivity
+	float reflectivity = posWS.y>0?0:0.5;
+
+	float4 reflColor = float4(0, 0, 0, 1);
+
+	//CS ray start & end point
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+
+	//float rayLength = ((v0.z + mul( float4(d,0), gView).z * cb_maxDistance) < cb_nearPlaneZ) ? (cb_nearPlaneZ - csOrig.z) / csDir.z : cb_maxDistance;
+
+	float3 v1 = v0 + ScreenRefl * cs_far;
+
+	//NDCS  ray start & end point
+	float4 p0 = mul( float4(v0,1.0), gViewProj );
+	float4 p1 = mul( float4(v1,1.0), gViewProj );
+
+	//projection factor
+	float k0 = 1.0f / p0.w;
+	float k1 = 1.0f / p1.w;
+
+	p0 *= k0; 
+	p1 *= k1;
+
+	//get screen space coord
+	p0.xy = NormalizedDeviceCoordToScreenCoord(p0.xy,dim);
+	p1.xy = NormalizedDeviceCoordToScreenCoord(p1.xy,dim);
+
+	v0 *= k0;
+	v1 *= k1;
+
+
+	float divisions = length(p1 - p0);
+	float3 dV = (v1 - v0) / divisions;
+	float dK = (k1 - k0) / divisions;
+	float2 traceDir = (p1 - p0) / divisions;
+
+
+	float maxSteps = min(MAX_STEPS, divisions);
+
+	if (reflectivity > 0.0f)
+	{
+       while( t < maxSteps)
+       {
+			coord = fragCoord.xy + traceDir * t;
+			
+			if(coord.x >= dim.x || coord.y >= dim.y || coord.x < 0 || coord.y < 0)
+			{
+				intersection = false;
+				//reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
+				break;
+			} 
+			
+			float curDepth = (v0 + dV * t).z;
+			curDepth /= k0 + dK * t; // Reverse the perspective divide back to view space
+			
+			//float3 curPosWS = gWindMap.Load(uint3(coord.xy, 0)).xyz;
+			float storedDepth = getReflZ(coord,viewRay); //getReflZ(coord,viewRay);//gWindMap.Load(uint3(coord.xy, 0)).z;
+
+			if( curDepth > storedDepth && curDepth - storedDepth < 0.1f && t > 15)
+			{
+				intersection = true;
+				hitPixel = coord.xy;
+				depthofhit = gDepthMap.Load(uint3(coord.xy, 0)).x;
+				reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
+				break;
+			}
+			t++;
+	   }
+	}
+
+	//end liu
+	
+	return  gDiffuseMap.Load(uint3(fragCoord.xy, 0)) * (1.0f - reflectivity) +reflColor * reflectivity;	
+	
+	//return float4(hitPixel.xy, depthofhit, rDotv) * (intersection ? 1.0f : 0.0f);
+	//return float4(intersection ? 1.0f : 0.0f,0,0,1.0f);
+}
+
+
+PS_wrapper_COLORED_MINIMAL_MESH(RayTracingPass_PS)
+
+#endif

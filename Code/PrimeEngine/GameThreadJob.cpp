@@ -3,6 +3,7 @@
 #include "RenderJob.h"
 
 #include "PrimeEngine/Scene/DrawList.h"
+#include <string>
 
 #if APIABSTRACTION_IOS
 #import <QuartzCore/QuartzCore.h>
@@ -196,7 +197,7 @@ int ClientGame::runGameFrame()
 				drawEvt->m_projectionTransform = pcam->m_viewToProjectedTransform;
 				drawEvt->m_eyeDir = pcam->m_worldTransform.getN();
                 drawEvt->m_parentWorldTransform.loadIdentity();
-                drawEvt->m_viewInvTransform = pcam->m_worldToViewTransform.inverse();
+				drawEvt->m_viewInvTransform = pcam->m_worldToViewTransform.inverse();
                 
 				//Commented out by Mac because I'm pretty sure this does nothing but am afraid to delete it...
 				static bool setCameraAsLightSource = false;
@@ -311,11 +312,86 @@ int ClientGame::runGameFrame()
 				//FPS
 				{
 					float fps = (1.0f/m_frameTime);
-					//sprintf(PEString::s_buf, "%.2f zonglinw Fall 2015 FPS", fps);
 					sprintf(PEString::s_buf, "%.2f FPS", fps);
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0, 
-						Vector3(.75f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+						Vector3(0.75f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+				
+				{
+					sprintf(PEString::s_buf, "Button U/I: Switch Between Buffers");
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
+				{
+					sprintf(PEString::s_buf, "Button K/L: Switch Between Shading Algorithms");
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
+				{
+					int curBuf = m_pContext->_debugMode;
+					std::string mode = "";
+					if (curBuf == 0)
+					{
+						mode += "Final Pass";
+					}
+					else if (curBuf == 1)
+					{
+						mode += "Albedo Buffer";
+					}
+					else if (curBuf == 2)
+					{
+						mode += "Normal Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 0)
+					{
+						mode += "Depth Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 1)
+					{
+						mode += "Position Buffer";
+					}
+					else if (curBuf == 4)
+					{
+						mode += "Lighting Buffer (Before Gamma Correction)";
+					}
+
+					sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.10f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
+				{
+					std::string shading = "";
+					if (m_pContext->_renderMode == 0)
+					{
+						shading = "Clustered Deferred (Culling by 3D clustered)";
+					}
+					else 
+					{
+						shading = "Classical Deferred (Culling by light volume)";
+					}
+					sprintf(PEString::s_buf, "Current Shading: %s", shading.c_str());
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
+				
+				// light num
+				{
+					auto &lights = PE::RootSceneNode::Instance()->m_lights;
+					int lightNum = lights.m_size;
+
+					sprintf(PEString::s_buf, "Light number: %d", lightNum);
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
 
                 PE::IRenderer::checkForErrors("");
@@ -323,10 +399,10 @@ int ClientGame::runGameFrame()
 				//LUA Command Server, Server
 				PE::GameContext *pServer = &PE::Components::ServerGame::s_context;
 				{
-					sprintf(PEString::s_buf, "Lua Command Receiver Ports: Client: %d Server: %d", m_pContext->getLuaCommandServerPort(), pServer->getLuaEnvironment() ? pServer->getLuaCommandServerPort():0);
+					/*sprintf(PEString::s_buf, "Lua Command Receiver Ports: Client: %d Server: %d", m_pContext->getLuaCommandServerPort(), pServer->getLuaEnvironment() ? pServer->getLuaCommandServerPort():0);
 					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(.0f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+					PEString::s_buf, true, false, false, false, 0,
+					Vector3(.0f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);*/
 				}
 
                 PE::IRenderer::checkForErrors("");
@@ -347,12 +423,12 @@ int ClientGame::runGameFrame()
                 PE::IRenderer::checkForErrors("");
 
 				//gameplay timer
-				{
+				/*{
 					sprintf(PEString::s_buf, "GT frame wait:%.3f pre-draw:%.3f+render wait:%.3f+render:%.3f+post-render:%.3f = %.3f sec\n", m_gameTimeBetweenFrames, m_gameThreadPreDrawFrameTime, m_gameThreadDrawWaitFrameTime, m_gameThreadDrawFrameTime, m_gameThreadPostDrawFrameTime, m_frameTime);
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0,
 						Vector3(.0f, .075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				}*/
 				
 				//debug draw root and grid
 				DebugRenderer::Instance()->createRootLineMesh();// send event while the array is on the stack

@@ -17,6 +17,8 @@
 #include "../Texture/Texture.h"
 #include "../GPUBuffers/VertexBufferGPU.h"
 #include "../GPUBuffers/IndexBufferGPU.h"
+//Liu
+#include "PrimeEngine/Render/D3D11Renderer.h"
 
 // Sibling/Children includes
 #include "EffectEnums.h"
@@ -24,10 +26,19 @@
 #include "PERasterizerState.h"
 #include "PEDepthStencilState.h"
 
+
+#include <vector>
+#include <D3DCommon.h>
+#include <D3DCompiler.h>
+#include <d3d11.h>
+
+#include "math.h"
+
 namespace PE {
 namespace Components{
 struct Effect;
 struct DrawList;
+struct Light;
 };
 
 struct EffectManager : public PE::PEAllocatableAndDefragmentable
@@ -73,7 +84,22 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
-	// void setLightAccumTextureRenderTarget();
+	void setLightAccumTextureRenderTarget();
+
+	//Liu
+	// void EffectManager::setClassicalLightTextureRenderTarget();
+	void drawClassicalLightPass(float angle);
+	void createSphere(float radius, int sliceCount, int stackCount);
+	void randomLightInfo(int num);
+	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
+	void rotateLight(float angle,int counter);
+	//Liu
+	void drawRayTracingPass();
+	void drawLightMipsPass(int curlevel, bool isSecBlur);
+	void setLightMipsTextureRenderTarget(int level);
+	
+
+
 	void setFinalLDRTextureRenderTarget();
 
 	void setTextureAndDepthTextureRenderTargetForDefaultRendering();
@@ -96,8 +122,11 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawFrameBufferCopy();
 
 	// + Deferred
+	void drawClusteredLightHDRPass();
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();
+
+	void assignLightToClusters();
 
 	void debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSeparatedGlow, bool drawGlow1stPass, bool drawGlow2ndPass, bool drawShadowRenderTarget);
 	void debugDeferredRenderTarget(int which);
@@ -130,6 +159,24 @@ public:
 	Handle m_hnormalTextureGPU;
 	Handle m_haccumHDRTextureGPU;
 	Handle m_hfinalLDRTextureGPU;
+	Handle m_hrootDepthBufferTextureGPU;
+	
+
+	//Liu
+	Handle m_hpositionTextureGPU;
+	Handle m_hmaterialTextureGPU;
+	Handle m_htempMipsTextureGPU;
+	Handle m_hrayTracingTextureGPU;
+	// Handle m_hlightTextureGPU;
+	struct LightInfo
+	{
+		Vector3 pos;
+		Vector3 color;
+		Vector3 obritAxis;
+	};
+	//Liu
+	// Array<LightInfo> m_lights;
+
 	// + End deferred 
 	
 	Matrix4x4 m_currentViewProjMatrix;
@@ -137,6 +184,10 @@ public:
 
 	Handle m_hVertexBufferGPU;
 	Handle m_hIndexBufferGPU;
+	//Liu
+	Handle m_hLightVertexBufferGPU;
+	Handle m_hLightIndexBufferGPU;
+
 	Handle m_hFirstGlowPassEffect;
 	Handle m_hSecondGlowPassEffect;
 	
@@ -147,6 +198,44 @@ public:
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
 	Handle m_hfinalLDRPassEffect;
+
+	Handle m_hdebugPassEffect;
+
+	// + Deferred cluster data - hard coded cluster size
+	struct ClusterData
+	{
+		unsigned int offset;
+		unsigned int counts;
+		// short pointLightCount;
+		// short spotLightCount;
+	};
+
+	Vector3 m_cMin;
+	Vector3 m_cMax;
+	static const int CX = 32;
+	static const int CY = 8;
+	static const int CZ = 32;
+	std::vector<PE::Components::Light *> _dirLights;
+	std::vector<PE::Components::Light *> _pointLights;
+	std::vector<PE::Components::Light *> _spotLights;
+	int _dirLightNum, _pointLightNum, _spotLightNum;
+	// std::vector<short> _lightIndices;
+	std::vector<unsigned int> _lightIndices;
+	ClusterData _cluster[CZ][CY][CX];
+
+	// DX11 resources - did not bother impl for TextureCPU
+	ID3D11Texture3D *_clusterTex;
+	ID3D11ShaderResourceView *_clusterTexShaderView;
+	ID3D11Buffer *_lightIndicesBuffer;
+	// ID3D11Texture1D *_lightIndicesTex;
+	ID3D11ShaderResourceView *_lightIndicesBufferShaderView;
+
+	// + End
+
+	//Liu
+	Handle m_hDeferredLightPassEffect;
+	Handle m_hLightMipsPassEffect;
+	Handle m_hRayTracingPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11
@@ -166,7 +255,7 @@ public:
 #	if APIABSTRACTION_D3D11
 		PEMap<ID3D11Buffer *> m_cbuffers; // only DX 11 has constant buffers. DX9 just has constant registers
 #	endif
-		
+
 	bool m_doMotionBlur;
 
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;

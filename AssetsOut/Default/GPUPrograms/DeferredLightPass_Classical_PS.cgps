@@ -1,0 +1,76 @@
+#ifndef DEFERRED_LIGHT_PASS_CLASSICAL_PS
+#define DEFERRED_LIGHT_PASS_CLASSICAL_PS
+
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "lighthelper.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+
+float getPointLightAtt(float radius, float dist) 
+{
+    // Soft transition
+    float attenuation = pow(1.0 + (dist / radius) , -2.0) * 1.2;
+    
+    float cutoff = radius * 0.7;
+    attenuation *= 1.0 - smoothstep(0.0, 1.0, ( (dist / cutoff) - 1.0) * 4.0 );
+    attenuation = max(0.0, attenuation);
+    return attenuation;
+}
+
+float3 blinn_phong(float3 n, float3 l, float3 e, 
+				   float3 le, float3 la, float spec_pow, 
+				   float3 kd, float3 ks, float3 ka, float att)
+{
+	float NoH = 0.0f;
+	float NoL = dot(n, l);
+	float3 diffuse = float3(0, 0, 0);
+	float3 specular = float3(0, 0, 0);
+	if (NoL > 0)
+	{
+		float3 h = normalize(l + e);
+		NoH = max(dot(n, h), 0.0);
+		diffuse = kd * NoL;
+		specular = ks * pow(NoH, spec_pow);
+	}
+
+	return att * le * (diffuse + specular) + la; //ka * la;
+}
+
+float3 renderPointLight(float3 posWS, float3 albedo, float3 normal, Light light)
+{
+	const float3 one = float3(1, 1, 1);
+	const float3 zero = float3(0, 0, 0);
+	
+	float3 E = normalize(xyzgEyePosW_wDoMotionBlur.xyz - posWS);
+	float3 L = light.xyzPos_w.xyz - posWS;
+	float  dist = length(L);
+	float  att = getPointLightAtt(light.xRange_yType_zw.x, dist);
+	L = normalize(L);
+	
+	return blinn_phong(normal, L, E,
+				   light.diffuse.xyz, zero, light.xyzAtt_wSpotPwr.w, 
+				   albedo, one, one, att);
+}
+
+float4 DeferredLightPass_Classical_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	uint4 fragCoord = pIn.iPosH;
+
+	float4 albedo = gDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float4 normal = gAdditionalDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float4 position = gWindMap.Load(uint3(fragCoord.xy, 0));
+
+	// Lighting 
+	float3 finalColor = float3(0, 0, 0);
+
+	finalColor = renderPointLight(position.xyz, albedo.xyz, normal.xyz, gLight0);
+	
+
+	return  float4( finalColor.xyz, 1.0);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(DeferredLightPass_Classical_PS)
+
+#endif

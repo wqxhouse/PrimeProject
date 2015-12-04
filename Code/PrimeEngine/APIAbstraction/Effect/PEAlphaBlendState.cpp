@@ -271,6 +271,18 @@ void PEAlphaBlendState::bindToPipeline(Components::Effect *pCurEffect)
             m_alphaBlendStates[PEAlphaBlendState_DefaultRGBLerp_A_DestUnchanged] = blendState;
         }
         
+		//Liu
+		{
+			PEAlphaBlendState blendState(context, arena);
+			blendState.m_blendEnabled = true;
+			blendState.m_alphaBlendOp = PEAlphaBlendState::PEBlendOp_Add;
+			blendState.m_srcRGBBlendFactor = PEAlphaBlendState::PEBlendFactor_1;
+			blendState.m_dstRGBBlendFactor = PEAlphaBlendState::PEBlendFactor_1;
+
+			blendState.setAPIValues();
+
+			m_alphaBlendStates[PEAlphaBlendState_OnePlusOne] = blendState;
+		}
     }
     
     PEAlphaBlendState *PEAlphaBlendStateManager::getAlphaBlendState(E_PEAlphaBlendState state)
