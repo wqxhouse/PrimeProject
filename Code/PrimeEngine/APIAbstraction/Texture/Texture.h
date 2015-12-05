@@ -92,6 +92,10 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	LPDIRECT3DSURFACE9 m_pEDRamColorRenderTargetSurface;
 #endif
 #elif APIABSTRACTION_D3D11
+	//liu
+	ID3D11ShaderResourceView *m_pMipsShaderResourceView; 
+	ID3D11RenderTargetView *m_pMipsRenderTargetView;
+
 	ID3D11ShaderResourceView *m_pShaderResourceView; // a standard texture view
 	ID3D11RenderTargetView *m_pRenderTargetView; // a view for D3D to draw into this texture
 

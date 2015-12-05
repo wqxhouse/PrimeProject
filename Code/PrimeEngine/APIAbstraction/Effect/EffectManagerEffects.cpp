@@ -51,6 +51,30 @@ namespace PE {
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);*/
 
+		//Liu
+		m_htempMipsTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *ptempMipsRTTGPU = new (m_htempMipsTextureGPU)TextureGPU(*m_pContext, m_arena);
+		ptempMipsRTTGPU->createDrawableIntoColorTexture(
+			m_pContext->getGPUScreen()->getWidth(),
+			m_pContext->getGPUScreen()->getHeight(),
+			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);
+
+		//Liu
+		m_hmaterialTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *pMaterialRTTGPU = new (m_hmaterialTextureGPU)TextureGPU(*m_pContext, m_arena);
+		pMaterialRTTGPU->createDrawableIntoColorTexture(
+			m_pContext->getGPUScreen()->getWidth(),
+			m_pContext->getGPUScreen()->getHeight(),
+			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);
+
+		//Liu
+		m_hrayTracingTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *pRayTracingRTTGPU = new (m_hrayTracingTextureGPU)TextureGPU(*m_pContext, m_arena);
+		pRayTracingRTTGPU->createDrawableIntoColorTexture(
+			m_pContext->getGPUScreen()->getWidth(),
+			m_pContext->getGPUScreen()->getHeight(),
+			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);
+
 		// 64bit float - TODO: mipmap or not? 
 		// (mipmap can create possible wrong samples at depth discontinuity)
 		m_haccumHDRTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
@@ -59,6 +83,7 @@ namespace PE {
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
 			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp, 1);
+		
 
 		// 32bit unorm
 		m_hfinalLDRTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
@@ -382,6 +407,40 @@ namespace PE {
 		pLightClassicalFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
 
 		m_map.add("DeferredLightPass_Classical_Tech", hLightClassicalFx);
+	}
+	
+	//Liu create mipmaps
+	{
+		Handle hLightMipsFx("EFFECT", sizeof(Effect));
+		Effect *pLightMipsFx = new(hLightMipsFx)Effect(*m_pContext, m_arena, hLightMipsFx);
+		pLightMipsFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"LightMipsPass_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"LightMipsPassTech");
+		pLightMipsFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("LightMipsPassTech", hLightMipsFx);
+	}
+
+	//Liu
+	{
+		Handle hRayTracingFx("EFFECT", sizeof(Effect));
+		Effect *pRayTracingFx = new(hRayTracingFx)Effect(*m_pContext, m_arena, hRayTracingFx);
+		pRayTracingFx->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"RayTracingPass_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"RayTracingPassTech");
+		pRayTracingFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("RayTracingPassTech", hRayTracingFx);
 	}
 
 	// + Deferred final LDR Pass

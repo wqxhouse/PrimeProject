@@ -5,7 +5,7 @@
 // Sibling/Children Includes
 
 #include "DefaultGameControls.h"
-
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 
 
 // definitions of keyboard and controller events. s.a. Button pressed, etc
@@ -277,10 +277,12 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
 	{
 		m_pContext->_renderMode = 0;
+		//EffectManager::Instance()->resizeLightNums(10);
 	}
 	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
 	{
 		m_pContext->_renderMode = 1;
+		//EffectManager::Instance()->resizeLightNums(-10);
 	}
 	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
 	{

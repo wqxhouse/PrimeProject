@@ -341,6 +341,50 @@ void D3D11Renderer::setRenderTargetsAndViewportWithDepth(TextureGPU *pDestColorT
 	}
 
 }
+//Liu
+void D3D11Renderer::setMipsRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex, bool clear)
+{
+	ID3D11RenderTargetView *renderTargets[1] = { 0 };
+	if (pDestColorTex != 0)
+	{
+		renderTargets[0] = pDestColorTex->m_pMipsRenderTargetView;
+	}
+	else
+	{
+		renderTargets[0] = m_pRenderTargetView;
+	}
+
+	m_pD3DContext->OMSetRenderTargets(1, renderTargets, 0);
+	
+	if (pDestColorTex != 0)
+	{
+		m_pD3DContext->RSSetViewports(1, &pDestColorTex->m_viewport);
+
+		float color[] = { 0.0f, 0.0f, 1.0f, 0.0f };
+		if (clear)
+		{
+			m_pD3DContext->ClearRenderTargetView(pDestColorTex->m_pMipsRenderTargetView, color);
+		}
+	}
+	else
+	{
+		D3D11_VIEWPORT vp;
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		vp.Width = (float)(m_width);
+		vp.Height = (float)(m_height);
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+
+		m_pD3DContext->RSSetViewports(1, &vp);
+		float color[] = { 1.0f * (rand() % 100) / 100.0f, 0.0f, 0.0f, 1.0f };
+		if (clear)
+		{
+			m_pD3DContext->ClearRenderTargetView(m_pRenderTargetView, color);
+		}
+	}
+	
+}
 
 void D3D11Renderer::setRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex, bool clear)
 {

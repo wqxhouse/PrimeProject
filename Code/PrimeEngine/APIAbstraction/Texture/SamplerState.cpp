@@ -144,6 +144,13 @@ namespace PE {
 
 		m_samplerStates[SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp] = ss;
 
+		//Liu
+		sdesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		hr = pDevice->CreateSamplerState(&sdesc, &ss.m_pd3dSamplerState);
+		assert(SUCCEEDED(hr));
+
+		m_samplerStates[SamplerStateCustom0] = ss;
+
 		sdesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		sdesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 		sdesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;

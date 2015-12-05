@@ -15,7 +15,7 @@ PE_IMPLEMENT_CLASS1(SceneNode, Component);
 SceneNode *SceneNode::s_pRootSceneNode = 0;
 
 // Constructor -------------------------------------------------------------
-SceneNode::SceneNode(PE::GameContext &context, PE::MemoryArena arena, Handle hMyself) :  Component(context, arena, hMyself), m_lights(context, arena, 8), m_inheritPositionOnly(false)
+SceneNode::SceneNode(PE::GameContext &context, PE::MemoryArena arena, Handle hMyself) :  Component(context, arena, hMyself), m_lights(context, arena, 1000), m_inheritPositionOnly(false)
 {
 }
 

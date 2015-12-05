@@ -239,11 +239,14 @@ AssetsOut/*
 AssetsOut/Default/*
 !AssetsOut/Default/GPUPrograms/
 
+<<<<<<< HEAD
 # Exclude test level
 !AssetsOut/Basic/
 AssetsOut/Basic/*
 !AssetsOut/Basic/Levels/
 
+=======
+>>>>>>> classicaldeferred
 External/**
 GlobalConfig/**
 Python25/**
@@ -260,8 +263,11 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
 
+<<<<<<< HEAD
 *.exe
 *.dll
 *.bat
 
+=======
+>>>>>>> classicaldeferred
 

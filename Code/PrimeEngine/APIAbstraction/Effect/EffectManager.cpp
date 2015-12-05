@@ -32,6 +32,7 @@
 #include "PrimeEngine/Scene/CameraSceneNode.h"
 #include "PrimeEngine/Scene/CameraManager.h"
 #include "PrimeEngine/Scene/Light.h"
+#include "PrimeEngine/Scene/SceneNode.h"
 
 #include "PrimeEngine/Scene/MeshInstance.h"
 #include "PrimeEngine/Scene/RootSceneNode.h"
@@ -234,8 +235,8 @@ void EffectManager::setupConstantBuffersAndShaderResources()
 		AnimSetBufferGPU::createGPUBufferForAnimationCSResult(*m_pContext);
 
 		// + Deferred - hard code cluster World space bound
-		m_cMin = Vector3(-500, -250, -500);
-		m_cMax = Vector3(500, 250, 500);
+		m_cMin = Vector3(-1000, -450, -1000);
+		m_cMax = Vector3(1000, 450, 1000);
 
 		_dirLights.resize(MAX_DIRECITONAL_LIGHT);
 		_pointLights.resize(MAX_POINT_LIGHT);
@@ -461,7 +462,7 @@ void EffectManager::assignLightToClusters()
 							break;
 						}
 
-						_cluster[z][y][x].offset = curLightIndices;
+						//_cluster[z][y][x].offset = curLightIndices;
 						 
 						// _cluster[z][y][x].pointLightCount++;
 						int curPtCount = _cluster[z][y][x].counts >> 16;
@@ -480,6 +481,7 @@ void EffectManager::assignLightToClusters()
 		}
 	}
 
+	
 	// flush c_list to _lightIndices - could cause high overhead if too finely subdivide the cluster
 	for (int z = 0; z < CZ; z++)
 	{
@@ -487,6 +489,8 @@ void EffectManager::assignLightToClusters()
 		{
 			for (int x = 0; x < CX; x++)
 			{
+				_cluster[z][y][x].offset = curLightIndices;
+
 				for (int k = 0; k < c_list_count[z][y][x]; k++)
 				{
 					_lightIndices[curLightIndices++] = c_list[z][y][x][k];
@@ -596,8 +600,10 @@ void EffectManager::buildFullScreenBoard()
 	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
 	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
 	m_hdebugPassEffect = getEffectHandle("debug_Tech.fx");
+	//Liu
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
-	
+	m_hLightMipsPassEffect = getEffectHandle("LightMipsPassTech");
+	m_hRayTracingPassEffect = getEffectHandle("RayTracingPassTech");
 	//Liu
 	createSphere(1,20,20);
 }
@@ -653,10 +659,13 @@ void EffectManager::setTextureAndDepthTextureRenderTargetForGBuffer()
 
 	if (m_pContext->_renderMode == 0)
 	{
-		const int numRts = 2; // Liu
+		const int numRts = 4; // Liu
 		TextureGPU* rtts[numRts];
 		rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
 		rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
+		rtts[2] = m_hmaterialTextureGPU.getObject<TextureGPU>();
+		rtts[3] = m_hpositionTextureGPU.getObject<TextureGPU>();
+		
 		// TODO: make it work for xbox, now only D3D11
 		((D3D11Renderer *)m_pContext->getGPUScreen())->
 			setDeferredShadingRTsAndViewportWithDepth(rtts, numRts, m_pCurDepthTarget, true, true);
@@ -689,13 +698,58 @@ void EffectManager::setLightAccumTextureRenderTarget()
 }
 
 //Liu
-//void EffectManager::setClassicalLightTextureRenderTarget()
-//{
-//	TextureGPU* clightTex = m_hlightTextureGPU.getObject<TextureGPU>();
-//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(clightTex, true);
-//
-//	m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
-//}
+void EffectManager::setLightMipsTextureRenderTarget(int level)
+{
+	//create new buffer	
+
+	HRESULT hr = S_OK;
+	D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
+	ID3D11Device *pDevice = pD3D11Renderer->m_pD3DDevice;
+	ID3D11DeviceContext *pDeviceContext = pD3D11Renderer->m_pD3DContext;
+
+	TextureGPU* accumTex = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+	TextureGPU* tempTex = m_htempMipsTextureGPU.getObject<TextureGPU>();
+
+	//Create a render target view
+	D3D11_RENDER_TARGET_VIEW_DESC DescRT;
+	DescRT.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	DescRT.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	DescRT.Texture2D.MipSlice = level;
+	hr = pDevice->CreateRenderTargetView(accumTex->m_pTexture, &DescRT, &accumTex->m_pMipsRenderTargetView);
+
+	
+	// Get the mip level and create the SRV
+	//ID3D11Resource* MipRes;
+	//accumTex->m_pMipsRenderTargetView->GetResource(&MipRes);
+	
+
+	// Create the resource view
+	D3D11_SHADER_RESOURCE_VIEW_DESC DescRV;
+	DescRV.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	DescRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	DescRV.Texture2D.MipLevels = 1;	
+	DescRV.Texture2D.MostDetailedMip = 0; //mip0
+	
+	hr = pDevice->CreateShaderResourceView(accumTex->m_pTexture, &DescRV, &accumTex->m_pMipsShaderResourceView);
+	
+	//MipRes->Release();
+
+	ID3D11Resource* srcRes;
+	ID3D11Resource*	desRes;
+	accumTex->m_pMipsShaderResourceView->GetResource(&srcRes);
+	tempTex->m_pRenderTargetView->GetResource(&desRes);
+	pDeviceContext->CopyResource(desRes, srcRes);
+	srcRes->Release(); desRes->Release();
+
+
+	((D3D11Renderer *)m_pContext->getGPUScreen())->
+		setMipsRenderTargetsAndViewportWithNoDepth(accumTex, true);
+	m_pCurRenderTarget = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+
+	//m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(clightTex, true);
+
+	//m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
+}
 
 void EffectManager::setFinalLDRTextureRenderTarget()
 {
@@ -1058,7 +1112,7 @@ void EffectManager::drawDeferredFinalPass()
 #else
 	// For simplicity, just draw directly into back buffer
 	// TODO: with or without depth?
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
 #endif
 
 	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
@@ -1070,20 +1124,50 @@ void EffectManager::drawDeferredFinalPass()
 	curEffect.setCurrent(pvbGPU);
 
 	TextureGPU *lightPassHDRTex = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
+	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
+	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
+	TextureGPU *rayTracingTexture = m_hrayTracingTextureGPU.getObject<TextureGPU>();
+	
+	//
+	//TextureGPU *positionTexture = m_hpositionTextureGPU.getObject<TextureGPU>();
 
 	PE::SA_Bind_Resource setTextureAction(
 		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
-		lightPassHDRTex->m_samplerState,
+		SamplerStateCustom0,//lightPassHDRTex->m_samplerState
 		API_CHOOSE_DX11_DX9_OGL(lightPassHDRTex->m_pShaderResourceView, lightPassHDRTex->m_pTexture, lightPassHDRTex->m_texture));
-	//TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
-	//// TextureGPU *normalTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
-
-	//PE::SA_Bind_Resource setTextureAction(
-	//	*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-	//	albedoTexture->m_samplerState, 
-	//	API_CHOOSE_DX11_DX9_OGL(albedoTexture->m_pShaderResourceView, albedoTexture->m_pTexture, albedoTexture->m_texture));
-
 	setTextureAction.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionDepth(
+		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		API_CHOOSE_DX11_DX9_OGL(rootDepthTexture->m_pDepthShaderResourceView, rootDepthTexture->m_pTexture, rootDepthTexture->m_texture));
+	setTextureActionDepth.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionNormal(
+		*m_pContext, m_arena, BUMPMAP_TEXTURE_2D_SAMPLER_SLOT,
+		normalTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(normalTexture->m_pShaderResourceView, normalTexture->m_pTexture, normalTexture->m_texture));
+	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionMaterial(
+		*m_pContext, m_arena, ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		materialTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(materialTexture->m_pShaderResourceView, materialTexture->m_pTexture, materialTexture->m_texture));
+	setTextureActionMaterial.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionRayTracing(
+		*m_pContext, m_arena, WIND_TEXTURE_2D_SAMPLER_SLOT,
+		rayTracingTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(rayTracingTexture->m_pShaderResourceView, rayTracingTexture->m_pTexture, rayTracingTexture->m_texture));
+	setTextureActionRayTracing.bindToPipeline(&curEffect);
+
+	/*PE::SA_Bind_Resource setTextureActionPosition(
+		*m_pContext, m_arena, WIND_TEXTURE_2D_SAMPLER_SLOT,
+		positionTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(positionTexture->m_pShaderResourceView, positionTexture->m_pTexture, positionTexture->m_texture));
+	setTextureActionPosition.bindToPipeline(&curEffect);*/
+
 
 	PE::SetPerObjectConstantsShaderAction objSa;
 	objSa.m_data.gW = Matrix4x4();
@@ -1092,13 +1176,44 @@ void EffectManager::drawDeferredFinalPass()
 
 	objSa.bindToPipeline(&curEffect);
 
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	CameraSceneNode *csn =
+		CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<CameraSceneNode>();
+	float n = csn->m_near;
+	float f = csn->m_far;
+	float projA = f / (f - n);
+	float projB = (-f * n) / (f - n);
+	Vector3 camPos = csn->m_base.getPos();
+
+	pscs.m_data.csconsts.cNear = n;
+	pscs.m_data.csconsts.cFar = f;
+	pscs.m_data.csconsts.cProjA = projA;
+	pscs.m_data.csconsts.cProjB = projB;
+	pscs.m_data.camPos = camPos;
+	pscs.m_data.pad3 = 0.5;
+	pscs.m_data.camZAxisWS = csn->m_base.getN();
+	pscs.bindToPipeline(&curEffect);
+
+	SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
+	cb.m_data.gViewInv = csn->m_worldToViewTransform;
+	cb.m_data.gViewProj = csn->m_viewToProjectedTransform;
+	cb.m_data.gViewProjInverseMatrix = (csn->m_viewToProjectedTransform * csn->m_worldToViewTransform).inverse();
+	cb.bindToPipeline(&curEffect);
+
 	pibGPU->draw(1, 0);
 
 	pibGPU->unbindFromPipeline();
 	pvbGPU->unbindFromPipeline(&curEffect);
 
 	setTextureAction.unbindFromPipeline(&curEffect);
+	setTextureActionDepth.unbindFromPipeline(&curEffect);
+	setTextureActionNormal.unbindFromPipeline(&curEffect);
+	setTextureActionMaterial.unbindFromPipeline(&curEffect);
+	setTextureActionRayTracing.unbindFromPipeline(&curEffect);
+	//setTextureActionPosition.unbindFromPipeline(&curEffect);
 	objSa.unbindFromPipeline(&curEffect);
+	pscs.unbindFromPipeline(&curEffect);
+	cb.unbindFromPipeline(&curEffect);
 }
 
 void EffectManager::drawMotionBlur()
@@ -1208,7 +1323,7 @@ void EffectManager::drawDeferredFinalToBackBuffer()
 	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
 #	elif APIABSTRACTION_D3D11
 	// TODO: with or without depth?
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);//setRenderTargetsAndViewportWithDepth(0, 0, true, true)
 #	endif
 
 	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
@@ -1454,15 +1569,17 @@ void EffectManager::drawClassicalLightPass(float angle)
 {
 	auto &lights = PE::RootSceneNode::Instance()->m_lights;
 
+
 	for (int i = 0; i < lights.m_size; i++)
 	{
 		Light *l = lights[i].getObject<Light>();
 		if (l->m_cbuffer.type != 0) continue;
 
+		
 		//Vector3 translation = m_lights[i].pos;
 		//Vector4 difuss = Vector4(m_lights[i].color.getX(), m_lights[i].color.getY(), m_lights[i].color.getZ(), 1);
 		Vector3 randomAxis;
-		randomizeLight(l, &randomAxis);
+		//randomizeLight(l, &randomAxis);
 		float scale = l->m_cbuffer.range;
 
 		Vector3 translation = l->m_base.getPos();
@@ -1514,10 +1631,11 @@ void EffectManager::drawClassicalLightPass(float angle)
 		scaleM.loadIdentity();
 		scaleM.importScale(scale, scale, scale);
 
-		Matrix4x4 rotationM = Matrix4x4();
+		Matrix4x4 rotationM =Matrix4x4();
 		rotationM.loadIdentity();
-		// rotationM.turnAboutAxis(angle, m_lights[i].obritAxis);//RootSceneNode::Instance()->m_worldTransform.getV()
-		// rotationM.turnAboutAxis(angle, randomAxis);//RootSceneNode::Instance()->m_worldTransform.getV()
+		rotationM.turnAboutAxis(angle, l->m_oribitAxis);
+		//l->m_base.
+		//l->m_base = rotationM* l->m_base;
 
 		Matrix4x4 translationM = Matrix4x4();
 		translationM.loadIdentity();
@@ -1525,8 +1643,8 @@ void EffectManager::drawClassicalLightPass(float angle)
 
 		objSa.m_data.gW = Matrix4x4();
 		objSa.m_data.gW.loadIdentity();
-		// objSa.m_data.gW = rotationM*scaleM*translationM;
-		objSa.m_data.gW = translationM * rotationM * scaleM;
+		//objSa.m_data.gW = rotationM*scaleM*translationM;
+		objSa.m_data.gW = translationM *rotationM* scaleM;
 
 		objSa.m_data.gWVP = m_currentViewProjMatrix*objSa.m_data.gW;//csn->m_worldToViewTransform ;//*m_currentViewProjMatrix;//
 		//objSa.m_data.gWVPInverse = objSa.m_data.gWVP.inverse();
@@ -1555,24 +1673,261 @@ void EffectManager::drawClassicalLightPass(float angle)
 }
 
 //Liu
-//void EffectManager::randomLightInfo(int num)
-//{
-//	m_lights.reset(num);
-//	for (int i=0;i<num;i++)
-//	{
-//		LightInfo li;
-//		li.pos=Vector3(rand()%5,rand()%5,rand()%5);
-//		li.color = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-//		li.obritAxis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)),(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-//		m_lights.add(li);
-//	}
-//}
-
-void EffectManager::randomizeLight(Light *l, Vector3 *axis)
+void EffectManager::drawLightMipsPass(int curlevel, bool isSecBlur = false)
 {
-	l->m_base.setPos(Vector3(rand() % 5, rand() % 5, rand() % 5));
+
+	Effect &curEffect = *m_hLightMipsPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	//m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);
+
+	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+
+	TextureGPU *lightPassHDRTex = m_htempMipsTextureGPU.getObject<TextureGPU>();
+	
+	PE::SA_Bind_Resource setTextureActionLight(
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		lightPassHDRTex->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(lightPassHDRTex->m_pShaderResourceView, lightPassHDRTex->m_pTexture, lightPassHDRTex->m_texture));
+	setTextureActionLight.bindToPipeline(&curEffect);
+
+	// Quad MVP
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
+	objSa.bindToPipeline(&curEffect);
+
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	if (isSecBlur)
+	{
+		pscs.m_data.csconsts.cNear = 1;
+	}
+	else
+	{
+		pscs.m_data.csconsts.cNear = 0;
+	}
+	pscs.m_data.csconsts.cFar = curlevel;
+	pscs.bindToPipeline(&curEffect);
+
+	pibGPU->draw(1, 0);
+
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureActionLight.unbindFromPipeline(&curEffect);
+	objSa.unbindFromPipeline(&curEffect);
+	pscs.unbindFromPipeline(&curEffect);
+}
+
+Vector4 CreateInvDeviceZToWorldZTransformA(Matrix4x4 & ProjMatrix)
+{
+	float DepthMul = ProjMatrix.m[2][2];
+	float DepthAdd = ProjMatrix.m[2][3];
+
+	if (DepthAdd == 0.f)
+	{
+		// Avoid dividing by 0 in this case
+		DepthAdd = 0.00000001f;
+	}
+
+	float SubtractValue = DepthMul / DepthAdd;
+
+	// Subtract a tiny number to avoid divide by 0 errors in the shader when a very far distance is decided from the depth buffer.
+	// This fixes fog not being applied to the black background in the editor.
+	SubtractValue -= 0.00000001f;
+
+	return Vector4(
+		0.0f,			// Unused
+		0.0f,			// Unused
+		1.f / DepthAdd,
+		SubtractValue
+		);
+}
+
+void EffectManager::drawRayTracingPass()
+{
+	Effect &curEffect = *m_hRayTracingPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	//setrendertarget
+	TextureGPU* rayTracingTex = m_hrayTracingTextureGPU.getObject<TextureGPU>();
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(rayTracingTex, true);
+	m_pCurRenderTarget = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+
+	//
+	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+
+	TextureGPU *lightPassHDRTex = m_haccumHDRTextureGPU.getObject<TextureGPU>();
+	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
+	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
+	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
+
+	PE::SA_Bind_Resource setTextureAction(
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		lightPassHDRTex->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(lightPassHDRTex->m_pShaderResourceView, lightPassHDRTex->m_pTexture, lightPassHDRTex->m_texture));
+	setTextureAction.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionDepth(
+		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		API_CHOOSE_DX11_DX9_OGL(rootDepthTexture->m_pDepthShaderResourceView, rootDepthTexture->m_pTexture, rootDepthTexture->m_texture));
+	setTextureActionDepth.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionNormal(
+		*m_pContext, m_arena, BUMPMAP_TEXTURE_2D_SAMPLER_SLOT,
+		normalTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(normalTexture->m_pShaderResourceView, normalTexture->m_pTexture, normalTexture->m_texture));
+	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionMaterial(
+		*m_pContext, m_arena, ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		materialTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(materialTexture->m_pShaderResourceView, materialTexture->m_pTexture, materialTexture->m_texture));
+	setTextureActionMaterial.bindToPipeline(&curEffect);
+
+	// Quad MVP
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
+	objSa.bindToPipeline(&curEffect);
+
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	CameraSceneNode *csn =
+		CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<CameraSceneNode>();
+	float n = csn->m_near;
+	float f = csn->m_far;
+	float projA = f / (f - n);
+	float projB = (-f * n) / (f - n);
+	Vector3 camPos = csn->m_base.getPos();
+
+	pscs.m_data.csconsts.cNear = n;
+	pscs.m_data.csconsts.cFar = f;
+	pscs.m_data.csconsts.cProjA = projA;
+	pscs.m_data.csconsts.cProjB = projB;
+	pscs.m_data.camPos = camPos;
+	pscs.m_data.camZAxisWS = csn->m_base.getN();
+	Vector4 bias = CreateInvDeviceZToWorldZTransformA(csn->m_viewToProjectedTransform);
+	pscs.m_data.bias = Vector3(bias.m_x, bias.m_y, bias.m_z);
+	pscs.m_data.pad3 = bias.m_w;
+	pscs.bindToPipeline(&curEffect);
+
+	SetPerObjectGroupConstantsShaderAction cb(*m_pContext, m_arena);
+	cb.m_data.gViewInv = csn->m_worldToViewTransform;
+	cb.m_data.gViewProj = csn->m_viewToProjectedTransform;
+	cb.m_data.gViewProjInverseMatrix = (csn->m_viewToProjectedTransform * csn->m_worldToViewTransform).inverse();
+	cb.bindToPipeline(&curEffect);
+
+
+	pibGPU->draw(1, 0);
+
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureAction.unbindFromPipeline(&curEffect);
+	setTextureActionDepth.unbindFromPipeline(&curEffect);
+	setTextureActionNormal.unbindFromPipeline(&curEffect);
+	setTextureActionMaterial.unbindFromPipeline(&curEffect);
+	objSa.unbindFromPipeline(&curEffect);
+	pscs.unbindFromPipeline(&curEffect);
+	cb.unbindFromPipeline(&curEffect);
+}
+//Liu
+void EffectManager::randomLightInfo(int num)
+{
+	RootSceneNode::Instance()->m_lights.reset(num,true);
+	for (int i=0; i<num; i++)
+	{	
+		Handle hLight("LIGHT", sizeof(Light));
+
+		Light *pLight = new(hLight) Light(
+		*m_pContext, 
+		m_arena,
+		hLight,
+		Vector3(5,0,0), //Position
+		Vector3(0,0,0), 
+		Vector3(0,0,0), 
+		Vector3(0,0,0), //Direction (z-axis)
+		Vector4(0,0,0,1), //Ambient
+		Vector4(1,0,1,1), //Diffuse
+		Vector4(0,0,0,1), //Specular
+		Vector3(0.05, 0.05, 0.05), //Attenuation (x, y, z)
+		1, // Spot Power
+		20, //Range
+		false, //Whether or not it casts shadows
+		0,//0 = point, 1 = directional, 2 = spot
+		Vector3(1,0,0)
+		);
+	
+	randomizeLight(pLight,&(pLight->m_oribitAxis) ,i);
+	pLight->addDefaultComponents();
+
+	RootSceneNode::Instance()->m_lights.add(hLight);
+	RootSceneNode::Instance()->addComponent(hLight);
+
+	}
+}
+
+void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
+{
+	if(i<2)
+	{
+		l->m_base.setPos(Vector3(rand() % 5, rand() % 5, rand() % 5));
+	}else
+	{
+		l->m_base.setPos(Vector3(rand() % 50 - 25, 3, rand() % 50 - 25));
+	}
+	
 	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
 	*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+	l->m_cbuffer.range = rand() % 10+10;
 }
+//Liu
+void EffectManager::rotateLight(float angle, int counter)
+{
+	
+	int a = PE::RootSceneNode::Instance()->getComponentCount();
+	for (int b = 0; b < a;b++)
+	{
+		if (PE::RootSceneNode::Instance()->getComponentByIndex(b).getObject<SceneNode>() != NULL)
+			PE::RootSceneNode::Instance()->getComponentByIndex(b).getObject<SceneNode>()->m_base.turnRight(0.1f);
+	}
+	//int b = 0;
+	/*
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Light *l = lights[i].getObject<Light>();
+		if (l->m_cbuffer.type != 0) continue;
+		
+		Matrix4x4 rotationM =Matrix4x4();
+		rotationM.loadIdentity();
+		rotationM.turnAboutAxis(angle, l->m_oribitAxis);
+		//l->m_base.
+		l->m_base = rotationM* l->m_base;
+		//if ((counter) % 9 == 0)
+		//{
+		//	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
+		//}
+		
+	}
+
+	*/
+}
+
 
 }; // namespace PE

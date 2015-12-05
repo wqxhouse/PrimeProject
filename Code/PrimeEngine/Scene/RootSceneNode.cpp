@@ -86,6 +86,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 
 		// psvPerObjectGroup->m_data.gViewInv = pDrawEvent ? pDrawEvent->m_viewInvTransform : Matrix4x4();
 		psvPerObjectGroup->m_data.gViewInv = pDrawEvent ? pDrawEvent->m_viewInvTransform : Matrix4x4();
+		//psvPerObjectGroup->m_data.gViewInv.turnRight(0.1f);
 		// TODO: fill these in for motion blur
 		psvPerObjectGroup->m_data.gPreviousViewProjMatrix = Matrix4x4();
 
@@ -117,7 +118,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 				}
 			}
 		}
-		for (PrimitiveTypes::UInt32 iLight = 0;iLight < pRoot->m_lights.m_size; iLight++)
+		for (PrimitiveTypes::UInt32 iLight = 0;iLight < 8; iLight++)//pRoot->m_lights.m_size
 		{
 			Light *pLight = pRoot->m_lights[iLight].getObject<Light>();
 			if(pLight->castsShadow())

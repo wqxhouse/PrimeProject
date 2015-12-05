@@ -114,6 +114,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 	//	EffectManager::Instance()->endCurrentRenderTarget();
 	//}
 
+		
+
 	IRenderer::checkForErrors("renderjob update start\n");
 
 	IRenderer::RenderMode renderMode = ctx.getGPUScreen()->m_renderMode;
@@ -140,15 +142,16 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 #else
 		assert(false);
 #endif
-
 		//Liu
-		m_angle+=0.01f;
+		m_angle += 1;
 
+		//EffectManager::Instance()->rotateLight(0.01, m_angle);
+		
 		if (ctx._renderMode == 0)
 		{
 			// 2.1) Assign light to clusters
 			EffectManager::Instance()->assignLightToClusters();
-
+			//EffectManager::Instance()->rotateLight(m_angle);
 			// 2.2) Render lights
 			EffectManager::Instance()->setLightAccumTextureRenderTarget();
 			EffectManager::Instance()->drawClusteredLightHDRPass();
@@ -157,18 +160,42 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		else
 		{
 			// EffectManager::Instance()->setClassicalLightTextureRenderTarget();
-
+			//EffectManager::Instance()->rotateLight(0.01);
 			EffectManager::Instance()->setLightAccumTextureRenderTarget();
-			EffectManager::Instance()->drawClassicalLightPass(m_angle);
+			EffectManager::Instance()->drawClassicalLightPass(0.01); //0.01
 			//EffectManager::Instance()->drawClassicalLightPass(Vector3(2,0,1),5,Vector4(1,1,0,1),m_angle);
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
+
+		//create mipmaps for lightTexture
+		{
+			for (int i = 1; i < 11; i++)
+			{
+				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+				EffectManager::Instance()->drawLightMipsPass(i, false);
+				EffectManager::Instance()->endCurrentRenderTarget();
+
+				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+				EffectManager::Instance()->drawLightMipsPass(i, true);
+				EffectManager::Instance()->endCurrentRenderTarget();
+			}
+			
+		}
+
+		//create raybuffer
+		{
+			//EffectManager::Instance()->setLightAccumTextureRenderTarget();
+			EffectManager::Instance()->drawRayTracingPass();
+			EffectManager::Instance()->endCurrentRenderTarget();
+		}
+
 
 		// 3) Render post process & final pass
 		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
 		if (ctx._debugMode == 0)
 		{
 			EffectManager::Instance()->drawDeferredFinalPass();
+			EffectManager::Instance()->endCurrentRenderTarget();
 
 		}
 		else
