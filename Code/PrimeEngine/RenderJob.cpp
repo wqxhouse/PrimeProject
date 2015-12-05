@@ -102,6 +102,9 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 	bool disableScreenSpaceEffects = renderMode == IRenderer::RenderMode_DefaultNoPostProcess;
 	if (!disableScreenSpaceEffects)
     {
+		// -1) Assign light to clusters
+		EffectManager::Instance()->assignLightToClusters();
+
 		// printf("PRE: %d\n", (int)CameraManager::Instance()->getActiveCameraType());
 		// 0) Render cubemap
 		ProbeManager *pm = EffectManager::Instance()->getProbeManagerPtr();
@@ -138,9 +141,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		
 		if (ctx._renderMode == 0)
 		{
-			// 2.1) Assign light to clusters
-			EffectManager::Instance()->assignLightToClusters();
-
+			
+			// 2.1) shared with cube map lighting - moved to front
 			// 2.2) Render lights
 			PIXEvent event(L"Render Scene Clustered Deferred");
 			EffectManager::Instance()->setLightAccumTextureRenderTarget();

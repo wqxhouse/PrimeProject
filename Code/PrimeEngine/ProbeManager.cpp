@@ -71,14 +71,6 @@ void ProbeManager::prepareDefaultCameras()
 
 void ProbeManager::Render(int &threadOwnershipMask)
 {
-	{
-		PIXEvent event(L"Render Cubemap GBuffer");
-		renderGBuffer(threadOwnershipMask);
-	}
-}
-
-void ProbeManager::renderGBuffer(int &threadOwnershipMask)
-{
 	D3D11_VIEWPORT viewport;
 	viewport.Width = static_cast<float>(_cubemapSize);
 	viewport.Height = static_cast<float>(_cubemapSize);
@@ -88,6 +80,16 @@ void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 	viewport.TopLeftY = 0.0f;
 
 	_context->RSSetViewports(1, &viewport);
+
+	{
+		PIXEvent event(L"Render Cubemap GBuffer");
+		renderGBuffer(threadOwnershipMask);
+	}
+}
+
+void ProbeManager::renderGBuffer(int &threadOwnershipMask)
+{
+	
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	for (int cubeboxFaceIndex = 0; cubeboxFaceIndex < 6; cubeboxFaceIndex++)
@@ -113,12 +115,30 @@ void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 		_pContext->getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 		DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&cubeboxFaceIndex, threadOwnershipMask, &viewProj, &viewInv);
 		_pContext->getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+
+		// end render targets
+		ID3D11RenderTargetView *nullRenderTarget[3] = { nullptr, nullptr, nullptr };
+		_context->OMSetRenderTargets(3, nullRenderTarget, nullptr);
+
+		// Shading
+		ID3D11RenderTargetViewPtr RTView = _cubemapFinalTarget.RTVArraySlices.at(cubeboxFaceIndex);
+		_context->ClearRenderTargetView(RTView, clearColor);
+		ID3D11RenderTargetView *renderTarget2[1] = { RTView };
+		_context->OMSetRenderTargets(1, renderTarget2, nullptr);
+
+		// TODO: this is huge overhead
+		EffectManager::Instance()->uploadDeferredClusteredConstants(0.1f, 500.0f);
+		EffectManager::Instance()->drawClusteredQuadOnly(
+			_cubemapDepthTarget.SRVArraySlices[cubeboxFaceIndex],
+			_cubemapTarget0.SRVArraySlices[cubeboxFaceIndex], 
+			_cubemapTarget1.SRVArraySlices[cubeboxFaceIndex],
+			_cubemapTarget2.SRVArraySlices[cubeboxFaceIndex]);
 	}
 
 	
 	// end render targets
-	ID3D11RenderTargetView *nullRenderTarget[3] = { nullptr, nullptr, nullptr };
-	_context->OMSetRenderTargets(3, nullRenderTarget, nullptr);
+	ID3D11RenderTargetView *nullRenderTarget[1] = { nullptr  };
+	_context->OMSetRenderTargets(1, nullRenderTarget, nullptr);
 }
 
 

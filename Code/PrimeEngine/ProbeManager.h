@@ -24,7 +24,6 @@ public:
 private:
 	void createSphere(float radius, int sliceCount, int stackCount);
 	void renderGBuffer(int &threadOwnershipMask);
-	void renderLight(int &threadOwnershipMask);
 
 	void prepareDefaultCameras();
 

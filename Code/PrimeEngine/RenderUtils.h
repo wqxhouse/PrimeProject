@@ -155,6 +155,7 @@ struct DepthStencilBuffer
 	int ArraySize;
 	bool CubeMap;
 	std::vector<ID3D11DepthStencilViewPtr> ArraySlices;
+	std::vector<ID3D11ShaderResourceViewPtr> SRVArraySlices;
 
 	DepthStencilBuffer();
 

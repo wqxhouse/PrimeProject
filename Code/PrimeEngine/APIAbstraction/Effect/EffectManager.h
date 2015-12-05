@@ -126,6 +126,8 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawFrameBufferCopy();
 
 	// + Deferred
+	void uploadDeferredClusteredConstants(float nearClip, float farClip);
+	void drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2);
 	void drawClusteredLightHDRPass();
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();

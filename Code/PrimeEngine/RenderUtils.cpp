@@ -297,6 +297,48 @@ void DepthStencilBuffer::Initialize(ID3D11Device* device,
 		}
 
 		DXCall(device->CreateShaderResourceView(Texture, &srvDesc, &SRView));
+
+		SRVArraySlices.clear();
+		for (int i = 0; i < arraySize; ++i)
+		{
+			ID3D11ShaderResourceViewPtr srView;
+			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+			srvDesc.Format = dsSRVFormat;
+
+			if (arraySize == 1)
+			{
+				if (multiSamples > 1)
+				{
+					srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+				}
+				else
+				{
+					srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+					srvDesc.Texture2D.MipLevels = -1;
+					srvDesc.Texture2D.MostDetailedMip = 0;
+				}
+			}
+			else
+			{
+				if (multiSamples > 1)
+				{
+					srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+					srvDesc.Texture2DMSArray.ArraySize = 1;
+					srvDesc.Texture2DMSArray.FirstArraySlice = i;
+				}
+				else
+				{
+					srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+					srvDesc.Texture2DArray.ArraySize = 1;
+					srvDesc.Texture2DArray.FirstArraySlice = i;
+					srvDesc.Texture2DArray.MipLevels = -1;
+					srvDesc.Texture2DArray.MostDetailedMip = 0;
+				}
+			}
+
+			DXCall(device->CreateShaderResourceView(Texture, &srvDesc, &srView));
+			SRVArraySlices.push_back(srView);
+		}
 	}
 	else
 		SRView = nullptr;

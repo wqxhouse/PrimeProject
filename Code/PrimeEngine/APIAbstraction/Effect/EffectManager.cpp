@@ -970,6 +970,136 @@ void EffectManager::drawSecondGlowPass()
 	objSa.unbindFromPipeline(&curEffect);
 }
 
+void EffectManager::uploadDeferredClusteredConstants(float nearClip, float farClip)
+{
+	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	// Quad MVP
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
+	objSa.bindToPipeline(&curEffect);
+
+	// cbClusteredShadingConsts
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	/*CameraSceneNode *csn =
+		CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<CameraSceneNode>();*/
+	float n = nearClip;
+	float f = farClip;
+	float projA = f / (f - n);
+	float projB = (-f * n) / (f - n);
+	// Vector3 camPos = csn->m_base.getPos();
+	Vector3 camPos = Vector3();
+
+	// TODO: default camera far plane is 2000 (too large, consider make it small to get better depth-pos reconstruction)
+	pscs.m_data.csconsts.cNear = n;
+	pscs.m_data.csconsts.cFar = f;
+	pscs.m_data.csconsts.cProjA = projA;
+	pscs.m_data.csconsts.cProjB = projB;
+	pscs.m_data.camPos = camPos;
+	pscs.m_data.camZAxisWS = Vector3();
+
+	pscs.m_data.dirLightNum = _dirLightNum;
+
+	Vector3 size = m_cMax - m_cMin;
+	Vector3 scale = Vector3(float(CX) / size.m_x, float(CY) / size.m_y, float(CZ) / size.m_z);
+	pscs.m_data.scale = scale;
+	Vector3 bias;
+	bias.m_x = -scale.m_x * m_cMin.m_x;
+	bias.m_y = -scale.m_y * m_cMin.m_y;
+	bias.m_z = -scale.m_z * m_cMin.m_z;
+	pscs.m_data.bias = bias;
+	// pscs.m_data.bias = m_cMin;
+
+	// Convert PE Light to shader Light (huge overhead...; 
+	// but no time to change the fundamental structure of PE)
+	for (unsigned int i = 0; i < _dirLightNum; i++)
+	{
+		pscs.m_data.dirLights[i].cDir = _dirLights[i]->m_cbuffer.dir;
+		pscs.m_data.dirLights[i].cColor = _dirLights[i]->m_cbuffer.diffuse.asVector3Ref();
+	}
+
+	for (unsigned int i = 0; i < _pointLightNum; i++)
+	{
+		pscs.m_data.pointLights[i].cPos = _pointLights[i]->m_cbuffer.pos;
+		pscs.m_data.pointLights[i].cColor = _pointLights[i]->m_cbuffer.diffuse.asVector3Ref();
+		pscs.m_data.pointLights[i].cRadius = _pointLights[i]->m_cbuffer.range;
+		pscs.m_data.pointLights[i].cSpecPow = _pointLights[i]->m_cbuffer.spotPower;
+	}
+
+	for (unsigned int i = 0; i < _spotLightNum; i++)
+	{
+		pscs.m_data.spotLights[i].cPos = _spotLights[i]->m_cbuffer.pos;
+		pscs.m_data.spotLights[i].cColor = _spotLights[i]->m_cbuffer.diffuse.asVector3Ref();
+		pscs.m_data.spotLights[i].cSpotCutOff = _spotLights[i]->m_cbuffer.range;
+		pscs.m_data.spotLights[i].cDir = _spotLights[i]->m_cbuffer.dir;
+		pscs.m_data.spotLights[i].cPos = _spotLights[i]->m_cbuffer.pos;
+	}
+
+	// memcpy(pscs.m_data.lightIndices, &_lightIndices, sizeof(short) * _lightIndices.size());
+
+	pscs.bindToPipeline(&curEffect);
+}
+
+void EffectManager::drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2)
+{
+	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	PE::SA_Bind_Resource setTextureActionAlbedo(
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		rt0);
+	setTextureActionAlbedo.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionNormal(
+		*m_pContext, m_arena, ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded, 
+		rt1);
+	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionDepth(
+		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		depth);
+	setTextureActionDepth.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionClusters(
+		*m_pContext, m_arena, CLUSTERED_TEXTURE_3D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		_clusterTexShaderView);
+	setTextureActionClusters.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setLightIndicesStructuredBuffer(
+		*m_pContext, m_arena, GpuResourceSlot_ClusteredLightIndexListResource,
+		SamplerState_NotNeeded,
+		_lightIndicesBufferShaderView);
+	setLightIndicesStructuredBuffer.bindToPipeline(&curEffect);
+
+
+	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+
+	// draw quad
+	pibGPU->draw(1, 0);
+
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureActionAlbedo.unbindFromPipeline(&curEffect);
+	setTextureActionNormal.unbindFromPipeline(&curEffect);
+	setTextureActionDepth.unbindFromPipeline(&curEffect);
+	setTextureActionClusters.unbindFromPipeline(&curEffect);
+}
+
 // + Deferred
 void EffectManager::drawClusteredLightHDRPass()
 {

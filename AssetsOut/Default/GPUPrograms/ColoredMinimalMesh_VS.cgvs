@@ -18,7 +18,9 @@ COLORED_MINIMAL_MESH_PS_IN ColoredMinimalMesh_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
 	
 	float4 quadWPos = mul(make_float4(vIn.iPosL, 1.0), gViewProjInverseMatrix);
 	quadWPos /= quadWPos.w;
-	vOut.viewRay = quadWPos.xyz - cs_camPos;
+	//vOut.viewRay = quadWPos.xyz - cs_camPos;
+	float3 camPos = float3(gView[3][0], gView[3][1], gView[3][2]);
+	vOut.viewRay = quadWPos.xyz - camPos;
 	
     vOut.iColor = vIn.iColor;
     
