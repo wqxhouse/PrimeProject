@@ -65,7 +65,7 @@ namespace PE {
 		pMaterialRTTGPU->createDrawableIntoColorTexture(
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
-			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 1);
+			SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp, 0);
 
 		//Liu
 		m_hrayTracingTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));

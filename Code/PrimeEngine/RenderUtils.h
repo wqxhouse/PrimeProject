@@ -9,10 +9,12 @@
 #include <d3d9.h>
 #include <assert.h>
 #include <DxErr.h>
+#pragma comment(lib,"DxErr.lib")
+#pragma comment(lib, "D3D9.lib")
 
 #define Assert_(x) assert(x)
 
-std::wstring GetDXErrorString(HRESULT hr)
+inline std::wstring GetDXErrorString(HRESULT hr)
 {
 	std::wstring message = L"DirectX Error: ";
 	message += DXGetErrorDescriptionW(hr);

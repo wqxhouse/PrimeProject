@@ -113,8 +113,12 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float3 viewRay = normalize(pIn.viewRay);
 	float linearZ = cs_projB / (perspectiveZ - cs_projA);
 	
-	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
-	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 camZ = float3(gView[2][0], gView[2][1], gView[2][2]);
+	float3 camPos = float3(gView[3][0], gView[3][1], gView[3][2]);
+	float viewRayProjCamZ = dot(camZ, viewRay);
+	//float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 posWS = camPos + viewRay * (linearZ / viewRayProjCamZ);
 	
 	/*
 	//Liu

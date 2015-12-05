@@ -41,7 +41,7 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 	output.Normal = float4(perPixelNormal, 1.0);
 	// output.Normal = float4(pIn.iPosW, 1.0);
 	
-	output.PosW = float4(pIn.iPosW, 1.0);
+	// output.PosW = float4(pIn.iPosW, 1.0);
 
 	if(pIn.iPosW.y == 0)
 	{

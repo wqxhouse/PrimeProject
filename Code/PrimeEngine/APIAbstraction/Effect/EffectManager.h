@@ -32,6 +32,8 @@
 #include <D3DCompiler.h>
 #include <d3d11.h>
 
+#include "PrimeEngine/ProbeManager.h"
+
 #include "math.h"
 
 namespace PE {
@@ -81,6 +83,8 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 		// Singleton
 		EffectManager::s_myHandle = handle;
 	}
+
+	inline ProbeManager *getProbeManagerPtr() { return &_probeManager; }
 
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
@@ -259,6 +263,8 @@ public:
 	bool m_doMotionBlur;
 
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;
+
+	ProbeManager _probeManager;
 }; // class EffectManager
 
 }; // namespace PE

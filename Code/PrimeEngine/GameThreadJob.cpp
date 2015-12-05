@@ -152,25 +152,25 @@ int ClientGame::runGameFrame()
 
 				RootSceneNode *pRoot = RootSceneNode::Instance();
 
-				if (pRoot->m_lights.m_size)
+				/*if (pRoot->m_lights.m_size)
 				{
-					PrimitiveTypes::Bool foundShadower = false;
-					for (PrimitiveTypes::UInt32 i = 0; i < (pRoot->m_lights.m_size); i++){
-						Light *pLight = pRoot->m_lights[i].getObject<Light>();
-						if (pLight->castsShadow()){
+				PrimitiveTypes::Bool foundShadower = false;
+				for (PrimitiveTypes::UInt32 i = 0; i < (pRoot->m_lights.m_size); i++){
+				Light *pLight = pRoot->m_lights[i].getObject<Light>();
+				if (pLight->castsShadow()){
 
-							drawZOnlyEvt->m_projectionViewTransform = (pLight->m_viewToProjectedTransform * pLight->m_worldToViewTransform);
-							drawZOnlyEvt->m_eyePos = pLight->m_base.getPos();
-							foundShadower = true;
-							break;
-						}
-						if (!foundShadower){
-							drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
-							drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
-						}
-					}
+				drawZOnlyEvt->m_projectionViewTransform = (pLight->m_viewToProjectedTransform * pLight->m_worldToViewTransform);
+				drawZOnlyEvt->m_eyePos = pLight->m_base.getPos();
+				foundShadower = true;
+				break;
 				}
-				else
+				if (!foundShadower){
+				drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
+				drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
+				}
+				}
+				}
+				else*/
 				{
 					drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
 					drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();

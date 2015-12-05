@@ -64,6 +64,8 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	, m_frameBufferCopyTexture(context, arena)
 {
 	m_arena = arena; m_pContext = &context;
+
+	_probeManager.Initialize(m_pContext, m_arena);
 }
 
 void EffectManager::setupConstantBuffersAndShaderResources()
@@ -659,12 +661,12 @@ void EffectManager::setTextureAndDepthTextureRenderTargetForGBuffer()
 
 	if (m_pContext->_renderMode == 0)
 	{
-		const int numRts = 4; // Liu
+		const int numRts = 3; // Liu
 		TextureGPU* rtts[numRts];
 		rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
 		rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
 		rtts[2] = m_hmaterialTextureGPU.getObject<TextureGPU>();
-		rtts[3] = m_hpositionTextureGPU.getObject<TextureGPU>();
+		// rtts[3] = m_hpositionTextureGPU.getObject<TextureGPU>();
 		
 		// TODO: make it work for xbox, now only D3D11
 		((D3D11Renderer *)m_pContext->getGPUScreen())->
@@ -1558,10 +1560,6 @@ void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 	m_hLightVertexBufferGPU = Handle("VERTEX_BUFFER_GPU", sizeof(VertexBufferGPU));
 	VertexBufferGPU *pvbgpu = new(m_hLightVertexBufferGPU) VertexBufferGPU(*m_pContext, m_arena);
 	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
-	
-	
-
-	
 }
 
 //Liu

@@ -9,6 +9,8 @@
 
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 
+#include "PrimeEngine/Scene/CameraManager.h"
+
 namespace PE {
 namespace Components {
 
@@ -302,7 +304,10 @@ void DrawList::optimizeByVertexBuffer(Array<PrimitiveTypes::UInt32> &callIndices
 
 void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 {
+	printf("%d\n", (int *)pEvt);
+
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+
 
 	m_pCurIndBuf = 0;
 	m_pCurEffect = 0;

@@ -254,8 +254,8 @@ D3D11Renderer::D3D11Renderer(PE::GameContext &context, unsigned int width, unsig
 
 void D3D11Renderer::setDeferredShadingRTsAndViewportWithDepth(TextureGPU **pTexArr, int nRTs, TextureGPU *pDestDepthTex, bool clearRT, bool clearDepth)
 {
-	ID3D11RenderTargetView *renderTargets[4];
-	assert(nRTs <= 4);
+	ID3D11RenderTargetView *renderTargets[3];
+	assert(nRTs <= 3);
 
 	for (int i = 0; i < nRTs; i++)
 	{

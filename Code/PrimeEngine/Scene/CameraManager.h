@@ -27,6 +27,7 @@ struct CameraManager : public Component
 		DEBUG_CAM = 1,
 		CINEMATIC = 2,
 		VEHICLE = 3,
+		CUBEMAP = 4,
 		CameraType_Count
 	};
 
@@ -53,7 +54,8 @@ struct CameraManager : public Component
 	Handle m_hPlayerCamera;
 	Handle m_hDebugCamera;
 	Handle m_hCinematicCamera;
-	Handle m_hVehicleCamera;
+	Handle m_hVehicleCamera; 
+	Handle m_hCubemapCamera;
 };
 
 }; // namespace Components
