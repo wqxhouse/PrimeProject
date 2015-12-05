@@ -117,11 +117,9 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			// TODO: skip shadow maps for now, since shadows are implemented differently
 			// in deferred pipeline.
 			
-			CameraManager::Instance()->selectActiveCamera(CameraManager::DEBUG_CAM);
-
 			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 			int x = -1;
-			DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&x, threadOwnershipMask);
+			DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&x, threadOwnershipMask, NULL, NULL);
 			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 		}
 		EffectManager::Instance()->endCurrentRenderTarget();
@@ -201,7 +199,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			PIXEvent event(L"Render UI");
 			DrawList::ZOnlyInstanceReadOnly()->optimize();
 			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
-			DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+			DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask, NULL, NULL);
 			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 		}
 
@@ -226,7 +224,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 
 		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 
-        DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+        DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask, NULL, NULL);
 
 		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 

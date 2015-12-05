@@ -5,15 +5,14 @@
 
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 #include "PrimeEngine/Scene/DrawList.h"
-#include "PrimeEngine/Scene/CameraManager.h"
-#include "PrimeEngine/Scene/CameraSceneNode.h"
+#include "PrimeEngine/Math/CameraOps.h"
 
-
+#include <DirectXMath.h>
 
 using namespace PE;
 using namespace PE::Components;
 
-const ProbeManager::CameraStruct ProbeManager::DefaultCubemapCameraStruct[6] = {
+ProbeManager::CameraStruct ProbeManager::DefaultCubemapCameraStruct[6] = {
 		{ Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f) },//Left
 		{ Vector3(-1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f) },//Right
 		{ Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, -1.0f) },//Up
@@ -22,7 +21,8 @@ const ProbeManager::CameraStruct ProbeManager::DefaultCubemapCameraStruct[6] = {
 		{ Vector3(0.0f, 0.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f) },//Back
 };
 
-Handle ProbeManager::DefaultCameras[6] = { Handle() };
+Matrix4x4 ProbeManager::_cameraMatrices[7];
+
 
 void ProbeManager::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 {
@@ -63,12 +63,10 @@ void ProbeManager::prepareDefaultCameras()
 
 	for (int i = 0; i < 6; i++)
 	{
-		DefaultCameras[i] = Handle("Camera", sizeof(Camera));
-		Camera *pCamera = new(DefaultCameras[i])Camera(*_pContext, _arena, DefaultCameras[i], hSN);
-		Matrix4x4 mat = genCamWorldMatrix(Vector3(0, 0, 0), DefaultCubemapCameraStruct[i].LookAt, DefaultCubemapCameraStruct[i].Up);
-		pCamera->getCamSceneNode()->m_base = mat;
-		pCamera->addDefaultComponents();
+		_cameraMatrices[i] = genCamViewMatrix(Vector3(0, 0, 0), DefaultCubemapCameraStruct[i].LookAt, DefaultCubemapCameraStruct[i].Up);
 	}
+
+	_cameraMatrices[6] = genCamProjMatrix();
 }
 
 void ProbeManager::Render(int &threadOwnershipMask)
@@ -81,8 +79,6 @@ void ProbeManager::Render(int &threadOwnershipMask)
 
 void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 {
-	
-
 	D3D11_VIEWPORT viewport;
 	viewport.Width = static_cast<float>(_cubemapSize);
 	viewport.Height = static_cast<float>(_cubemapSize);
@@ -108,14 +104,14 @@ void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 
 		
 		ID3D11RenderTargetView *renderTarget[3] = { RTView0, RTView1, RTView2 };
+		Matrix4x4 viewProj =  _cameraMatrices[cubeboxFaceIndex];
+		Matrix4x4 viewInv = _cameraMatrices[cubeboxFaceIndex].inverse();
+
 		_context->OMSetRenderTargets(3, renderTarget, DSView);
 
 		DrawList::InstanceReadOnly()->optimize();
 		_pContext->getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
-		CameraManager::Instance()->setCamera(CameraManager::CUBEMAP, DefaultCameras[cubeboxFaceIndex]);
-		CameraManager::Instance()->selectActiveCamera(CameraManager::CUBEMAP);
-
-		DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&cubeboxFaceIndex, threadOwnershipMask);
+		DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&cubeboxFaceIndex, threadOwnershipMask, &viewProj, &viewInv);
 		_pContext->getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 	}
 
@@ -151,17 +147,36 @@ void ProbeManager::createSphere(float radius, int sliceCount, int stackCount)
 	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
 }
 
-Matrix4x4 ProbeManager::genCamWorldMatrix(const Vector3 &eye, const Vector3 &lookAt, Vector3 up)
+Matrix4x4 ProbeManager::genCamViewMatrix(Vector3 &eye, Vector3 &lookAt, Vector3 up)
 {
-	Matrix4x4 world;
-	Vector3 z = lookAt - eye;
-	Vector3 x = up.crossProduct(z);
-	Vector3 y = z.crossProduct(x);
+	//Matrix4x4 world;
+	//Vector3 z = lookAt - eye;
+	//Vector3 x = up.crossProduct(z);
+	//Vector3 y = z.crossProduct(x);
 
-	world.setU(x);
-	world.setV(y);
-	world.setN(z);
-	
-	// return world.inverse();
-	return world;
+	//world.setU(x);
+	//world.setV(y);
+	//world.setN(z);
+	//
+	//// return world.inverse();
+	//return world;
+
+	// return CameraOps::CreateViewMatrix(eye, lookAt, up);
+	DirectX::XMVECTOR eyePosition = DirectX::XMVectorSet(eye.m_x, eye.m_y, eye.m_z, 1.0f);
+	DirectX::XMVECTOR focusPoint = DirectX::XMVectorSet(lookAt.m_x, lookAt.m_y, lookAt.m_z, 1.0f);
+	DirectX::XMVECTOR upDirection = DirectX::XMVectorSet(up.m_x, up.m_y, up.m_z, 0.0f);
+	DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(eyePosition, focusPoint, upDirection);
+	Matrix4x4 viewMat;
+	memcpy(&viewMat, &view, sizeof(Matrix4x4));
+	return viewMat.transpose();
+}
+
+Matrix4x4 ProbeManager::genCamProjMatrix()
+{
+	// return CameraOps::CreateProjectionMatrix(90, 1, 0.01, 100);
+
+	DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), 1.0f, 0.1f, 500.0f);
+	Matrix4x4 projMat;
+	memcpy(&projMat, &proj, sizeof(Matrix4x4));
+	return projMat.transpose();
 }

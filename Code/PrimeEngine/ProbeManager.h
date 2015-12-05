@@ -28,7 +28,8 @@ private:
 
 	void prepareDefaultCameras();
 
-	Matrix4x4 genCamWorldMatrix(const Vector3 &eye, const Vector3 &lookAt, Vector3 up);
+	Matrix4x4 genCamViewMatrix(Vector3 &eye, Vector3 &lookAt, Vector3 up);
+	Matrix4x4 genCamProjMatrix();
 
 	ID3D11DevicePtr _device;
 	ID3D11DeviceContextPtr _context;
@@ -44,8 +45,7 @@ private:
 		Vector3 LookAt;
 		Vector3	Up;
 	} CubemapCameraStruct[6];
-	static const CameraStruct DefaultCubemapCameraStruct[6];
-	static PE::Handle DefaultCameras[6];
+	static CameraStruct DefaultCubemapCameraStruct[6];
 
 	struct VSConstant
 	{
@@ -53,6 +53,8 @@ private:
 		Float4Align Matrix4x4 View;
 		Float4Align Matrix4x4 WorldViewProjection;
 	};
+
+	static Matrix4x4 _cameraMatrices[7];
 
 	ConstantBuffer<VSConstant> _VSConstants;
 

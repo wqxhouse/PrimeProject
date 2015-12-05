@@ -67,7 +67,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	{
 		// fill in the data object that will be submitted to pipeline
 		Handle &h = pDrawList->nextGlobalShaderValue();
-		h = Handle("RAW_DATA", sizeof(SetPerFrameConstantsShaderAction));
+		h = Handle("RAW_DATA_PER_FRAME", sizeof(SetPerFrameConstantsShaderAction));
 		SetPerFrameConstantsShaderAction *p = new(h) SetPerFrameConstantsShaderAction(*m_pContext, m_arena);
 		p->m_data.gGameTimes[0] = pDrawEvent ? pDrawEvent->m_gameTime : 0;
 		p->m_data.gGameTimes[1] = pDrawEvent ? pDrawEvent->m_frameTime : 0;
@@ -79,7 +79,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	if (setGlobalValues)
 	{
 		Handle &hsvPerObjectGroup = pDrawList->nextGlobalShaderValue();
-		hsvPerObjectGroup = Handle("RAW_DATA", sizeof(SetPerObjectGroupConstantsShaderAction));
+		hsvPerObjectGroup = Handle("RAW_DATA_PER_OBJECTGROUP", sizeof(SetPerObjectGroupConstantsShaderAction));
 		SetPerObjectGroupConstantsShaderAction *psvPerObjectGroup = new(hsvPerObjectGroup) SetPerObjectGroupConstantsShaderAction(*m_pContext, m_arena);
 	
 		psvPerObjectGroup->m_data.gViewProj = pDrawEvent ? pDrawEvent->m_projectionViewTransform : pZOnlyDrawEvent->m_projectionViewTransform;
