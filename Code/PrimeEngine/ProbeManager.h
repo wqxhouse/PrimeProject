@@ -20,10 +20,12 @@ public:
 	void Initialize(PE::GameContext *context, PE::MemoryArena arena);
 	void Render(int &threadOwnershipMask);
 
+	void SetProbePosition(const Vector3 &pos);
 
 private:
 	void createSphere(float radius, int sliceCount, int stackCount);
 	void renderGBuffer(int &threadOwnershipMask);
+	void renderConvolution();
 
 	void prepareDefaultCameras();
 
@@ -46,16 +48,23 @@ private:
 	} CubemapCameraStruct[6];
 	static CameraStruct DefaultCubemapCameraStruct[6];
 
-	struct VSConstant
-	{
-		Matrix4x4 world;
-		Float4Align Matrix4x4 View;
-		Float4Align Matrix4x4 WorldViewProjection;
-	};
+	//struct ConvolutionVSConstant
+	//{
+	//	Float4Align Matrix4x4 WorldViewProjection;
+	//};
+	//ConstantBuffer<ConvolutionVSConstant> _convolutionVSConstants;
 
 	static Matrix4x4 _cameraMatrices[7];
 
-	ConstantBuffer<VSConstant> _VSConstants;
+	struct ConvolutionPSConsts
+	{
+		long mipLevel;
+		long numMips;
+		long pad0;
+		long pad1;
+	};
+
+	ConstantBuffer<ConvolutionPSConsts> _convolvePSConsts;
 
 	RenderTarget2D _cubemapTarget0;
 	RenderTarget2D _cubemapTarget1;
@@ -63,6 +72,12 @@ private:
 	RenderTarget2D _cubemapFinalTarget;
 	RenderTarget2D _cubemapPrefilterTarget;
 	DepthStencilBuffer _cubemapDepthTarget;
+
+	ID3D11SamplerStatePtr _linearSampler;
+
+	Vector3 _probePosition;
+
+	std::vector<std::vector<ID3D11RenderTargetViewPtr> > _convolveMipmapRTs;
 
 	int _cubemapSize;
 };

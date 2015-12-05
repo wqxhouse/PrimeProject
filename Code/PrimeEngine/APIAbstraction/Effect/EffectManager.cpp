@@ -606,8 +606,11 @@ void EffectManager::buildFullScreenBoard()
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
 	m_hLightMipsPassEffect = getEffectHandle("LightMipsPassTech");
 	m_hRayTracingPassEffect = getEffectHandle("RayTracingPassTech");
+
 	//Liu
 	createSphere(1,20,20);
+
+	m_hCubemapPrefilterPassEffect = getEffectHandle("CubemapPrefilterTech");
 }
 
 void EffectManager::setFrameBufferCopyRenderTarget()
@@ -1690,6 +1693,25 @@ void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 	m_hLightVertexBufferGPU = Handle("VERTEX_BUFFER_GPU", sizeof(VertexBufferGPU));
 	VertexBufferGPU *pvbgpu = new(m_hLightVertexBufferGPU) VertexBufferGPU(*m_pContext, m_arena);
 	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
+}
+
+void EffectManager::renderCubemapConvolutionSphere()
+{
+	Effect &curEffect = *m_hCubemapPrefilterPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	IndexBufferGPU *pibGPU = m_hLightIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hLightVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+	pibGPU->draw(1, 0);
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
 }
 
 //Liu

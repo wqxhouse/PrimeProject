@@ -94,6 +94,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	// void EffectManager::setClassicalLightTextureRenderTarget();
 	void drawClassicalLightPass(float angle);
 	void createSphere(float radius, int sliceCount, int stackCount);
+	void renderCubemapConvolutionSphere();
 	void randomLightInfo(int num);
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
@@ -242,6 +243,8 @@ public:
 	Handle m_hDeferredLightPassEffect;
 	Handle m_hLightMipsPassEffect;
 	Handle m_hRayTracingPassEffect;
+
+	Handle m_hCubemapPrefilterPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11

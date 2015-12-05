@@ -317,6 +317,22 @@ namespace PE {
 		m_map.add("DetailedMesh_Shadowed_A_Glow_Tech", hEffect);
 	}
 
+	{
+		Handle hCubemapConvolution("EFFECT", sizeof(Effect));
+		Effect *pCubemapConvolution = new(hCubemapConvolution)Effect(*m_pContext, m_arena, hCubemapConvolution);
+		pCubemapConvolution->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"CubemapPrefilter_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"CubemapPrefilterTech");
+		pCubemapConvolution->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("CubemapPrefilterTech", hCubemapConvolution);
+	}
+
 	// + Deferred GBuffer
 	{
 		Handle hEffect("EFFECT", sizeof(Effect));
