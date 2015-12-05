@@ -63,7 +63,7 @@ void ProbeManager::prepareDefaultCameras()
 
 	for (int i = 0; i < 6; i++)
 	{
-		_cameraMatrices[i] = genCamViewMatrix(Vector3(0, 0, 0), DefaultCubemapCameraStruct[i].LookAt, DefaultCubemapCameraStruct[i].Up);
+		_cameraMatrices[i] = genCamViewMatrix(Vector3(0, 2, 0), DefaultCubemapCameraStruct[i].LookAt + Vector3(0, 2, 0), DefaultCubemapCameraStruct[i].Up);
 	}
 
 	_cameraMatrices[6] = genCamProjMatrix();
@@ -104,7 +104,7 @@ void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 
 		
 		ID3D11RenderTargetView *renderTarget[3] = { RTView0, RTView1, RTView2 };
-		Matrix4x4 viewProj =  _cameraMatrices[cubeboxFaceIndex];
+		Matrix4x4 viewProj =  _cameraMatrices[6] * _cameraMatrices[cubeboxFaceIndex];
 		Matrix4x4 viewInv = _cameraMatrices[cubeboxFaceIndex].inverse();
 
 		_context->OMSetRenderTargets(3, renderTarget, DSView);
