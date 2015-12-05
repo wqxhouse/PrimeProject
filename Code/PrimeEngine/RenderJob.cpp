@@ -167,27 +167,27 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
 
-		//create mipmaps for lightTexture
-		{
-			for (int i = 1; i < 11; i++)
-			{
-				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
-				EffectManager::Instance()->drawLightMipsPass(i, false);
-				EffectManager::Instance()->endCurrentRenderTarget();
+		////create mipmaps for lightTexture
+		//{
+		//	for (int i = 1; i < 11; i++)
+		//	{
+		//		EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+		//		EffectManager::Instance()->drawLightMipsPass(i, false);
+		//		EffectManager::Instance()->endCurrentRenderTarget();
 
-				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
-				EffectManager::Instance()->drawLightMipsPass(i, true);
-				EffectManager::Instance()->endCurrentRenderTarget();
-			}
-			
-		}
+		//		EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+		//		EffectManager::Instance()->drawLightMipsPass(i, true);
+		//		EffectManager::Instance()->endCurrentRenderTarget();
+		//	}
+		//	
+		//}
 
-		//create raybuffer
-		{
-			//EffectManager::Instance()->setLightAccumTextureRenderTarget();
-			EffectManager::Instance()->drawRayTracingPass();
-			EffectManager::Instance()->endCurrentRenderTarget();
-		}
+		////create raybuffer
+		//{
+		//	//EffectManager::Instance()->setLightAccumTextureRenderTarget();
+		//	EffectManager::Instance()->drawRayTracingPass();
+		//	EffectManager::Instance()->endCurrentRenderTarget();
+		//}
 
 
 		// 3) Render post process & final pass
