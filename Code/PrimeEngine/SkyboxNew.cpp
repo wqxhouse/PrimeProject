@@ -169,8 +169,11 @@ static float zenithChromacity(const Vector4& c0, const Vector4& c1, const Vector
 
 void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSunY)
 {
-	Assert_(sunTheta >= 0 && sunTheta <= 3.14159265359 / 2);
+	// Assert_(sunTheta >= 0 && sunTheta <= 3.14159265359 / 2);
 	Assert_(turbidity >= 1);
+
+	if (sunTheta < 0) _sunTheta = 0;
+	if (sunTheta > 3.14159265359 / 2) _sunTheta = 3.14159265359 / 2;
 
 	// A.2 Skylight Distribution Coefficients and Zenith Values: compute Perez distribution coefficients
 	Vector3 A = Vector3(-0.0193, -0.0167, 0.1787) * turbidity + Vector3(-0.2592, -0.2608, -1.4630);

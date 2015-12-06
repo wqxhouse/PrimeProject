@@ -10,7 +10,8 @@ public:
 	void Initialize(PE::GameContext *context, PE::MemoryArena arena);
 	void Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView);
 
-	void SetSunDirection(float theta, float phi);
+	inline void SetSunDirection(float theta, float phi) { _sunTheta = theta; _sunPhi = phi; }
+	inline void GetSunDirection(float &theta, float &phi) { theta = _sunTheta; phi = _sunPhi; }
 
 private:
 	ID3D11DevicePtr _device;

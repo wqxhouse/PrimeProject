@@ -46,6 +46,13 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		static bool kdown = false;
 		static bool ldown = false;
 
+		static bool xdown = false;
+		static bool cdown = false;
+		static bool vdown = false;
+		static bool bdown = false;
+		static bool ndown = false;
+		static bool mdown = false;
+
 		//Check for Button Down events
 
 		//Check for Button Up events
@@ -148,6 +155,99 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			ldown = false;
+		}
+
+		if (GetAsyncKeyState('X') & 0x8000)
+		{
+			// xdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_X_HELD));
+			new (h)Event_KEY_X_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+	/*	else if (xdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_X_HELD));
+			new (h)Event_KEY_X_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			xdown = false;
+		}*/
+
+		if (GetAsyncKeyState('C') & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_C_HELD));
+			new (h)Event_KEY_C_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+			// cdown = true;
+		}
+		/*else if (cdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_C_HELD));
+			new (h)Event_KEY_C_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			cdown = false;
+		}*/
+
+		if (GetAsyncKeyState('V') & 0x8000)
+		{
+			// vdown = true;
+
+			Handle h("EVENT", sizeof(Event_KEY_V_HELD));
+			new (h)Event_KEY_V_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+		}
+		//else if (vdown)
+		//{
+		//	Handle h("EVENT", sizeof(Event_KEY_V_HELD));
+		//	new (h)Event_KEY_V_HELD;
+		//	m_pQueueManager->add(h, Events::QT_INPUT);
+
+		//	vdown = false;
+		//}
+
+		if (GetAsyncKeyState('B') & 0x8000)
+		{
+			// bdown = true;
+
+			Handle h("EVENT", sizeof(Event_KEY_B_HELD));
+			new (h)Event_KEY_B_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		//else if (bdown)
+		//{
+		//	Handle h("EVENT", sizeof(Event_KEY_B_HELD));
+		//	new (h)Event_KEY_B_HELD;
+		//	m_pQueueManager->add(h, Events::QT_INPUT);
+
+		//	bdown = false;
+		//}
+
+		if (GetAsyncKeyState('N') & 0x8000)
+		{
+			ndown = true;
+		}
+		else if (ndown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_N_HELD));
+			new (h)Event_KEY_N_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			ndown = false;
+		}
+
+		if (GetAsyncKeyState('M') & 0x8000)
+		{
+			mdown = true;
+		}
+		else if (mdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_M_HELD));
+			new (h)Event_KEY_M_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			mdown = false;
 		}
 	}
 #endif
