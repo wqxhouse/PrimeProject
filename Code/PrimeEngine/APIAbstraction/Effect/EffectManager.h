@@ -33,6 +33,7 @@
 #include <d3d11.h>
 
 #include "PrimeEngine/ProbeManager.h"
+#include "PrimeEngine/SkyboxNew.h"
 
 #include "math.h"
 
@@ -85,6 +86,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	}
 
 	inline ProbeManager *getProbeManagerPtr() { return &_probeManager; }
+	inline SkyboxNew *getSkybox() { return &_skybox; }
 
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
@@ -94,7 +96,10 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	// void EffectManager::setClassicalLightTextureRenderTarget();
 	void drawClassicalLightPass(float angle);
 	void createSphere(float radius, int sliceCount, int stackCount);
+	void createSkyBoxGeom();
+
 	void renderCubemapConvolutionSphere();
+	void renderSkyboxNewSphere();
 	void randomLightInfo(int num);
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
@@ -195,6 +200,9 @@ public:
 	Handle m_hLightVertexBufferGPU;
 	Handle m_hLightIndexBufferGPU;
 
+	Handle m_hSkyBoxGeomVBGpu;
+	Handle m_hSkyBoxGeomIBGpu;
+
 	Handle m_hFirstGlowPassEffect;
 	Handle m_hSecondGlowPassEffect;
 	
@@ -270,6 +278,7 @@ public:
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;
 
 	ProbeManager _probeManager;
+	SkyboxNew _skybox;
 }; // class EffectManager
 
 }; // namespace PE

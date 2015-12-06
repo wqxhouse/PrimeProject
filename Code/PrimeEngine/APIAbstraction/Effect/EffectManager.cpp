@@ -66,6 +66,7 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	m_arena = arena; m_pContext = &context;
 
 	_probeManager.Initialize(m_pContext, m_arena);
+	_skybox.Initialize(m_pContext, m_arena);
 }
 
 void EffectManager::setupConstantBuffersAndShaderResources()
@@ -609,6 +610,7 @@ void EffectManager::buildFullScreenBoard()
 
 	//Liu
 	createSphere(1,20,20);
+	createSkyBoxGeom();
 
 	m_hCubemapPrefilterPassEffect = getEffectHandle("CubemapPrefilterTech");
 }
@@ -1106,6 +1108,7 @@ void EffectManager::drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D1
 // + Deferred
 void EffectManager::drawClusteredLightHDRPass()
 {
+	PIXEvent event(L"Render Scene Clustered Deferred");
 	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
@@ -1667,6 +1670,79 @@ void EffectManager::debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSe
 	pvbGPU->unbindFromPipeline(&curEffect);
 }
 
+void EffectManager::createSkyBoxGeom()
+{
+	static const int NumIndices = 36;
+	static const int NumVertices = 8;
+
+	Vector3 verts[NumVertices] =
+	{
+		Vector3(-1, 1, 1),
+		Vector3(1, 1, 1),
+		Vector3(1, -1, 1),
+		Vector3(-1, -1, 1),
+		Vector3(1, 1, -1),
+		Vector3(-1, 1, -1),
+		Vector3(-1, -1, -1),
+		Vector3(1, -1, -1),
+	};
+
+	unsigned short indices[NumIndices] =
+	{
+		0, 1, 2, 2, 3, 0,   // Front
+		1, 4, 7, 7, 2, 1,   // Right
+		4, 5, 6, 6, 7, 4,   // Back
+		5, 0, 3, 3, 6, 5,   // Left
+		5, 4, 1, 1, 0, 5,   // Top
+		3, 2, 7, 7, 6, 3    // Bottom
+	};
+
+
+	PositionBufferCPU vbcpu(*m_pContext, m_arena);
+	vbcpu.m_values.reset(NumIndices * 3);
+	for (int i = 0; i < NumVertices; i++)
+	{
+		vbcpu.m_values.add(verts[i].m_x);
+		vbcpu.m_values.add(verts[i].m_y);
+		vbcpu.m_values.add(verts[i].m_z);
+	}
+
+	ColorBufferCPU tcbcpu(*m_pContext, m_arena);
+	tcbcpu.m_values.reset(NumIndices);
+	for (int i = 0; i < NumIndices; i++)
+	{
+		tcbcpu.m_values.add(0.5f);
+	}
+
+	IndexBufferCPU ibcpu(*m_pContext, m_arena);
+	ibcpu.m_values.reset(NumIndices);
+	for (int i = 0; i < NumIndices; i++)
+	{
+		ibcpu.m_values.add(indices[i]);
+	}
+	ibcpu.m_indexRanges.reset(1);
+	ibcpu.m_vertsPerFacePerRange.reset(1);
+	IndexRange range(*m_pContext, m_arena);
+	range.m_start = 0;
+	range.m_end = NumIndices;
+	range.m_minVertIndex = 0;
+	range.m_maxVertIndex = NumVertices;
+	ibcpu.m_indexRanges.add(range);
+	ibcpu.m_vertsPerFacePerRange.add(3);
+	ibcpu.m_primitiveTopology = PEPrimitveTopology_TRIANGLES;
+	ibcpu.m_minVertexIndex = range.m_minVertIndex;
+	ibcpu.m_maxVertexIndex = range.m_maxVertIndex;
+	ibcpu.m_verticesPerPolygon = 3;
+
+	m_hSkyBoxGeomIBGpu = Handle("INDEX_BUFFER_GPU", sizeof(IndexBufferGPU));
+	IndexBufferGPU *pibgpu = new(m_hSkyBoxGeomIBGpu)IndexBufferGPU(*m_pContext, m_arena);
+	pibgpu->createGPUBuffer(ibcpu);
+
+	m_hSkyBoxGeomVBGpu = Handle("VERTEX_BUFFER_GPU", sizeof(VertexBufferGPU));
+	VertexBufferGPU *pvbgpu = new(m_hSkyBoxGeomVBGpu)VertexBufferGPU(*m_pContext, m_arena);
+	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
+}
+
 //Liu
 void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 {
@@ -1709,6 +1785,24 @@ void EffectManager::renderCubemapConvolutionSphere()
 	pvbGPU->setAsCurrent(&curEffect);
 	pvbGPU->setAsCurrent(&curEffect);
 	curEffect.setCurrent(pvbGPU);
+	pibGPU->draw(1, 0);
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+}
+
+void EffectManager::renderSkyboxNewSphere()
+{
+	Handle hSkyboxEffect = getEffectHandle("SkyboxNewTech");
+	Effect &curEffect = *hSkyboxEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	IndexBufferGPU *pibGPU = m_hSkyBoxGeomIBGpu.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hSkyBoxGeomVBGpu.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrentShaderOnly(pvbGPU);
 	pibGPU->draw(1, 0);
 	pibGPU->unbindFromPipeline();
 	pvbGPU->unbindFromPipeline(&curEffect);

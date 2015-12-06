@@ -163,6 +163,7 @@ struct DepthStencilBuffer
 		int width,
 		int height,
 		DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT,
+		int numMipLevels = 1,
 		bool useAsShaderResource = false,
 		int multiSamples = 1,
 		int msQuality = 0,

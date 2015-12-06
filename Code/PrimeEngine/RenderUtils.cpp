@@ -169,6 +169,7 @@ void DepthStencilBuffer::Initialize(ID3D11Device* device,
 	int width,
 	int height,
 	DXGI_FORMAT format,
+	int numMipLevels,
 	bool useAsShaderResource,
 	int multiSamples,
 	int msQuality,
@@ -203,7 +204,7 @@ void DepthStencilBuffer::Initialize(ID3D11Device* device,
 	desc.BindFlags = bindFlags;
 	desc.CPUAccessFlags = 0;
 	desc.Format = dsTexFormat;
-	desc.MipLevels = 1;
+	desc.MipLevels = numMipLevels;
 	desc.MiscFlags = 0;
 	if (cubeMap)
 	{
@@ -572,3 +573,6 @@ void StagingTexture2D::Unmap(ID3D11DeviceContext* context, int subResourceIndex)
 {
 	context->Unmap(Texture, subResourceIndex);
 }
+
+// Shader compilation
+

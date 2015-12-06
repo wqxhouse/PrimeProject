@@ -60,7 +60,7 @@ void ProbeManager::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 	_cubemapFinalTarget.Initialize(_device, _cubemapSize, _cubemapSize, DXGI_FORMAT_R16G16B16A16_FLOAT, 1,
 		1, 0, FALSE, FALSE, 6, TRUE);
 
-	_cubemapDepthTarget.Initialize(_device, _cubemapSize, _cubemapSize, DXGI_FORMAT_D32_FLOAT, true, 1,
+	_cubemapDepthTarget.Initialize(_device, _cubemapSize, _cubemapSize, DXGI_FORMAT_D32_FLOAT, 0, true, 1,
 		false, 6, TRUE);
 
 	_cubemapPrefilterTarget.Initialize(_device, _cubemapSize, _cubemapSize, DXGI_FORMAT_R16G16B16A16_FLOAT, 0,
@@ -90,9 +90,12 @@ void ProbeManager::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 	int numMips = NumMipLevels(_cubemapSize, _cubemapSize);
 	_convolveMipmapRTs.clear();
 	_convolveMipmapRTs.resize(6);
+	_convolveMipmapDepthRTs.clear();
+	_convolveMipmapDepthRTs.resize(6);
 	for (int i = 0; i < 6; i++)
 	{
 		_convolveMipmapRTs[i].resize(numMips);
+		_convolveMipmapDepthRTs[i].resize(numMips);
 	}
 
 	for (int j = 0; j < 6; j++)
@@ -109,6 +112,18 @@ void ProbeManager::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 
 			DXCall(_device->CreateRenderTargetView(_cubemapPrefilterTarget.Texture, &rtDesc, &rtView));
 			_convolveMipmapRTs[j][i] = rtView;
+
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+			ID3D11DepthStencilViewPtr dsView;
+			dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+			dsvDesc.Texture2DArray.ArraySize = 1;
+			dsvDesc.Texture2DArray.FirstArraySlice = j;
+			dsvDesc.Texture2DArray.MipSlice = i;
+			dsvDesc.Flags = 0;
+
+			DXCall(_device->CreateDepthStencilView(_cubemapDepthTarget.Texture, &dsvDesc, &dsView));
+			_convolveMipmapDepthRTs[j][i] = dsView;
 		}
 	}
 }
@@ -190,7 +205,8 @@ void ProbeManager::renderConvolution()
 
 			// ID3D11RenderTargetViewPtr RTView = _cubemapPrefilterTarget.RTVArraySlices.at(cubeboxFaceIndex);
 			ID3D11RenderTargetViewPtr RTView = _convolveMipmapRTs[cubeboxFaceIndex][mipLevel];
-			ID3D11DepthStencilViewPtr DSView = _cubemapDepthTarget.ArraySlices.at(cubeboxFaceIndex);
+			// ID3D11DepthStencilViewPtr DSView = _cubemapDepthTarget.ArraySlices.at(cubeboxFaceIndex);
+			ID3D11DepthStencilViewPtr DSView = _convolveMipmapDepthRTs[cubeboxFaceIndex][mipLevel];
 
 			_context->ClearRenderTargetView(RTView, clearColor);
 			_context->ClearDepthStencilView(DSView, D3D11_CLEAR_DEPTH, 1.0f, 0);

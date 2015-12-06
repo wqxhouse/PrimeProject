@@ -1,0 +1,53 @@
+#ifndef SKYBOX_NEW_PS
+#define SKYBOX_NEW_PS
+#include "ColoredMinimalMesh_Structs.fx"
+
+cbuffer SkyboxNewConstants : register(b0) 
+{
+	float3 A;
+	float pad0;
+	float3 B;
+	float pad1;
+	float3 C;
+	float pad2;
+	float3 D;
+	float pad3;
+	float3 E;
+	float pad4;
+	float3 Z;
+	float pad5;
+	float3 SunDirection;
+	float pad6;
+}
+
+
+float3 perez(float cos_theta, float gamma, float cos_gamma, float3 A, float3 B, float3 C, float3 D, float3 E)
+{
+    return (1 + A * exp(B / (cos_theta + 0.01))) * (1 + C * exp(D * gamma) + E * cos_gamma * cos_gamma);
+}
+
+float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float3 V = normalize(pIn.iPosOS);
+
+	float cos_theta = clamp(V.z, 0, 1);
+	float cos_gamma = dot(V, SunDirection);
+	float gamma_ = acos(cos_gamma);
+
+	float3 R_xyY = Z * perez(cos_theta, gamma_, cos_gamma, A, B, C, D, E);
+
+	float3 R_XYZ = float3(R_xyY.x, R_xyY.y, 1 - R_xyY.x - R_xyY.y) * R_xyY.z / R_xyY.y;
+
+	float R_r = dot(float3( 3.240479, -1.537150, -0.498535), R_XYZ);
+	float R_g = dot(float3(-0.969256,  1.875992,  0.041556), R_XYZ);
+	float R_b = dot(float3( 0.055648, -0.204043,  1.057311), R_XYZ);
+
+	float3 R = float3(R_r, R_g, R_b);
+
+	// return float4(pow(saturate(R), 1.0 / 2.2), 1);
+	return float4(saturate(R), 1);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(SkyboxNew_PS)
+
+#endif

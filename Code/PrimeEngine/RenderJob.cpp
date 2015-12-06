@@ -98,6 +98,30 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 
 	IRenderer::checkForErrors("renderjob update start\n");
 
+	Matrix4x4 viewProjMat;
+	viewProjMat.loadIdentity();
+	Matrix4x4 viewMat;
+	viewMat.loadIdentity();
+	Matrix4x4 projMat;
+	projMat.loadIdentity();
+
+	// TODO: since we don't have proj mat in constant buf at hand; we grab from cameramanager
+	// However, this will be off by one frame; but since proj mat doesn't always change, 
+	// it is convenient for now to use this instead of passing an additional proj mat in const buf
+	projMat = CameraManager::Instance()->getActiveCamera()->getCamSceneNode()->m_viewToProjectedTransform;
+
+	auto &globalShaderValues = DrawList::InstanceReadOnly()->m_globalShaderValues;
+	for (PrimitiveTypes::UInt32 isv = 0; isv < globalShaderValues.m_size; isv++)
+	{
+		ShaderAction *sv = globalShaderValues[isv].getObject<ShaderAction>();
+		if (globalShaderValues[isv].getDbgName() == "RAW_DATA_PER_OBJECTGROUP")
+		{
+			SetPerObjectGroupConstantsShaderAction *orig = (SetPerObjectGroupConstantsShaderAction *)sv;
+			viewProjMat = orig->m_data.gViewProj;
+			viewMat = orig->m_data.gViewInv.inverse();
+		}
+	}
+
 	IRenderer::RenderMode renderMode = ctx.getGPUScreen()->m_renderMode;
 	bool disableScreenSpaceEffects = renderMode == IRenderer::RenderMode_DefaultNoPostProcess;
 	if (!disableScreenSpaceEffects)
@@ -144,9 +168,13 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			
 			// 2.1) shared with cube map lighting - moved to front
 			// 2.2) Render lights
-			PIXEvent event(L"Render Scene Clustered Deferred");
 			EffectManager::Instance()->setLightAccumTextureRenderTarget();
 			EffectManager::Instance()->drawClusteredLightHDRPass();
+
+			ID3D11RenderTargetView *lightClusterSRV = EffectManager::Instance()->m_pCurRenderTarget->m_pRenderTargetView;
+			ID3D11DepthStencilView *geomPassDepth = EffectManager::Instance()->m_hrootDepthBufferTextureGPU.getObject<TextureGPU>()->m_DepthStencilView;
+
+			EffectManager::Instance()->getSkybox()->Render(viewMat, projMat, lightClusterSRV, geomPassDepth);
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
 		else

@@ -78,6 +78,7 @@ private:
 	Vector3 _probePosition;
 
 	std::vector<std::vector<ID3D11RenderTargetViewPtr> > _convolveMipmapRTs;
+	std::vector<std::vector<ID3D11DepthStencilViewPtr> > _convolveMipmapDepthRTs;
 
 	int _cubemapSize;
 };

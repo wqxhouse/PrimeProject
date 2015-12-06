@@ -333,6 +333,24 @@ namespace PE {
 		m_map.add("CubemapPrefilterTech", hCubemapConvolution);
 	}
 
+	// sky box new
+	{
+		Handle _skyBoxEffect("EFFECT", sizeof(Effect));
+		PE::Components::Effect *pSkyboxEffect = new (_skyBoxEffect)PE::Components::Effect(*m_pContext, m_arena, _skyBoxEffect);
+		pSkyboxEffect->loadTechnique(
+			"ColoredMinimalMesh_SkyboxNew_VS", "main",
+			NULL, NULL, // geometry shader
+			"SkyboxNew_PS", "main",
+			NULL, NULL, // compute shader
+			PE::E_PERasterizerState::PERasterizerState_SolidTriNoCull,
+			PE::E_PEDepthStencilState::PEDepthStencilState_ZBuffer, PE::E_PEAlphaBlendState::PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"SkyboxNewTech");
+
+		pSkyboxEffect->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+		pSkyboxEffect->m_effectDrawOrder = EffectDrawOrder::First;
+		m_map.add("SkyboxNewTech", _skyBoxEffect);
+	}
+
 	// + Deferred GBuffer
 	{
 		Handle hEffect("EFFECT", sizeof(Effect));
