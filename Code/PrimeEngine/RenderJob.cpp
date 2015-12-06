@@ -234,6 +234,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		// Draw text & hud & etc.
 		{
 			PIXEvent event(L"Render UI");
+			// clear by color target and depth by tonemapping in postprocessing
+			EffectManager::Instance()->m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, false, false);
 			DrawList::ZOnlyInstanceReadOnly()->optimize();
 			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 			DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask, NULL, NULL);

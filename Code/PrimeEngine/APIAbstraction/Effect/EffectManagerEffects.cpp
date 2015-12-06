@@ -461,6 +461,22 @@ namespace PE {
 	}
 
 	{
+		Handle hTonemap("EFFECT", sizeof(Effect));
+		Effect *pTonemap = new(hTonemap)Effect(*m_pContext, m_arena, hTonemap);
+		pTonemap->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"Tonemapping_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"TonemappingTech");
+		pTonemap->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("TonemappingTech", pTonemap);
+	}
+
+	{
 		Handle hBlurH("EFFECT", sizeof(Effect));
 		Effect *pBlurH = new(hBlurH)Effect(*m_pContext, m_arena, hBlurH);
 		pBlurH->loadTechnique(

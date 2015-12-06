@@ -198,7 +198,8 @@ void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSu
 	Z.m_x = zenithChromacity(Vector4(0.00166, -0.00375, 0.00209, 0), Vector4(-0.02903, 0.06377, -0.03202, 0.00394), Vector4(0.11693, -0.21196, 0.06052, 0.25886), sunTheta, turbidity);
 	Z.m_y = zenithChromacity(Vector4(0.00275, -0.00610, 0.00317, 0), Vector4(-0.04214, 0.08970, -0.04153, 0.00516), Vector4(0.15346, -0.26756, 0.06670, 0.26688), sunTheta, turbidity);
 	Z.m_z = zenithLuminance(sunTheta, turbidity);
-	Z.m_z *= 1000; // conversion from kcd/m^2 to cd/m^2
+	// Z.m_z *= 1000; // conversion from kcd/m^2 to cd/m^2
+	Z.m_z *= 5; 
 
 	// 3.2 Skylight Model: pre-divide zenith color by distribution denominator
 	Z.m_x /= perez(0, sunTheta, A.m_x, B.m_x, C.m_x, D.m_x, E.m_x);
@@ -206,10 +207,10 @@ void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSu
 	Z.m_z /= perez(0, sunTheta, A.m_z, B.m_z, C.m_z, D.m_z, E.m_z);
 
 	// For low dynamic range simulation, normalize luminance to have a fixed value for sun
-	/*if (normalizedSunY)
-	{
-		Z.m_z = normalizedSunY / perez(sunTheta, 0, A.m_z, B.m_z, C.m_z, D.m_z, E.m_z);
-	}*/
+	//if (normalizedSunY)
+	//{
+	//	Z.m_z = normalizedSunY / perez(sunTheta, 0, A.m_z, B.m_z, C.m_z, D.m_z, E.m_z);
+	//}
 
 	_A = A; _B = B; _C = C; _D = D; _E = E; _Z = Z;
 }

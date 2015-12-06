@@ -1249,6 +1249,8 @@ void EffectManager::drawClusteredLightHDRPass()
 	setTextureActionNormal.unbindFromPipeline(&curEffect);
 	setTextureActionDepth.unbindFromPipeline(&curEffect);
 	setTextureActionClusters.unbindFromPipeline(&curEffect);
+	setLocalCubemap.unbindFromPipeline(&curEffect);
+	setIBLLut.unbindFromPipeline(&curEffect);
 	objSa.unbindFromPipeline(&curEffect);
 	pscs.unbindFromPipeline(&curEffect);
 }

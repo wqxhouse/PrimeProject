@@ -30,6 +30,8 @@ private:
 	RenderTarget2D _blurTarget;
 
 	void renderBloom();
+	void renderBlur();
+	void renderTonemapping();
 
 	void computeAvgLuminance();
 	

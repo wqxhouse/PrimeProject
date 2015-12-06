@@ -43,6 +43,20 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 void PostProcess::Render()
 {
 	computeAvgLuminance();
+
+	D3D11_VIEWPORT viewport;
+	viewport.Width = static_cast<float>(1280 / 2);
+	viewport.Height = static_cast<float>(720 / 2);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	_context->RSSetViewports(1, &viewport);
+
+	renderBloom();
+	renderBlur();
+	renderTonemapping();
 }
 
 
@@ -112,6 +126,128 @@ void PostProcess::renderBloom()
 {
 	PIXEvent event(L"Bloom");
 
+	PE::Components::Effect *bloomPass =
+		PE::EffectManager::Instance()->getEffectHandle("BloomTech").getObject<PE::Components::Effect>();
 
+	PE::SA_Bind_Resource setInputTex(
+		*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NotNeeded,
+		_finalPassSRV);
+	setInputTex.bindToPipeline(bloomPass);
 
+	PE::SA_Bind_Resource setAvgLumTex(
+		*_pContext, _arena, PE::ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NotNeeded,
+		_adaptedLuminance);
+	setAvgLumTex.bindToPipeline(bloomPass);
+
+	ID3D11RenderTargetView *rtvs[1] = { _bloomTarget.RTView };
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+	PE::IndexBufferGPU *pibGPU = PE::EffectManager::Instance()->m_hIndexBufferGPU.getObject<PE::IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	PE::VertexBufferGPU *pvbGPU = PE::EffectManager::Instance()->m_hVertexBufferGPU.getObject<PE::VertexBufferGPU>();
+	pvbGPU->setAsCurrent(bloomPass);
+	bloomPass->setCurrent(pvbGPU);
+
+	// draw quad
+	pibGPU->draw(1, 0);
+
+	setInputTex.unbindFromPipeline(bloomPass);
+	setAvgLumTex.unbindFromPipeline(bloomPass);
+	rtvs[0] = nullptr;
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+}
+
+void PostProcess::renderBlur()
+{
+	PIXEvent event(L"RenderBlur");
+
+	PE::Components::Effect *blurHPass  =
+		PE::EffectManager::Instance()->getEffectHandle("BlurH").getObject<PE::Components::Effect>();
+
+	PE::Components::Effect *blurVPass  =
+		PE::EffectManager::Instance()->getEffectHandle("BlurV").getObject<PE::Components::Effect>();
+
+	PE::IndexBufferGPU *pibGPU = PE::EffectManager::Instance()->m_hIndexBufferGPU.getObject<PE::IndexBufferGPU>();
+	PE::VertexBufferGPU *pvbGPU = PE::EffectManager::Instance()->m_hVertexBufferGPU.getObject<PE::VertexBufferGPU>();
+
+	for (int i = 0; i < 2; ++i)
+	{
+		// horizontal - input bloomtar - output blurtar
+		ID3D11RenderTargetView *rtvs[1] = { _blurTarget.RTView };
+		_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+		PE::SA_Bind_Resource setInputTex(
+			*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+			PE::SamplerState_NotNeeded,
+			_bloomTarget.SRView);
+		setInputTex.bindToPipeline(blurHPass);
+		pibGPU->setAsCurrent();
+		pvbGPU->setAsCurrent(blurHPass);
+		blurHPass->setCurrent(pvbGPU);
+		pibGPU->draw(1, 0);
+
+		setInputTex.unbindFromPipeline(blurHPass);
+
+		// vertical - input blurtar - output bloomtar
+		rtvs[0] = _bloomTarget.RTView;
+		_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+		PE::SA_Bind_Resource setInputTexVertical(
+			*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+			PE::SamplerState_NotNeeded,
+			_blurTarget.SRView);
+		setInputTexVertical.bindToPipeline(blurVPass);
+		pibGPU->setAsCurrent();
+		pvbGPU->setAsCurrent(blurVPass);
+		blurVPass->setCurrent(pvbGPU);
+		pibGPU->draw(1, 0);
+		setInputTexVertical.unbindFromPipeline(blurVPass);
+	}
+
+	ID3D11RenderTargetView *nullRTVs[1] = { nullptr };
+	_context->OMSetRenderTargets(1, nullRTVs, nullptr);
+}
+
+void PostProcess::renderTonemapping()
+{
+	PIXEvent event(L"Tonemapping");
+
+	PE::Components::Effect *tonemappingPass =
+		PE::EffectManager::Instance()->getEffectHandle("TonemappingTech").getObject<PE::Components::Effect>();
+
+	PE::IndexBufferGPU *pibGPU = PE::EffectManager::Instance()->m_hIndexBufferGPU.getObject<PE::IndexBufferGPU>();
+	PE::VertexBufferGPU *pvbGPU = PE::EffectManager::Instance()->m_hVertexBufferGPU.getObject<PE::VertexBufferGPU>();
+
+	PE::SA_Bind_Resource setInputTex(
+		*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NotNeeded,
+		_finalPassSRV);
+	setInputTex.bindToPipeline(tonemappingPass);
+
+	PE::SA_Bind_Resource setAvgLumTex(
+		*_pContext, _arena, PE::ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NotNeeded,
+		_adaptedLuminance);
+	setAvgLumTex.bindToPipeline(tonemappingPass);
+
+	PE::SA_Bind_Resource setBloomTex(
+		*_pContext, _arena, PE::GLOW_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NotNeeded,
+		_bloomTarget.SRView);
+	setBloomTex.bindToPipeline(tonemappingPass);
+
+	// Render directly to back buffer
+	_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+
+	pibGPU->setAsCurrent();
+	pvbGPU->setAsCurrent(tonemappingPass);
+	tonemappingPass->setCurrent(pvbGPU);
+	pibGPU->draw(1, 0);
+
+	setInputTex.unbindFromPipeline(tonemappingPass);
+	setAvgLumTex.unbindFromPipeline(tonemappingPass);
+	setBloomTex.unbindFromPipeline(tonemappingPass);
 }

@@ -354,7 +354,7 @@ namespace Components {
 		Vector3(0, 0, 0),
 		sunDir, //Direction (z-axis)
 		Vector4(0, 0, 0, 1), //Ambient
-		Vector4(1, 0.8, 0.5, 1), //Diffuse
+		Vector4(1, 0.8, 0.5, 1) * 30, //Diffuse
 		Vector4(0, 0, 0, 1), //Specular
 		Vector3(0.05, 0.05, 0.05), //Attenuation (x, y, z)
 		1, // Spot Power
