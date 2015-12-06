@@ -34,6 +34,7 @@
 
 #include "PrimeEngine/ProbeManager.h"
 #include "PrimeEngine/SkyboxNew.h"
+#include "PrimeEngine/PostProcess.h"
 
 #include "math.h"
 
@@ -170,7 +171,7 @@ public:
 	Handle m_halbedoTextureGPU;
 	Handle m_hnormalTextureGPU;
 	Handle m_haccumHDRTextureGPU;
-	Handle m_hfinalLDRTextureGPU;
+	Handle m_hfinalHDRTextureGPU;
 	Handle m_hrootDepthBufferTextureGPU;
 	
 
@@ -212,7 +213,7 @@ public:
 
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
-	Handle m_hfinalLDRPassEffect;
+	Handle m_hfinalHDRPassEffect;
 
 	Handle m_hdebugPassEffect;
 
@@ -279,6 +280,7 @@ public:
 
 	ProbeManager _probeManager;
 	SkyboxNew _skybox;
+	PostProcess _postProcess;
 }; // class EffectManager
 
 }; // namespace PE

@@ -30,7 +30,9 @@ float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
 	float3 V = normalize(pIn.iPosOS);
 
+	//float cos_theta = saturate(V.z);
 	float cos_theta = saturate(V.z);
+	
 	float cos_gamma = dot(V, SunDirection);
 	float gamma = acos(cos_gamma);
 
@@ -45,7 +47,8 @@ float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float3 R = float3(R_r, R_g, R_b);
 
 	// return float4(pow(saturate(R), 1.0 / 2.2), 1);
-	return float4(saturate(R), 1);
+	//return float4(saturate(R), 1);
+	return float4(R, 1);
 }
 
 PS_wrapper_COLORED_MINIMAL_MESH(SkyboxNew_PS)

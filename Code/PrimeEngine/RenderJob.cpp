@@ -215,10 +215,16 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
 		if (ctx._debugMode == 0)
 		{
-			PIXEvent event(L"Render Final Pass");
-			EffectManager::Instance()->drawDeferredFinalPass();
-			EffectManager::Instance()->endCurrentRenderTarget();
+			{
+				PIXEvent event(L"Render Final Pass");
+				EffectManager::Instance()->drawDeferredFinalPass();
+				EffectManager::Instance()->endCurrentRenderTarget();
+			}
 
+			{
+				PIXEvent event(L"Post processing");
+				EffectManager::Instance()->_postProcess.Render();
+			}
 		}
 		else
 		{

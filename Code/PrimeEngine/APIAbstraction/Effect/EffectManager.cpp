@@ -65,8 +65,6 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 {
 	m_arena = arena; m_pContext = &context;
 
-	_probeManager.Initialize(m_pContext, m_arena);
-	_skybox.Initialize(m_pContext, m_arena);
 }
 
 void EffectManager::setupConstantBuffersAndShaderResources()
@@ -601,7 +599,7 @@ void EffectManager::buildFullScreenBoard()
 	m_hColoredMinimalMeshTech = getEffectHandle("ColoredMinimalMesh_Tech");
 
 	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
-	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
+	m_hfinalHDRPassEffect= getEffectHandle("deferredFinalHDR.fx");
 	m_hdebugPassEffect = getEffectHandle("debug_Tech.fx");
 	//Liu
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
@@ -757,12 +755,12 @@ void EffectManager::setLightMipsTextureRenderTarget(int level)
 
 	//m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
 }
-
-void EffectManager::setFinalLDRTextureRenderTarget()
-{
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(m_hfinalLDRTextureGPU.getObject<TextureGPU>(), true);
-	m_pCurRenderTarget = m_hfinalLDRTextureGPU.getObject<TextureGPU>();
-}
+//
+//void EffectManager::setFinalLDRTextureRenderTarget()
+//{
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(m_hfinalLDRTextureGPU.getObject<TextureGPU>(), true);
+//	m_pCurRenderTarget = m_hfinalLDRTextureGPU.getObject<TextureGPU>();
+//}
 
 void EffectManager::setTextureAndDepthTextureRenderTargetForGlow()
 {
@@ -1257,7 +1255,7 @@ void EffectManager::drawClusteredLightHDRPass()
 
 void EffectManager::drawDeferredFinalPass()
 {
-	Effect &curEffect = *m_hfinalLDRPassEffect.getObject<Effect>();
+	Effect &curEffect = *m_hfinalHDRPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
 
@@ -1269,7 +1267,8 @@ void EffectManager::drawDeferredFinalPass()
 #else
 	// For simplicity, just draw directly into back buffer
 	// TODO: with or without depth?
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
+	// m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(m_hfinalHDRTextureGPU.getObject<TextureGPU>(), true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
 #endif
 
 	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
@@ -1468,49 +1467,49 @@ Effect *EffectManager::operator[] (const char *pEffectFilename)
 
 void EffectManager::drawDeferredFinalToBackBuffer()
 {
-	// use motion blur for now since it doesnt do anything but draws the surface
-	Effect &curEffect = *m_hMotionBlurEffect.getObject<Effect>();
-	if (!curEffect.m_isReady)
-		return;
-
-#	if APIABSTRACTION_D3D9
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
-	// this is called in function above: IRenderer::Instance()->getDevice()->BeginScene();
-#elif APIABSTRACTION_OGL
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
-#	elif APIABSTRACTION_D3D11
-	// TODO: with or without depth?
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);//setRenderTargetsAndViewportWithDepth(0, 0, true, true)
-#	endif
-
-	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
-	pibGPU->setAsCurrent();
-
-	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
-	pvbGPU->setAsCurrent(&curEffect);
-
-	curEffect.setCurrent(pvbGPU);
-
-	PE::SA_Bind_Resource setTextureAction(*m_pContext, m_arena);
-	setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-		m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState,  
-		API_CHOOSE_DX11_DX9_OGL(m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
-	setTextureAction.bindToPipeline(&curEffect);
-
-	PE::SetPerObjectConstantsShaderAction objSa;
-	objSa.m_data.gW = Matrix4x4();
-	objSa.m_data.gW.loadIdentity();
-	objSa.m_data.gWVP = objSa.m_data.gW;
-
-	objSa.bindToPipeline(&curEffect);
-
-	pibGPU->draw(1, 0);
-
-	pibGPU->unbindFromPipeline();
-	pvbGPU->unbindFromPipeline(&curEffect);
-
-	setTextureAction.unbindFromPipeline(&curEffect);
-	objSa.unbindFromPipeline(&curEffect);
+//	// use motion blur for now since it doesnt do anything but draws the surface
+//	Effect &curEffect = *m_hMotionBlurEffect.getObject<Effect>();
+//	if (!curEffect.m_isReady)
+//		return;
+//
+//#	if APIABSTRACTION_D3D9
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+//	// this is called in function above: IRenderer::Instance()->getDevice()->BeginScene();
+//#elif APIABSTRACTION_OGL
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+//#	elif APIABSTRACTION_D3D11
+//	// TODO: with or without depth?
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);//setRenderTargetsAndViewportWithDepth(0, 0, true, true)
+//#	endif
+//
+//	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+//	pibGPU->setAsCurrent();
+//
+//	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+//	pvbGPU->setAsCurrent(&curEffect);
+//
+//	curEffect.setCurrent(pvbGPU);
+//
+//	PE::SA_Bind_Resource setTextureAction(*m_pContext, m_arena);
+//	setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
+//		m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState,  
+//		API_CHOOSE_DX11_DX9_OGL(m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
+//	setTextureAction.bindToPipeline(&curEffect);
+//
+//	PE::SetPerObjectConstantsShaderAction objSa;
+//	objSa.m_data.gW = Matrix4x4();
+//	objSa.m_data.gW.loadIdentity();
+//	objSa.m_data.gWVP = objSa.m_data.gW;
+//
+//	objSa.bindToPipeline(&curEffect);
+//
+//	pibGPU->draw(1, 0);
+//
+//	pibGPU->unbindFromPipeline();
+//	pvbGPU->unbindFromPipeline(&curEffect);
+//
+//	setTextureAction.unbindFromPipeline(&curEffect);
+//	objSa.unbindFromPipeline(&curEffect);
 }
 
 // + Deferred
@@ -1594,11 +1593,11 @@ void EffectManager::debugDeferredRenderTarget(int which)
 	else if (which == 4)
 	{
 		setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState, 
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_samplerState, 
 			API_CHOOSE_DX11_DX9_OGL(
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture,
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pTexture,
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_texture));
 	}
 
 	setTextureAction.bindToPipeline(&curEffect);

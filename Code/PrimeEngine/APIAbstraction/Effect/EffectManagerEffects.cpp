@@ -85,13 +85,13 @@ namespace PE {
 			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp, 1);
 		
 
-		// 32bit unorm
-		m_hfinalLDRTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
-		TextureGPU *pFinalRTTGPU = new (m_hfinalLDRTextureGPU)TextureGPU(*m_pContext, m_arena);
+		// 64bit float 
+		m_hfinalHDRTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
+		TextureGPU *pFinalRTTGPU = new (m_hfinalHDRTextureGPU)TextureGPU(*m_pContext, m_arena);
 		pFinalRTTGPU->createDrawableIntoColorTexture(
 			m_pContext->getGPUScreen()->getWidth(),
 			m_pContext->getGPUScreen()->getHeight(),
-			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp);
+			SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp, 1);
 
 		// Root Depth buffer TextureGPU
 		m_hrootDepthBufferTextureGPU = Handle("TEXTURE_GPU", sizeof(TextureGPU));
@@ -442,7 +442,104 @@ namespace PE {
 
 		m_map.add("DeferredLightPass_Classical_Tech", hLightClassicalFx);
 	}
-	
+
+	// Postprocessing
+	{
+		Handle hBloom("EFFECT", sizeof(Effect));
+		Effect *pBloom = new(hBloom)Effect(*m_pContext, m_arena, hBloom);
+		pBloom->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"Bloom_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"BloomTech");
+		pBloom->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("BloomTech", hBloom);
+	}
+
+	{
+		Handle hBlurH("EFFECT", sizeof(Effect));
+		Effect *pBlurH = new(hBlurH)Effect(*m_pContext, m_arena, hBlurH);
+		pBlurH->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"BlurH_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"BlurH");
+		pBlurH->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("BlurH", hBlurH);
+	}
+
+	{
+		Handle hBlurV("EFFECT", sizeof(Effect));
+		Effect *pBlurV = new(hBlurV)Effect(*m_pContext, m_arena, hBlurV);
+		pBlurV->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"BlurV_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"BlurV");
+		pBlurV->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("BlurV", hBlurV);
+	}
+
+	{
+		Handle hLumDeduceInit("EFFECT", sizeof(Effect));
+		Effect *pLumDeduceInit = new(hLumDeduceInit)Effect(*m_pContext, m_arena, hLumDeduceInit);
+		pLumDeduceInit->loadTechnique(
+			NULL, NULL,
+			NULL, NULL, // geometry shader
+			NULL, NULL,
+			"GetAvgLuminanceInitial", "LuminanceReductionInitialCS", // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"GetLumInit");
+		pLumDeduceInit->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("GetLumInit", hLumDeduceInit);
+	}
+
+	{
+		Handle hLumDeduceSec("EFFECT", sizeof(Effect));
+		Effect *pLumDeduceSec = new(hLumDeduceSec)Effect(*m_pContext, m_arena, hLumDeduceSec);
+		pLumDeduceSec->loadTechnique(
+			NULL, NULL,
+			NULL, NULL, // geometry shader
+			NULL, NULL,
+			"GetAvgLuminanceSecond", "LuminanceReductionSecondCS", // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"GetLumSec");
+		pLumDeduceSec->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("GetLumSec", hLumDeduceSec);
+	}
+
+	{
+		Handle hLumDeduceFinal("EFFECT", sizeof(Effect));
+		Effect *pLumDeduceFinal= new(hLumDeduceFinal)Effect(*m_pContext, m_arena, hLumDeduceFinal);
+		pLumDeduceFinal->loadTechnique(
+			NULL, NULL,
+			NULL, NULL, // geometry shader
+			NULL, NULL,
+			"GetAvgLuminanceFinal", "LuminanceReductionFinalCS", // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"GetLumFinal");
+		pLumDeduceFinal->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("GetLumFinal", pLumDeduceFinal);
+	}
+
 	//Liu create mipmaps
 	{
 		Handle hLightMipsFx("EFFECT", sizeof(Effect));
@@ -477,10 +574,10 @@ namespace PE {
 		m_map.add("RayTracingPassTech", hRayTracingFx);
 	}
 
-	// + Deferred final LDR Pass
+	// + Deferred final HDR Pass
 	{
-		Handle hFinalLDRFx("EFFECT", sizeof(Effect));
-		Effect *pFinalLDRFx = new(hFinalLDRFx)Effect(*m_pContext, m_arena, hFinalLDRFx);
+		Handle hFinalHDRFx("EFFECT", sizeof(Effect));
+		Effect *pFinalLDRFx = new(hFinalHDRFx)Effect(*m_pContext, m_arena, hFinalHDRFx);
 		pFinalLDRFx->loadTechnique(
 			"ColoredMinimalMesh_VS", "main",
 			NULL, NULL, // geometry shader
@@ -491,7 +588,7 @@ namespace PE {
 			"finalLDRPassTech");
 		pFinalLDRFx->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
 
-		m_map.add("deferredFinalLDR.fx", hFinalLDRFx);
+		m_map.add("deferredFinalHDR.fx", hFinalHDRFx);
 	}
 
 	{
@@ -672,5 +769,9 @@ namespace PE {
 	buildFullScreenBoard();
 
 	setupConstantBuffersAndShaderResources();
+
+	_probeManager.Initialize(m_pContext, m_arena);
+	_skybox.Initialize(m_pContext, m_arena);
+	_postProcess.Initialize(m_pContext, m_arena, m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView);
 }
 }; // namespace PE

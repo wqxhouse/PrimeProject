@@ -206,10 +206,10 @@ void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSu
 	Z.m_z /= perez(0, sunTheta, A.m_z, B.m_z, C.m_z, D.m_z, E.m_z);
 
 	// For low dynamic range simulation, normalize luminance to have a fixed value for sun
-	if (normalizedSunY)
+	/*if (normalizedSunY)
 	{
 		Z.m_z = normalizedSunY / perez(sunTheta, 0, A.m_z, B.m_z, C.m_z, D.m_z, E.m_z);
-	}
+	}*/
 
 	_A = A; _B = B; _C = C; _D = D; _E = E; _Z = Z;
 }

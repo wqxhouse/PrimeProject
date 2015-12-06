@@ -1,0 +1,62 @@
+#ifndef BLOOM_PS
+#define BLOOM_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "StandardTextureResources.fx"
+
+float3 CalcExposedColor(float3 color, float avgLuminance, float offset, out float exposure)
+{
+    // Use geometric mean
+    avgLuminance = max(avgLuminance, 0.001f);
+	/*
+    float linearExposure = (KeyValue / avgLuminance);
+    if(EnableAutoExposure)
+	{
+        exposure = log2(max(linearExposure, 0.0001f));
+	}
+    else
+	{
+        exposure = ManualExposure;
+	}
+	*/
+	exposure = -2.5;
+    exposure += offset;
+    // exposure -= ExposureScale;
+	
+    return exp2(exposure) * color;
+}
+
+float4 Bloom_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float4 reds = gDiffuseMap.GatherRed(gDiffuseMapSampler, pIn.iColor);
+    float4 greens = gDiffuseMap.GatherGreen(gDiffuseMapSampler, pIn.iColor);
+    float4 blues = gDiffuseMap.GatherBlue(gDiffuseMapSampler, pIn.iColor);
+
+    float3 result = 0.0f;
+    float weightSum = 0.0f;
+
+    [unroll]
+    for(uint i = 0; i < 4; ++i)
+    {
+        float3 color = float3(reds[i], greens[i], blues[i]);
+
+        // Apply exposure offset
+        float avgLuminance = gAdditionalDiffuseMap.Load(uint3(0, 0, 0)).x;
+        float exposure = 0;
+        // result += CalcExposedColor(color, avgLuminance, BloomExposure, exposure);
+        result += CalcExposedColor(color, avgLuminance, -4.0, exposure);
+
+        // float weight = 1.0f / (1.0f + CalcLuminance(color));
+        float weight = 1.0f;
+        result *= weight;
+        weightSum += weight;
+    }
+
+    // result /= 4.0f;
+    result /= weightSum;
+
+    return float4(result, 1.0f);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(Bloom_PS)
+
+#endif 
