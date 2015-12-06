@@ -2113,7 +2113,7 @@ void EffectManager::drawRayTracingPass()
 //Liu
 void EffectManager::randomLightInfo(int num)
 {
-	RootSceneNode::Instance()->m_lights.reset(num,true);
+	RootSceneNode::Instance()->m_lights.reset(num + 1,true);
 	for (int i=0; i<num; i++)
 	{	
 		Handle hLight("LIGHT", sizeof(Light));
@@ -2139,6 +2139,9 @@ void EffectManager::randomLightInfo(int num)
 	
 	randomizeLight(pLight,&(pLight->m_oribitAxis) ,i);
 	pLight->addDefaultComponents();
+	
+	// diffuse multiplyer
+	pLight->m_cbuffer.diffuse = pLight->m_cbuffer.diffuse * 20;
 
 	RootSceneNode::Instance()->m_lights.add(hLight);
 	RootSceneNode::Instance()->addComponent(hLight);

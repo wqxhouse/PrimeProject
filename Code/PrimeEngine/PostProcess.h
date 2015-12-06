@@ -34,5 +34,10 @@ private:
 	void renderTonemapping();
 
 	void computeAvgLuminance();
+
+	struct PostProcessConstants
+	{
+		Float4Align float deltaSec;
+	};
 	
 };

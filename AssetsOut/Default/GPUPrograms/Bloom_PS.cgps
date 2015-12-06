@@ -3,22 +3,17 @@
 #include "ColoredMinimalMesh_Structs.fx"
 #include "StandardTextureResources.fx"
 
+// static const float KeyValue = 0.1150f;
+static const float KeyValue = 0.2f;
+
 float3 CalcExposedColor(float3 color, float avgLuminance, float offset, out float exposure)
 {
     // Use geometric mean
     avgLuminance = max(avgLuminance, 0.001f);
-	/*
+	
     float linearExposure = (KeyValue / avgLuminance);
-    if(EnableAutoExposure)
-	{
-        exposure = log2(max(linearExposure, 0.0001f));
-	}
-    else
-	{
-        exposure = ManualExposure;
-	}
-	*/
-	exposure = -2.5;
+    exposure = log2(max(linearExposure, 0.0001f));
+	
     exposure += offset;
     // exposure -= ExposureScale;
 	
@@ -45,13 +40,11 @@ float4 Bloom_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
         // result += CalcExposedColor(color, avgLuminance, BloomExposure, exposure);
         result += CalcExposedColor(color, avgLuminance, -4.0, exposure);
 
-        // float weight = 1.0f / (1.0f + CalcLuminance(color));
         float weight = 1.0f;
         result *= weight;
         weightSum += weight;
     }
 
-    // result /= 4.0f;
     result /= weightSum;
 
     return float4(result, 1.0f);

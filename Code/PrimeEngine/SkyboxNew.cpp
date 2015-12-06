@@ -199,7 +199,7 @@ void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSu
 	Z.m_y = zenithChromacity(Vector4(0.00275, -0.00610, 0.00317, 0), Vector4(-0.04214, 0.08970, -0.04153, 0.00516), Vector4(0.15346, -0.26756, 0.06670, 0.26688), sunTheta, turbidity);
 	Z.m_z = zenithLuminance(sunTheta, turbidity);
 	// Z.m_z *= 1000; // conversion from kcd/m^2 to cd/m^2
-	Z.m_z *= 5; 
+	Z.m_z *= 10; 
 
 	// 3.2 Skylight Model: pre-divide zenith color by distribution denominator
 	Z.m_x /= perez(0, sunTheta, A.m_x, B.m_x, C.m_x, D.m_x, E.m_x);

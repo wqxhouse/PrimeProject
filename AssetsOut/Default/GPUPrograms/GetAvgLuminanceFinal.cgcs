@@ -1,3 +1,10 @@
+#include "APIAbstraction.gpu"
+cbuffer PerFrame : register(b0)
+{
+	// x = game time, y = frame time
+	float4 gGameTimes;
+}
+
 Texture2D<float4> InputMap : register(t0);
 Texture2D<float> ReductionMap : register(t0);
 RWTexture2D<float> OutputMap : register(u0);
@@ -40,12 +47,10 @@ void LuminanceReductionFinalCS(in uint3 GroupID : SV_GroupID, in uint3 GroupThre
 		float currentLum = exp(LumSamples[0] / NumThreads);
 
 		// Adapt the luminance using Pattanaik's technique
-		// const float Tau = AdaptationRate;
-		const float Tau = 2.0f;
-		//float adaptedLum = EnableAdaptation ? lastLum + (currentLum - lastLum) * (1 - exp(-TimeDelta * Tau))
-		//									: currentLum;
-		
-		float adaptedLum = currentLum;
+		const float Tau = 1.0f;
+		float adaptedLum = lastLum + (currentLum - lastLum) * (1 - exp(-gGameTimes.y * Tau));
+										
+		// float adaptedLum = currentLum;
 		
 		OutputMap[uint2(0, 0)] = adaptedLum;
     }
