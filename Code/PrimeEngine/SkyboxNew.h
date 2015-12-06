@@ -14,6 +14,8 @@ public:
 	inline void GetSunDirection(float &theta, float &phi) { theta = _sunTheta; phi = _sunPhi; }
 	Vector3 GetSunDirection();
 
+	ID3D11ShaderResourceView *getLocalCubemapSRV();
+
 private:
 	ID3D11DevicePtr _device;
 	ID3D11DeviceContextPtr _context;

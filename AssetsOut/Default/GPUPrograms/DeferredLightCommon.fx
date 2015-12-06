@@ -63,6 +63,10 @@ cbuffer cbClusteredShadingConsts : register(b4)
 // texture register maxed t70 used in animations
 StructuredBuffer<uint> gLightIndices : register(t71);
 
+// IBL
+TextureCube<float3> LocalSpecularCubemap : register(t72);
+Texture2D<float2> SpecularCubemapLookup : register(t73);
+
 // 3D texture for clusters
 Texture3D<ClusterData> gClusters : register(t8);
 

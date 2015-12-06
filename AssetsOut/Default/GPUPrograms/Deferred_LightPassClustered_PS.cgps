@@ -82,6 +82,10 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 
 	float4 albedo = gDiffuseMap.Load(uint3(fragCoord.xy, 0));
 	float4 normal = gAdditionalDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float4 material = gWindMap.Load(uint3(fragCoord.xy, 0));
+	float roughness = material.r;
+	float metallic = material.g;
+	
 	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
 	
 	float3 viewRay = normalize(pIn.viewRay);
@@ -94,14 +98,13 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
 	float3 posWS = camPos + viewRay * (linearZ / viewRayProjCamZ);
 	
-	
 	// Lighting 
 	float3 finalColor = float3(0, 0, 0);
 	
 	// Process directional light first
-	for (uint i = 0; i < cs_dirLightNum; i++)
+	for (uint dir = 0; dir < cs_dirLightNum; dir++)
 	{
-		finalColor += renderDirLight(posWS, albedo.xyz, normal.xyz, cs_dirLights[i]);
+		finalColor += renderDirLight(posWS, albedo.xyz, normal.xyz, cs_dirLights[dir]);
 	}
 	
 	int4 cluster_coord = int4(posWS * cs_scale + cs_bias, 0);
@@ -113,19 +116,32 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	uint pointLightCount = counts >> 16;
 	uint spotLightCount  = counts & 0xFFFF;
 	
-	//return float4(float(pointLightCount), float(pointLightCount), float(pointLightCount), 1);
-	
-	for (uint i = 0; i < pointLightCount; i++)
+	for (uint pt = 0; pt < pointLightCount; pt++)
 	{
-		uint lightIndex = gLightIndices[offset + i];
+		uint lightIndex = gLightIndices[offset + pt];
 		finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, cs_pointLights[lightIndex]);
 	}
+
+	// Apply IBL
+	float3 viewWS = normalize(camPos - posWS);
+	float3 reflectWS = reflect(-viewWS, normal.xyz);
+
+	uint width, height, numMips;
+	LocalSpecularCubemap.GetDimensions(0, width, height, numMips);
+
+	const float SqrtRoughness = sqrt(roughness);
+	// Compute the mip level, assuming the top level is a roughness of 0.01
+	float mipLevel = saturate(SqrtRoughness - 0.01f) * (numMips - 1.0f);
+
+	// Compute fresnel
+	float viewAngle = saturate(dot(viewWS, normal.xyz));
+	float2 AB = SpecularCubemapLookup.SampleLevel(gDiffuseMapSampler, float2(viewAngle, SqrtRoughness), 0.0f);
+	float fresnel = metallic * AB.x + AB.y;
+	fresnel *= saturate(metallic * 100.0f);
+
+	finalColor += LocalSpecularCubemap.SampleLevel(gDiffuseMapSampler, reflectWS, mipLevel) * fresnel;
 	
 	return float4(finalColor.xyz,1.0);
-	
-	// return  float4(perspectiveZ, perspectiveZ, perspectiveZ, 1.0); // * (1.0f - reflectivity)+ float4(reflColor.xyz,1.0) * reflectivity;
-	
-	
 }
 
 PS_wrapper_COLORED_MINIMAL_MESH(DeferredLightPass_Clustered_PS)

@@ -1123,6 +1123,7 @@ void EffectManager::drawClusteredLightHDRPass()
 	TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
 	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
 	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
+	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
 
 	PE::SA_Bind_Resource setTextureActionAlbedo(
 		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
@@ -1135,6 +1136,12 @@ void EffectManager::drawClusteredLightHDRPass()
 		normalTexture->m_samplerState,
 		API_CHOOSE_DX11_DX9_OGL(normalTexture->m_pShaderResourceView, normalTexture->m_pTexture, normalTexture->m_texture));
 	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionMaterial(
+		*m_pContext, m_arena, WIND_TEXTURE_2D_SAMPLER_SLOT,
+		materialTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(materialTexture->m_pShaderResourceView, materialTexture->m_pTexture, materialTexture->m_texture));
+	setTextureActionMaterial.bindToPipeline(&curEffect);
 
 	PE::SA_Bind_Resource setTextureActionDepth(
 		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
@@ -1153,6 +1160,18 @@ void EffectManager::drawClusteredLightHDRPass()
 		SamplerState_NotNeeded,
 		_lightIndicesBufferShaderView);
 	setLightIndicesStructuredBuffer.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setLocalCubemap(
+		*m_pContext, m_arena, GpuResourceSlot_LocalSpecularCubemapResource,
+		SamplerState_NotNeeded,
+		_probeManager.getLocalCubemapPrefilterTargetSRV());
+	setLocalCubemap.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setIBLLut(
+		*m_pContext, m_arena, GpuResourceSlot_SpecularCubemapLUTResource,
+		SamplerState_NotNeeded,
+		_probeManager.getPbrLutTex());
+	setIBLLut.bindToPipeline(&curEffect);
 
 	// TODO: optimize constant buffer - reduce num of const buffers
 
