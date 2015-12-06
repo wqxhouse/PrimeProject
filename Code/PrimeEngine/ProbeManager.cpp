@@ -308,6 +308,9 @@ void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 			_cubemapTarget0.SRVArraySlices[cubeboxFaceIndex], 
 			_cubemapTarget1.SRVArraySlices[cubeboxFaceIndex],
 			_cubemapTarget2.SRVArraySlices[cubeboxFaceIndex]);
+
+		// skybox
+		EffectManager::Instance()->getSkybox()->Render(view, _cameraMatrices[6], RTView, DSView);
 	}
 
 	
