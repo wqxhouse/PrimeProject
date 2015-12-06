@@ -9,7 +9,7 @@
 #include "ColoredMinimalMesh_Structs.fx"
 #include "DeferredLightCommon.fx"
 
-#define MAX_STEPS 1000
+#define MAX_STEPS 300
 #define MAX_INTERSECT_DIST 0.1
 #define STRIDE 1
 #define ZTHICKNESS 1
@@ -43,8 +43,8 @@ float linearDepthTexelFetch(int2 hitPixel ,float3 viewRay)
 	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
 	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
 	float convFromDeviceZ = 1.0f / (perspectiveZ * cs_bias.z - cs_pad3);
-	depthVS = convFromDeviceZ;
-	posWS = camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
+	//depthVS = convFromDeviceZ;
+	float3 posWS = cs_camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
 	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
 	return v0.z;
 }
@@ -170,8 +170,11 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
 	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
 	float convFromDeviceZ = 1.0f / (perspectiveZ * cs_bias.z - cs_pad3);
-	depthVS = convFromDeviceZ;
-	posWS = camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
+	//depthVS = convFromDeviceZ;
+	float3 posWS = cs_camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
+
+	//get reflactivity
+	float reflectivity = (posWS.y>0.01f)?0:0.5f;
 
 	//get screen dimension
 	uint width;
@@ -183,13 +186,15 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
 	float3 d = viewRay;//normalize(posWS.xyz - cs_camPos.xyz);//viewRay
 	float3 refl = normalize(reflect(d, n));
-	float3 rayDirectionVS = mul( float4(refl,0), gView).xyz;
+	float3 rayDirectionVS = normalize(mul( float4(refl,0), gView).xyz);
 	
+	float3 viewRayVS = mul( float4(d,0), gView).xyz;
+
 	//cone
-	float3 rayOriginVS = mul(float4(posWS,1.0),gView).xyz;
+	float3 rayOriginVS = viewRayVS;//mul(float4(posWS,1.0),gView).xyz;
+	float3 toPositionVS = normalize(rayOriginVS);
 	
-	float3 viewRayVS = mul( float4(d,0), gView);
-	float rDotv = dot(normalize(rayDirectionVS),normalize(viewRayVS));
+	float rDotv = dot(rayDirectionVS,toPositionVS);
 
 	// out parameters
 	float2 hitPixel = float2(0.0f, 0.0f);
@@ -206,20 +211,32 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 		intersection = false;
 	}
 
-	return float4(hitPixel.xy, depthofhit, rDotv) * (intersection ? 1.0f : 0.0f);
+	//return float4(hitPixel.xy, depthofhit, rDotv) * (intersection ? 1.0f : 0.0f);
 	//return float4(n.xyz,1.0f);
 	//return float4(intersection ? 1.0f : 0.0f,0,0,1.0f);
+	if(intersection)
+	{
+		return  float4(gDiffuseMap.Load(uint3(fragCoord.xy, 0)).xyz * (1.0f - reflectivity),1.0f) +float4(gDiffuseMap.Load(uint3(hitPixel.xy, 0)).xyz,1.0) * reflectivity;	
+	}else
+	{
+		return float4(gDiffuseMap.Load(uint3(fragCoord.xy, 0)).xyz,1.0f);
+	}
 }
 */
 
 
-//////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float getReflZ(int2 coord, float3 viewRay)
 {
 	float perspectiveZ = gDepthMap.Load(uint3(coord.xy, 0)).x;
 	float linearZ = cs_projB / (perspectiveZ - cs_projA);
 	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
-	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float convFromDeviceZ = 1.0f / (perspectiveZ * cs_bias.z - cs_pad3);
+	//depthVS = convFromDeviceZ;
+	float3 posWS = cs_camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
 	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
 	return v0.z;
 }
@@ -243,12 +260,14 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float3 viewRay = normalize(pIn.viewRay);
 	float linearZ = cs_projB / (perspectiveZ - cs_projA);
 	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
-	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float convFromDeviceZ = 1.0f / (perspectiveZ * cs_bias.z - cs_pad3);
+	//depthVS = convFromDeviceZ;
+	float3 posWS = cs_camPos + viewRay * (convFromDeviceZ / viewRayProjCamZ);
 	
 	float lengthOfViewRay = length(viewRay);
 
 	float aa = lengthOfViewRay/10;
-	//float3 posWS = gWindMap.Load(uint3(fragCoord.xy, 0)).xyz;
+	
 
 	//Liu
 	
@@ -266,7 +285,7 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 
 	//get CS reflection ray
 	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
-	float3 d = viewRay;//normalize(posWS.xyz - cs_camPos.xyz);//viewRay
+	float3 d = viewRay;
 	float3 refl = normalize(reflect(d, n));
 	float3 ScreenRefl = mul( float4(refl,0), gView).xyz;
 	
@@ -279,7 +298,7 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	//end
 
 	//get reflactivity
-	float reflectivity = posWS.y>0?0:0.5;
+	float reflectivity = (posWS.y>0.01f)?0:0.5f;
 
 	float4 reflColor = float4(0, 0, 0, 1);
 
