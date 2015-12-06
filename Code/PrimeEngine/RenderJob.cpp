@@ -126,6 +126,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 	bool disableScreenSpaceEffects = renderMode == IRenderer::RenderMode_DefaultNoPostProcess;
 	if (!disableScreenSpaceEffects)
     {
+		EffectManager::Instance()->updateLight();
 		// -1) Assign light to clusters
 		EffectManager::Instance()->assignLightToClusters();
 

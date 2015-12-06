@@ -2126,6 +2126,21 @@ void EffectManager::randomLightInfo(int num)
 	}
 }
 
+void EffectManager::updateLight()
+{
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Handle hl = lights[i];
+		Light *l = hl.getObject<Light>();
+		if (l->m_cbuffer.type == 1)
+		{
+			Vector3 dir = _skybox.GetSunDirection();
+			l->m_cbuffer.dir = dir;
+		}
+	}
+}
+
 void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
 {
 	if(i<2)

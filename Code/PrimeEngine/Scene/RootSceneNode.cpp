@@ -118,14 +118,14 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 				}
 			}
 		}
-		for (PrimitiveTypes::UInt32 iLight = 0;iLight < 8; iLight++)//pRoot->m_lights.m_size
-		{
-			Light *pLight = pRoot->m_lights[iLight].getObject<Light>();
-			if(pLight->castsShadow())
-				continue;
-			psvPerObjectGroup->m_data.gLights[iDestLight] = pLight->m_cbuffer;
-			iDestLight++;
-		}
+		//for (PrimitiveTypes::UInt32 iLight = 0;iLight < 8; iLight++)//pRoot->m_lights.m_size
+		//{
+		//	Light *pLight = pRoot->m_lights[iLight].getObject<Light>();
+		//	if(pLight->castsShadow())
+		//		continue;
+		//	psvPerObjectGroup->m_data.gLights[iDestLight] = pLight->m_cbuffer;
+		//	iDestLight++;
+		//}
 	}
 }
 }; // namespace Components

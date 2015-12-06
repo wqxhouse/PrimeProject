@@ -10,6 +10,8 @@
 #include <math.h>
 #include <DirectXMath.h>
 
+#include "DDSTextureLoader.h"
+
 using namespace PE;
 using namespace PE::Components;
 
@@ -126,6 +128,15 @@ void ProbeManager::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 			_convolveMipmapDepthRTs[j][i] = dsView;
 		}
 	}
+
+	//_pbrLutTex = Handle("TEXTUREGPU", sizeof(PE::TextureGPU));
+	//TextureGPU *lutTex = new (_pbrLutTex) TextureGPU(*_pContext, _arena);
+	//lutTex->createColorTextureGPU("SpecularLookup.dds", "Default");
+
+	ID3D11ResourcePtr resource;
+	DXCall(DirectX::CreateDDSTextureFromFileEx(_device, L"AssetsOut\\Default\\Textures\\SpecularLookup.dds", 0, D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
+		&resource, &_pbrLutTexSRV, nullptr));
 }
 
 void ProbeManager::prepareDefaultCameras()

@@ -4,6 +4,7 @@
 #include "PrimeEngine/MemoryManagement/Handle.h"
 #include "PrimeEngine/RenderUtils.h"
 #include "PrimeEngine/GameObjectModel/Camera.h"
+#include "PrimeEngine/APIAbstraction/Texture/Texture.h"
 
 
 namespace PE
@@ -21,6 +22,9 @@ public:
 	void Render(int &threadOwnershipMask);
 
 	void SetProbePosition(const Vector3 &pos);
+
+	inline ID3D11ShaderResourceViewPtr getPbrLutTex() { return _pbrLutTexSRV; }
+	inline ID3D11ShaderResourceViewPtr getLocalCubemapPrefilterTargetSRV() { return _cubemapPrefilterTarget.SRView; }
 
 private:
 	void createSphere(float radius, int sliceCount, int stackCount);
@@ -79,6 +83,9 @@ private:
 
 	std::vector<std::vector<ID3D11RenderTargetViewPtr> > _convolveMipmapRTs;
 	std::vector<std::vector<ID3D11DepthStencilViewPtr> > _convolveMipmapDepthRTs;
+
+	// PE::Handle _pbrLutTex;
+	ID3D11ShaderResourceViewPtr _pbrLutTexSRV;
 
 	int _cubemapSize;
 };

@@ -30,11 +30,11 @@ float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
 	float3 V = normalize(pIn.iPosOS);
 
-	float cos_theta = clamp(V.z, 0, 1);
+	float cos_theta = saturate(V.z);
 	float cos_gamma = dot(V, SunDirection);
-	float gamma_ = acos(cos_gamma);
+	float gamma = acos(cos_gamma);
 
-	float3 R_xyY = Z * perez(cos_theta, gamma_, cos_gamma, A, B, C, D, E);
+	float3 R_xyY = Z * perez(cos_theta, gamma, cos_gamma, A, B, C, D, E);
 
 	float3 R_XYZ = float3(R_xyY.x, R_xyY.y, 1 - R_xyY.x - R_xyY.y) * R_xyY.z / R_xyY.y;
 

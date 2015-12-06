@@ -12,6 +12,7 @@ public:
 
 	inline void SetSunDirection(float theta, float phi) { _sunTheta = theta; _sunPhi = phi; }
 	inline void GetSunDirection(float &theta, float &phi) { theta = _sunTheta; phi = _sunPhi; }
+	Vector3 GetSunDirection();
 
 private:
 	ID3D11DevicePtr _device;

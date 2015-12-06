@@ -108,7 +108,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawLightMipsPass(int curlevel, bool isSecBlur);
 	void setLightMipsTextureRenderTarget(int level);
 	
-
+	void updateLight();
 
 	void setFinalLDRTextureRenderTarget();
 

@@ -8,7 +8,7 @@ void SkyboxNew::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 	_arena = arena;
 
 	_sunTheta = 60;
-	_sunPhi = 50;
+	_sunPhi = 200;
 
 	PE::D3D11Renderer *pD3D11Renderer = static_cast<PE::D3D11Renderer *>(_pContext->getGPUScreen());
 	_context = pD3D11Renderer->m_pD3DContext;
@@ -90,6 +90,11 @@ float deg2rad(float deg)
 	return deg * 3.14159265359f / 180.0f;
 }
 
+Vector3 SkyboxNew::GetSunDirection()
+{
+	return -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
+}
+
 void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView)
 {
 	PIXEvent event(L"Render skybox");
@@ -129,7 +134,7 @@ void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D1
 	_psConstants.Data.D = _D;
 	_psConstants.Data.E = _E;
 	_psConstants.Data.Z = _Z;
-	_psConstants.Data.SunDirection = sphericalConv(deg2rad(_sunPhi), deg2rad(_sunTheta));
+	_psConstants.Data.SunDirection = -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
 
 	_psConstants.ApplyChanges(_context);
 	_psConstants.SetPS(_context, 0);
@@ -176,6 +181,12 @@ void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSu
 	if (sunTheta > 3.14159265359 / 2) _sunTheta = 3.14159265359 / 2;
 
 	// A.2 Skylight Distribution Coefficients and Zenith Values: compute Perez distribution coefficients
+	//Vector3 A = Vector3(-0.0193, -0.0167, 0.1787) * turbidity + Vector3(-0.2592, -0.2608, -1.4630);
+	//Vector3 B = Vector3(-0.0665, -0.0950, -0.3554) * turbidity + Vector3(0.0008, 0.0092, 0.4275);
+	//Vector3 C = Vector3(-0.0004, -0.0079, -0.0227) * turbidity + Vector3(0.2125, 0.2102, 5.3251);
+	//Vector3 D = Vector3(-0.0641, -0.0441, 0.1206) * turbidity + Vector3(-0.8989, -1.6537, -2.5771);
+	//Vector3 E = Vector3(-0.0033, -0.0109, -0.0670) * turbidity + Vector3(0.0452, 0.0529, 0.3703);
+
 	Vector3 A = Vector3(-0.0193, -0.0167, 0.1787) * turbidity + Vector3(-0.2592, -0.2608, -1.4630);
 	Vector3 B = Vector3(-0.0665, -0.0950, -0.3554) * turbidity + Vector3(0.0008, 0.0092, 0.4275);
 	Vector3 C = Vector3(-0.0004, -0.0079, -0.0227) * turbidity + Vector3(0.2125, 0.2102, 5.3251);
