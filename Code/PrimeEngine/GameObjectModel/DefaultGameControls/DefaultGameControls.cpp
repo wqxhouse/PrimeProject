@@ -299,26 +299,26 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_X_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
-		EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(++phi, theta);
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(++phi, theta);*/
 	}
 	else if (Event_KEY_C_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
-		EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(--phi, theta);
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(--phi, theta);*/
 	}
 	else if (Event_KEY_V_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
-		EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, ++theta);
+		/*	EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+			EffectManager::Instance()->getSkybox()->SetSunDirection(phi, ++theta);*/
 	}
 	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
-		EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
 	}
 	else
 	{

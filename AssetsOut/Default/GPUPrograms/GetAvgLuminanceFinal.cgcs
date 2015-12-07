@@ -47,10 +47,10 @@ void LuminanceReductionFinalCS(in uint3 GroupID : SV_GroupID, in uint3 GroupThre
 		float currentLum = exp(LumSamples[0] / NumThreads);
 
 		// Adapt the luminance using Pattanaik's technique
-		const float Tau = 1.0f;
-		float adaptedLum = lastLum + (currentLum - lastLum) * (1 - exp(-gGameTimes.y * Tau));
+		//const float Tau = 1.0f;
+		//float adaptedLum = lastLum + (currentLum - lastLum) * (1 - exp(-gGameTimes.y * Tau));
 										
-		// float adaptedLum = currentLum;
+		float adaptedLum = currentLum;
 		
 		OutputMap[uint2(0, 0)] = adaptedLum;
     }

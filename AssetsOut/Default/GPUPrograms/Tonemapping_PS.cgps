@@ -40,6 +40,8 @@ float4 Tonemapping_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
     // Tone map the primary input
     float avgLuminance = gAdditionalDiffuseMap.Load(uint3(0, 0, 0)).x;
+	avgLuminance = min(10.0, max(0.5, avgLuminance));
+	
     float3 res = gDiffuseMap.Sample(gDiffuseMapSampler, pIn.iColor).rgb;
 
     // res += gGlowMap.Sample(gGlowMapSampler, pIn.iColor).xyz * BloomMagnitude;

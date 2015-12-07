@@ -20,6 +20,12 @@ float3 CalcExposedColor(float3 color, float avgLuminance, float offset, out floa
     return exp2(exposure) * color;
 }
 
+float CalcLuminance(float3 color)
+{
+    return dot(color, float3(0.299f, 0.587f, 0.114f));
+}
+
+
 float4 Bloom_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
 	float4 reds = gDiffuseMap.GatherRed(gDiffuseMapSampler, pIn.iColor);
@@ -36,11 +42,14 @@ float4 Bloom_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 
         // Apply exposure offset
         float avgLuminance = gAdditionalDiffuseMap.Load(uint3(0, 0, 0)).x;
+		avgLuminance = min(10.0, max(0.5, avgLuminance));
+		
         float exposure = 0;
         // result += CalcExposedColor(color, avgLuminance, BloomExposure, exposure);
         result += CalcExposedColor(color, avgLuminance, -4.0, exposure);
 
-        float weight = 1.0f;
+        //float weight = 1.0f;
+		float weight = 1.0f / (1.0f + CalcLuminance(color));
         result *= weight;
         weightSum += weight;
     }

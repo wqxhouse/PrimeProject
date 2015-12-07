@@ -4,11 +4,22 @@
 
 void SkyboxNew::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 {
+	PI_ = 3.14159265359f;
+
 	_pContext = context;
 	_arena = arena;
 
 	_sunTheta = 60;
 	_sunPhi = 200;
+
+	// _turbidity = 4.0;
+	_latitude = 40 * (float)PI_ / 180;
+	_solarDeclination = 0;
+	_solarTime = 0;
+
+	SetTurbidity(4.0f);
+	SetSolarTime(0.0f);
+
 
 	PE::D3D11Renderer *pD3D11Renderer = static_cast<PE::D3D11Renderer *>(_pContext->getGPUScreen());
 	_context = pD3D11Renderer->m_pD3DContext;
@@ -90,15 +101,16 @@ float deg2rad(float deg)
 	return deg * 3.14159265359f / 180.0f;
 }
 
-Vector3 SkyboxNew::GetSunDirection()
-{
-	return -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
-}
+//Vector3 SkyboxNew::GetSunDirection()
+//{
+//	return -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
+//}
+
 
 void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView)
 {
 	PIXEvent event(L"Render skybox");
-	calcPreetham(deg2rad(_sunTheta), 4.0f, 1.1f);
+	// calcPreetham(deg2rad(_sunTheta), 4.0f, 1.1f);
 
 	float blendFactor[4] = { 1, 1, 1, 1 };
 	_context->RSSetState(_rasterizerState);
@@ -128,13 +140,23 @@ void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D1
 	_vsConstants.ApplyChanges(_context);
 	_vsConstants.SetVS(_context, 0);
 
-	_psConstants.Data.A = _A;
-	_psConstants.Data.B = _B;
-	_psConstants.Data.C = _C;
-	_psConstants.Data.D = _D;
-	_psConstants.Data.E = _E;
-	_psConstants.Data.Z = _Z;
-	_psConstants.Data.SunDirection = -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
+	//_psConstants.Data.A = _A;
+	//_psConstants.Data.B = _B;
+	//_psConstants.Data.C = _C;
+	//_psConstants.Data.D = _D;
+	//_psConstants.Data.E = _E;
+	//_psConstants.Data.Z = _Z;
+	//_psConstants.Data.SunDirection = -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
+
+	_psConstants.Data.cY = _cY;
+	_psConstants.Data.cx = _cx;
+	_psConstants.Data.cy = _cy;
+	_psConstants.Data.solar_azimuth = _solarAzimuth;
+	_psConstants.Data.solar_zenith = _solarZenith;
+	_psConstants.Data.turbidity = _turbidity;
+	_psConstants.Data.Yz = _Yz;
+	_psConstants.Data.xz = _xz;
+	_psConstants.Data.yz = _yz;
 
 	_psConstants.ApplyChanges(_context);
 	_psConstants.SetPS(_context, 0);
@@ -213,4 +235,131 @@ void SkyboxNew::calcPreetham(float sunTheta, float turbidity, float normalizedSu
 	//}
 
 	_A = A; _B = B; _C = C; _D = D; _E = E; _Z = Z;
+}
+
+double SkyboxNew::Perez(float zenith, float gamma, const Coefficients &coeffs)
+{
+	return (1 + coeffs.A * exp(coeffs.B / cos(zenith))) *
+		(1 + coeffs.C * exp(coeffs.D * gamma) + coeffs.E * pow(cos(gamma), 2));
+}
+
+
+void SkyboxNew::CalculateZenitalAbsolutes()
+{
+	float Yz = (4.0453 * _turbidity - 4.9710) * tan((4.0 / 9 - _turbidity / 120.0f) * (PI_ - 2 * _solarZenith)) - 0.2155 * _turbidity + 2.4192;
+	float Y0 = (4.0453 * _turbidity - 4.9710) * tan((4.0 / 9 - _turbidity / 120.0f) * PI_)-0.2155 * _turbidity + 2.4192;
+	_Yz = (float)(Yz / Y0);
+
+	float z3 = (float)pow(_solarZenith, 3);
+	float z2 = _solarZenith * _solarZenith;
+	float z = _solarZenith;
+	Vector3 T_vec(_turbidity * _turbidity, _turbidity, 1);
+
+	Vector3 x = Vector3(
+		0.00166f * z3 - 0.00375f * z2 + 0.00209f * z,
+		-0.02903f * z3 + 0.06377f * z2 - 0.03202f * z + 0.00394f,
+		0.11693f * z3 - 0.21196f * z2 + 0.06052f * z + 0.25886f);
+	float xz = T_vec.dotProduct(x);
+	_xz = xz;
+
+	Vector3 y = Vector3(
+		0.00275f * z3 - 0.00610f * z2 + 0.00317f * z,
+		-0.04214f * z3 + 0.08970f * z2 - 0.04153f * z + 0.00516f,
+		0.15346f * z3 - 0.26756f * z2 + 0.06670f * z + 0.26688f);
+	float yz = T_vec.dotProduct(y);
+	_yz = yz;
+}
+
+void SkyboxNew::CalculateCoefficents()
+{
+	Coefficients coeffsY;
+	coeffsY.A = 0.1787f * _turbidity - 1.4630f;
+	coeffsY.B = -0.3554f * _turbidity + 0.4275f;
+	coeffsY.C = -0.0227f * _turbidity + 5.3251f;
+	coeffsY.D = 0.1206f * _turbidity - 2.5771f;
+	coeffsY.E = -0.0670f * _turbidity + 0.3703f;
+	_cY = coeffsY;
+
+	Coefficients coeffsx;
+	coeffsx.A = -0.0193f * _turbidity - 0.2592f;
+	coeffsx.B = -0.0665f * _turbidity + 0.0008f;
+	coeffsx.C = -0.0004f * _turbidity + 0.2125f;
+	coeffsx.D = -0.0641f * _turbidity - 0.8989f;
+	coeffsx.E = -0.0033f * _turbidity + 0.0452f;
+	_cx = coeffsx;
+
+	Coefficients coeffsy;
+	coeffsy.A = -0.0167f * _turbidity - 0.2608f;
+	coeffsy.B = -0.0950f * _turbidity + 0.0092f;
+	coeffsy.C = -0.0079f * _turbidity + 0.2102f;
+	coeffsy.D = -0.0441f * _turbidity - 1.6537f;
+	coeffsy.E = -0.0109f * _turbidity + 0.0529f;
+	_cy = coeffsy;
+}
+
+void SkyboxNew::CalculateLightColor()
+{
+	Vector3 nightColor(0.2f, 0.2f, 0.5f);
+	if (_solarZenith > PI_ / 2)
+	{
+		_LightColor = nightColor;
+		return;
+	}
+
+	float Ys = _Yz * Perez(_solarZenith, 0, _cY) / Perez(0, _solarZenith, _cY);
+	float xs = _xz * Perez(_solarZenith, 0, _cx) / Perez(0, _solarZenith, _cx);
+	float ys = _yz * Perez(_solarZenith, 0, _cy) / Perez(0, _solarZenith, _cy);
+	Vector3 dayColor = calcRGB((float)Ys, (float)xs, (float)ys);
+
+	float interpolation = (float)max(0.0f, min(1.0f, (_solarZenith - PI_ / 2 + 0.2f) / 0.2f));
+	_LightColor = (interpolation * nightColor + (1 - interpolation) * dayColor);
+}
+
+Vector3 SkyboxNew::calcRGB(float Y, float x, float y)
+{
+	float X = x / y * Y;
+	float Z = (1 - x - y) / y * Y;
+	Vector3 rgb;
+	rgb.m_x = max(0.0f, min(1.0f, 3.2406f * X - 1.5372f * Y - 0.4986f * Z));
+	rgb.m_y = max(0.0f, min(1.0f, -0.9689f * X + 1.8758f * Y + 0.0415f * Z));
+	rgb.m_z = max(0.0f, min(1.0f, 0.0557f * X - 0.2040f * Y + 1.0570f * Z));
+	return rgb;
+}
+
+void SkyboxNew::SetTurbidity(float turbitidy)
+{
+	_turbidity = turbitidy;
+	CalculateZenitalAbsolutes();
+	CalculateCoefficents();
+	CalculateLightColor();
+}
+
+void SkyboxNew::SetSolarZenith(float zenith)
+{
+	zenith = min(zenith, (float)PI_ / 2 + 0.3f);
+	_solarZenith = zenith;
+	CalculateZenitalAbsolutes();
+	CalculateLightColor();
+}
+
+void SkyboxNew::SetSolarAzimuth(float azimuth)
+{
+	_solarAzimuth = azimuth;
+}
+
+void SkyboxNew::SetSolarTime(float solarTime)
+{
+	float solarZenith = (float)acos(sin(_latitude) * sin(_solarDeclination) + cos(_latitude) * cos(_solarDeclination) * cos(solarTime));
+	float lightZenith = min(solarZenith, PI_ / 2 - 0.2f);
+	float solarAzimuth = solarTime;
+
+	SetSolarZenith(solarZenith);
+	SetSolarAzimuth(solarAzimuth);
+
+	Vector3 lightDir = Vector3(
+		(float)(sin(solarAzimuth) * sin(lightZenith)),
+		(float)(cos(lightZenith)),
+		(float)(cos(solarAzimuth) * sin(lightZenith)));
+
+	_lightDirection = lightDir;
 }
