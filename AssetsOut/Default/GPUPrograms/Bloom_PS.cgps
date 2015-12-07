@@ -42,7 +42,7 @@ float4 Bloom_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 
         // Apply exposure offset
         float avgLuminance = gAdditionalDiffuseMap.Load(uint3(0, 0, 0)).x;
-		avgLuminance = min(10.0, max(0.5, avgLuminance));
+		avgLuminance = min(10.0, max(0.3, avgLuminance));
 		
         float exposure = 0;
         // result += CalcExposedColor(color, avgLuminance, BloomExposure, exposure);
