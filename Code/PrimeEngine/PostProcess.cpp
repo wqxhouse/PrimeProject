@@ -181,7 +181,7 @@ void PostProcess::renderBlur()
 
 		PE::SA_Bind_Resource setInputTex(
 			*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
-			PE::SamplerState_NotNeeded,
+			PE::SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp,
 			_bloomTarget.SRView);
 		setInputTex.bindToPipeline(blurHPass);
 		pibGPU->setAsCurrent();
@@ -197,7 +197,7 @@ void PostProcess::renderBlur()
 
 		PE::SA_Bind_Resource setInputTexVertical(
 			*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
-			PE::SamplerState_NotNeeded,
+			PE::SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp,
 			_blurTarget.SRView);
 		setInputTexVertical.bindToPipeline(blurVPass);
 		pibGPU->setAsCurrent();
@@ -223,7 +223,7 @@ void PostProcess::renderTonemapping()
 
 	PE::SA_Bind_Resource setInputTex(
 		*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
-		PE::SamplerState_NotNeeded,
+		PE::SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp,
 		_finalPassSRV);
 	setInputTex.bindToPipeline(tonemappingPass);
 
@@ -235,7 +235,7 @@ void PostProcess::renderTonemapping()
 
 	PE::SA_Bind_Resource setBloomTex(
 		*_pContext, _arena, PE::GLOW_TEXTURE_2D_SAMPLER_SLOT,
-		PE::SamplerState_NotNeeded,
+		PE::SamplerState_MipLerp_MinTexelLerp_MagTexelLerp_Clamp,
 		_bloomTarget.SRView);
 	setBloomTex.bindToPipeline(tonemappingPass);
 
