@@ -2,6 +2,8 @@
 #include "PrimeEngine/APIAbstraction/Effect/Effect.h"
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 
+#include "PrimeEngine/DDSTextureLoader.h"
+
 void SkyboxNew::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 {
 	PI_ = 3.14159265359f;
@@ -89,6 +91,26 @@ void SkyboxNew::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 	sampDesc.MinLOD = 0;
 	sampDesc.MipLODBias = 0;
 	DXCall(_device->CreateSamplerState(&sampDesc, &_samplerState));
+
+	ID3D11ResourcePtr resource;
+	DXCall(DirectX::CreateDDSTextureFromFileEx(_device, L"AssetsOut\\FinalProjectAssets\\Milkyway.dds", 0, D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
+		&resource, &_nightCubemap, nullptr));
+
+	//D3D11_SAMPLER_DESC sampDesc;
+
+	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.MipLODBias = 0.0f;
+	//sampDesc.MaxAnisotropy = 1;
+	//sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	//sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
+	//sampDesc.MinLOD = 0;
+	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	//DXCall(_device->CreateSamplerState(&sampDesc, &_linearSampler));
 }
 
 Vector3 sphericalConv(float theta, float phi)
@@ -157,11 +179,25 @@ void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D1
 	_psConstants.Data.Yz = _Yz;
 	_psConstants.Data.xz = _xz;
 	_psConstants.Data.yz = _yz;
+	_psConstants.Data.sunColor = _LightColor;
+	_psConstants.Data.night = _solarZenith > PI_ / 2 ? 1.0f : -1.0f;
 
 	_psConstants.ApplyChanges(_context);
 	_psConstants.SetPS(_context, 0);
 
+	_nightCubemap;
+
+	ID3D11ShaderResourceView *srvs[1] = { _nightCubemap };
+	_context->PSSetShaderResources(0, 1, srvs);
+
+
 	PE::EffectManager::Instance()->renderSkyboxNewSphere();
+
+	ID3D11SamplerState *sampStates[1] = { nullptr };
+	_context->PSSetSamplers(0, 1, sampStates);
+
+	srvs[0] = nullptr;
+	_context->PSSetShaderResources(0, 1, srvs);
 
 	// Set the viewport back to what it was
 	_context->RSSetViewports(numViewports, oldViewports);
@@ -299,7 +335,7 @@ void SkyboxNew::CalculateCoefficents()
 
 void SkyboxNew::CalculateLightColor()
 {
-	Vector3 nightColor(0.2f, 0.2f, 0.5f);
+	Vector3 nightColor(0.01f, 0.01f, 0.03f);
 	if (_solarZenith > PI_ / 2)
 	{
 		_LightColor = nightColor;
@@ -312,6 +348,7 @@ void SkyboxNew::CalculateLightColor()
 	Vector3 dayColor = calcRGB((float)Ys, (float)xs, (float)ys);
 
 	float interpolation = (float)max(0.0f, min(1.0f, (_solarZenith - PI_ / 2 + 0.2f) / 0.2f));
+	printf("interpo: %.2f\n", interpolation);
 	_LightColor = (interpolation * nightColor + (1 - interpolation) * dayColor);
 }
 

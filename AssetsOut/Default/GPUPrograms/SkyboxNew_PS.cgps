@@ -2,6 +2,9 @@
 #define SKYBOX_NEW_PS
 #include "ColoredMinimalMesh_Structs.fx"
 
+TextureCube<float3> NightCubemap : register(t0);
+SamplerState LinearSampler : register(s0);
+
 struct Coefficent
 {
 	float A;
@@ -31,6 +34,9 @@ cbuffer SkyboxNewConstants : register(b0)
 	Coefficent coeffsY;
 	Coefficent coeffsx;
 	Coefficent coeffsy;
+	
+	float3 sunColor;
+	float night;
 };
 
 
@@ -76,6 +82,15 @@ float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 
 	float4 color = RGB(Yp, xp, yp);
 	
+	float4 finalColor = float4(0, 0, 0, 1);
+
+	finalColor.xyz = lerp(sunColor * 10, color, saturate(abs(gamma) / 0.03));
+	finalColor.xyz *= 20;
+	if(night > 0)
+	{
+		float3 nightSky = NightCubemap.Sample(LinearSampler, world_pos).xyz;
+		return float4(nightSky, 1);
+	}
 	// fix for intel
 	/*
 	if(isnan(color.x)) 
@@ -83,7 +98,7 @@ float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 		return float4(5, 5, 5, 1);
 	}
 	*/
-	return color * 20.0;
+	return finalColor;
 }
 
 /*
