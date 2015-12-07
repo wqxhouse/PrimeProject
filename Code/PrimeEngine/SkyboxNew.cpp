@@ -349,6 +349,7 @@ void SkyboxNew::SetSolarAzimuth(float azimuth)
 
 void SkyboxNew::SetSolarTime(float solarTime)
 {
+	_solarTime = solarTime;
 	float solarZenith = (float)acos(sin(_latitude) * sin(_solarDeclination) + cos(_latitude) * cos(_solarDeclination) * cos(solarTime));
 	float lightZenith = min(solarZenith, PI_ / 2 - 0.2f);
 	float solarAzimuth = solarTime;

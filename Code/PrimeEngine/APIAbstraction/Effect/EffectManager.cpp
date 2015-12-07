@@ -2159,7 +2159,10 @@ void EffectManager::updateLight()
 		if (l->m_cbuffer.type == 1)
 		{
 			Vector3 dir = _skybox.GetSunDirection();
+			Vector3 color = _skybox.GetSunColor();
+			Vector4 colorVec4 = Vector4(color.m_x, color.m_y, color.m_z, 1.0f);
 			l->m_cbuffer.dir = dir;
+			l->m_cbuffer.diffuse = colorVec4;
 		}
 	}
 }

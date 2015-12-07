@@ -299,12 +299,22 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_X_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
+
+		float solarTime;
+		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
+		printf("SolarTime = %.2f\n", solarTime);
+		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime + 0.02);
 		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
 		EffectManager::Instance()->getSkybox()->SetSunDirection(++phi, theta);*/
 	}
 	else if (Event_KEY_C_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
+
+		float solarTime;
+		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
+		printf("SolarTime = %.2f\n", solarTime);
+		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime - 0.02);
 		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
 		EffectManager::Instance()->getSkybox()->SetSunDirection(--phi, theta);*/
 	}

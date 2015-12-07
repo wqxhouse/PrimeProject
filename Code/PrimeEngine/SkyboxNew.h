@@ -15,7 +15,7 @@ public:
 	Vector3 GetSunDirection() { return _lightDirection; }
 
 	void SetSolarTime(float solarTime);
-	inline float getSolarTime() { return _solarTime; }
+	inline float GetSolarTime() { return _solarTime; }
 	Vector3 GetSunColor() { return _LightColor; }
 
 	ID3D11ShaderResourceView *getLocalCubemapSRV();
