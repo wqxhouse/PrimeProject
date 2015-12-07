@@ -13,6 +13,7 @@ namespace PE {
 
 	void runDrawThreadSingleFrameThreaded(PE::GameContext &ctx);
 
+	void initNoise();
 
 }; // namespace PE
 

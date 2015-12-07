@@ -339,7 +339,7 @@ namespace Components {
 	context.getNetworkManager()->initNetwork();
 	
 	//Liu
-	EffectManager::Instance()->randomLightInfo(20);
+	EffectManager::Instance()->randomLightInfo(100);
 
 	return 1;
 }
@@ -350,7 +350,7 @@ int ClientGame::initGame()
 {
     // we intitalise game in one thread before laucnhing all the different threads
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
-
+	initNoise();
     return 1;
 }
 void ClientGame::runGameFrameStatic()

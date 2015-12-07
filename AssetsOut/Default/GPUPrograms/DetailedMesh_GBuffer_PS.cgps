@@ -46,12 +46,12 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 	if(pIn.iPosW.y == 0)
 	{
 	output.Material = float4(0.5,0,0,1.0);
-	output.Normal = float4(0,1.0,0,1.0);
+	//output.Normal = float4(0,1.0,0,1.0);
 	}
 	else
 	{
 	output.Material = float4(0,0,0,1.0);
-	output.Normal = float4(perPixelNormal, 1.0);
+	//output.Normal = float4(perPixelNormal, 1.0);
 	}
 
 	return output;

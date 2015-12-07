@@ -94,6 +94,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
 	void drawLightGbuffer();
+	void updateLightDirection(Vector3 sprinkleDir);
 	//Liu
 	void drawRayTracingPass();
 	void drawLightMipsPass(int curlevel, bool isSecBlur);

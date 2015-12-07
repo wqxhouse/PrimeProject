@@ -1886,7 +1886,7 @@ void EffectManager::drawRayTracingPass()
 	cb.m_data.gViewProjInverseMatrix = (csn->m_viewToProjectedTransform * csn->m_worldToViewTransform).inverse();
 	cb.bindToPipeline(&curEffect);
 
-
+	
 	pibGPU->draw(1, 0);
 
 	pibGPU->unbindFromPipeline();
@@ -1900,6 +1900,46 @@ void EffectManager::drawRayTracingPass()
 	pscs.unbindFromPipeline(&curEffect);
 	cb.unbindFromPipeline(&curEffect);
 }
+
+void EffectManager::updateLightDirection(Vector3 sprinkleDir)
+{
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+
+	Vector3 box = Vector3(20,100,20);
+
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Light *l = lights[i].getObject<Light>();
+		if (l->m_cbuffer.type != 0) continue;
+
+		Vector3 pos = l->m_base.getPos();
+		Vector3 dir = l->m_oribitAxis;
+
+		l->m_physicsRest += 0.03f;
+
+		if (l->m_physicsRest >= 4.0){
+			// Restart animation
+			l->m_oribitAxis = sprinkleDir;
+			l->m_base.setPos(Vector3(0, 3, 0));
+			l->m_physicsRest -= 4.0;
+		}
+		else {
+			// Gravity
+			l->m_oribitAxis.m_y -=  25 * 0.03f;//500.0 *
+
+			// Update position
+			l->m_base.setPos(l->m_base.getPos()+(0.03f * l->m_oribitAxis));
+
+			Vector3 newdir = Vector3(abs(l->m_oribitAxis.m_x), abs(l->m_oribitAxis.m_y), abs(l->m_oribitAxis.m_z));
+			//l->m_oribitAxis.m_y<0 ? -0.8 * abs(l->m_oribitAxis)
+			
+			l->m_oribitAxis = (pos.m_x > box.m_x || pos.m_y > box.m_y || pos.m_z > box.m_z) ? -0.8f * newdir : l->m_oribitAxis;
+			l->m_oribitAxis = (-pos.m_x > box.m_x || -pos.m_y > 0 || -pos.m_z > box.m_z) ? 0.8f * newdir : l->m_oribitAxis;
+			
+			float a = 0;
+		}
+	}
+}
 //Liu
 void EffectManager::randomLightInfo(int num)
 {
@@ -1912,7 +1952,7 @@ void EffectManager::randomLightInfo(int num)
 		*m_pContext, 
 		m_arena,
 		hLight,
-		Vector3(5,0,0), //Position
+		Vector3(0,-i,0), //Position
 		Vector3(0,0,0), 
 		Vector3(0,0,0), 
 		Vector3(0,0,0), //Direction (z-axis)
@@ -1921,10 +1961,11 @@ void EffectManager::randomLightInfo(int num)
 		Vector4(0,0,0,1), //Specular
 		Vector3(0.05, 0.05, 0.05), //Attenuation (x, y, z)
 		1, // Spot Power
-		20, //Range
+		5, //Range
 		false, //Whether or not it casts shadows
 		0,//0 = point, 1 = directional, 2 = spot
-		Vector3(1,0,0)
+		Vector3(0,0,0),
+		i*(-0.1f)
 		);
 	
 	randomizeLight(pLight,&(pLight->m_oribitAxis) ,i);
@@ -1938,17 +1979,18 @@ void EffectManager::randomLightInfo(int num)
 
 void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
 {
-	if(i<2)
+	/*if(i<2)
 	{
 		l->m_base.setPos(Vector3(rand() % 5, rand() % 5, rand() % 5));
 	}else
 	{
 		l->m_base.setPos(Vector3(rand() % 50 - 25, 3, rand() % 50 - 25));
-	}
+	}*/
 	
 	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
-	*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-	l->m_cbuffer.range = rand() % 10+10;
+	//*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
+	l->m_cbuffer.range = rand() % 10;
+	
 }
 //Liu
 void EffectManager::rotateLight(float angle, int counter)
