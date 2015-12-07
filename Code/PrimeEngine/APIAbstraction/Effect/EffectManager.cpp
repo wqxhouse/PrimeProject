@@ -1047,9 +1047,11 @@ void EffectManager::uploadDeferredClusteredConstants(float nearClip, float farCl
 	pscs.bindToPipeline(&curEffect);
 }
 
-void EffectManager::drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2)
+void EffectManager::drawDeferredCubemapLightingQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2)
 {
-	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
+	PE::Components::Effect &curEffect =
+		*PE::EffectManager::Instance()->getEffectHandle("DeferredCubemapLightingTech").getObject<PE::Components::Effect>();
+
 	if (!curEffect.m_isReady)
 		return;
 
@@ -2159,7 +2161,7 @@ void EffectManager::updateLight()
 		if (l->m_cbuffer.type == 1)
 		{
 			Vector3 dir = _skybox.GetSunDirection();
-			Vector3 color = _skybox.GetSunColor();
+			Vector3 color = _skybox.GetSunColor() * 20;
 			Vector4 colorVec4 = Vector4(color.m_x, color.m_y, color.m_z, 1.0f);
 			l->m_cbuffer.dir = dir;
 			l->m_cbuffer.diffuse = colorVec4;

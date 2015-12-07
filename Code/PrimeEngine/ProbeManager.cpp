@@ -303,7 +303,14 @@ void ProbeManager::renderGBuffer(int &threadOwnershipMask)
 
 		// TODO: this is huge overhead
 		EffectManager::Instance()->uploadDeferredClusteredConstants(0.1f, 500.0f);
-		EffectManager::Instance()->drawClusteredQuadOnly(
+
+		//PE::Components::Effect *DeferredCubemapLighting =
+		//	PE::EffectManager::Instance()->getEffectHandle("DeferredCubemapLightingTech").getObject<PE::Components::Effect>();
+
+		//PE::IndexBufferGPU *pibGPU = PE::EffectManager::Instance()->m_hIndexBufferGPU.getObject<PE::IndexBufferGPU>();
+		//PE::VertexBufferGPU *pvbGPU = PE::EffectManager::Instance()->m_hVertexBufferGPU.getObject<PE::VertexBufferGPU>();
+
+		EffectManager::Instance()->drawDeferredCubemapLightingQuadOnly(
 			_cubemapDepthTarget.SRVArraySlices[cubeboxFaceIndex],
 			_cubemapTarget0.SRVArraySlices[cubeboxFaceIndex], 
 			_cubemapTarget1.SRVArraySlices[cubeboxFaceIndex],

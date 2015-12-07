@@ -408,6 +408,23 @@ namespace PE {
 		m_map.add("DeferredLightPass_Clustered_Tech", hLightHDRClusteredFx);
 	}
 
+	{
+		Handle hDeferredCubemapLighting("EFFECT", sizeof(Effect));
+		Effect *pDeferredCubemapLighting = new(hDeferredCubemapLighting)Effect(*m_pContext, m_arena, hDeferredCubemapLighting);
+		pDeferredCubemapLighting->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DeferredCubemapLighting_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"DeferredCubemapLightingTech");
+		pDeferredCubemapLighting->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DeferredCubemapLightingTech", hDeferredCubemapLighting);
+	}
+
+
 	// + Debug Pass
 	{
 		Handle hDebugPass("EFFECT", sizeof(Effect));
