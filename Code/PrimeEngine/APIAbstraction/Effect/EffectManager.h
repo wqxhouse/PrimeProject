@@ -32,6 +32,10 @@
 #include <D3DCompiler.h>
 #include <d3d11.h>
 
+#include "PrimeEngine/ProbeManager.h"
+#include "PrimeEngine/SkyboxNew.h"
+#include "PrimeEngine/PostProcess.h"
+
 #include "math.h"
 
 namespace PE {
@@ -82,6 +86,9 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 		EffectManager::s_myHandle = handle;
 	}
 
+	inline ProbeManager *getProbeManagerPtr() { return &_probeManager; }
+	inline SkyboxNew *getSkybox() { return &_skybox; }
+
 	// + Deferred
 	void setTextureAndDepthTextureRenderTargetForGBuffer();
 	void setLightAccumTextureRenderTarget();
@@ -90,6 +97,10 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	// void EffectManager::setClassicalLightTextureRenderTarget();
 	void drawClassicalLightPass(float angle);
 	void createSphere(float radius, int sliceCount, int stackCount);
+	void createSkyBoxGeom();
+
+	void renderCubemapConvolutionSphere();
+	void renderSkyboxNewSphere();
 	void randomLightInfo(int num);
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
@@ -100,7 +111,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawLightMipsPass(int curlevel, bool isSecBlur);
 	void setLightMipsTextureRenderTarget(int level);
 	
-
+	void updateLight();
 
 	void setFinalLDRTextureRenderTarget();
 
@@ -124,6 +135,8 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void drawFrameBufferCopy();
 
 	// + Deferred
+	void uploadDeferredClusteredConstants(float nearClip, float farClip);
+	void drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2);
 	void drawClusteredLightHDRPass();
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();
@@ -160,7 +173,7 @@ public:
 	Handle m_halbedoTextureGPU;
 	Handle m_hnormalTextureGPU;
 	Handle m_haccumHDRTextureGPU;
-	Handle m_hfinalLDRTextureGPU;
+	Handle m_hfinalHDRTextureGPU;
 	Handle m_hrootDepthBufferTextureGPU;
 	
 
@@ -190,6 +203,9 @@ public:
 	Handle m_hLightVertexBufferGPU;
 	Handle m_hLightIndexBufferGPU;
 
+	Handle m_hSkyBoxGeomVBGpu;
+	Handle m_hSkyBoxGeomIBGpu;
+
 	Handle m_hFirstGlowPassEffect;
 	Handle m_hSecondGlowPassEffect;
 	
@@ -199,7 +215,7 @@ public:
 
 	// + Deferred
 	Handle m_hAccumulationHDRPassEffect;
-	Handle m_hfinalLDRPassEffect;
+	Handle m_hfinalHDRPassEffect;
 
 	Handle m_hdebugPassEffect;
 
@@ -240,6 +256,8 @@ public:
 	Handle m_hRayTracingPassEffect;
 	Handle m_hGBufferLightPassEffect;
 
+	Handle m_hCubemapPrefilterPassEffect;
+
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11
 		PEMap<ID3D11PixelShader *> m_pixelShaders;
@@ -262,6 +280,10 @@ public:
 	bool m_doMotionBlur;
 
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;
+
+	ProbeManager _probeManager;
+	SkyboxNew _skybox;
+	PostProcess _postProcess;
 }; // class EffectManager
 
 }; // namespace PE

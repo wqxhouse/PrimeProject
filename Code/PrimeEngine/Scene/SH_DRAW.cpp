@@ -698,7 +698,7 @@ void SingleHandler_DRAW::addNonInstancedTechShaderActions(Mesh *pMeshCaller, Ind
     
 	PEASSERT(API_CHOOSE_DX11_DX9_OGL(pEffect->m_CS, NULL, NULL) == NULL, "We dont support CS as part of non instanced rendering yet");
 	Handle &hsvPerObject = pDrawList->nextShaderValue(); // create object referenced by Handle in DrawList, this handle will be released on end of draw call
-	hsvPerObject = Handle("RAW_DATA", sizeof(SetPerObjectConstantsShaderAction));
+	hsvPerObject = Handle("RAW_DATA_PER_OBJECT", sizeof(SetPerObjectConstantsShaderAction));
 	SetPerObjectConstantsShaderAction *psvPerObject = new(hsvPerObject) SetPerObjectConstantsShaderAction();
 
 	memset(&psvPerObject->m_data, 0, sizeof(SetPerObjectConstantsShaderAction::Data));

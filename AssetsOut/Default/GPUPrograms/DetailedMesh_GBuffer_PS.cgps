@@ -9,10 +9,6 @@
 DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
 {
 	DETAILED_MESH_GBUFFER_PS_OUT output;
-	// output.Albedo = float4(0.1, 0.2, 0.6, 1);
-	// output.Normal = float4(0.6, 0.2, 0.1, 1); 
-	
-	output.Albedo = sample2D(gDiffuseMapSampler, pIn.iTexCoord, gDiffuseMap);
 	
 	float3 perPixelNormal = pIn.iNormalW;
 	if (xHasNrm_yHasSpec_zHasGlow_wHasDiff.x > 0.1)
@@ -38,11 +34,17 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 		perPixelNormal = normalize(perPixelNormal);
 	}
 	
+	output.Albedo = sample2D(gDiffuseMapSampler, pIn.iTexCoord, gDiffuseMap) * gVDiffuse;
 	output.Normal = float4(perPixelNormal, 1.0);
-	// output.Normal = float4(pIn.iPosW, 1.0);
-	
-	output.PosW = float4(pIn.iPosW, 1.0);
 
+	float roughness = sample2D(gGlowMapSampler, pIn.iTexCoord, gGlowMap).r;
+	roughness = max(roughness, 0.01);
+	float metallic = sample2D(gSpecularMapSampler, pIn.iTexCoord, gSpecularMap).r;
+	
+	output.Albedo *= (1.0f - metallic);
+	output.Material = float4(roughness, metallic, 0, 0);
+
+	/*
 	if(pIn.iPosW.y == 0)
 	{
 	output.Material = float4(0.5,0,0,1.0);
@@ -53,6 +55,9 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 	output.Material = float4(0,0,0,1.0);
 	//output.Normal = float4(perPixelNormal, 1.0);
 	}
+	*/
+	
+	output.Normal = float4(0,1.0,0,1.0);
 
 	return output;
 }

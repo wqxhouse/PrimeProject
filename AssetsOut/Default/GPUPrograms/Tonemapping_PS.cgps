@@ -1,0 +1,58 @@
+#ifndef TONEMAPPING_PS
+#define TONEMAPPING_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "StandardTextureResources.fx"
+
+// static const float KeyValue = 0.1150f;
+static const float KeyValue = 0.2f;	
+
+float3 ToneMapFilmicALU(in float3 color)
+{
+    color = max(0, color - 0.004f);
+    color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 1.7f)+ 0.06f);
+
+    // Result has 1/2.2 baked in
+    return pow(color, 2.2f);
+}
+
+float3 CalcExposedColor(float3 color, float avgLuminance, float offset, out float exposure)
+{
+    // Use geometric mean
+    avgLuminance = max(avgLuminance, 0.001f);
+	
+    float linearExposure = (KeyValue / avgLuminance);
+    exposure = log2(max(linearExposure, 0.0001f));
+	
+    exposure += offset;
+    // exposure -= ExposureScale;
+	
+    return exp2(exposure) * color;
+}
+
+float3 Tonemap_helper(float3 color, float avgLuminance, float threshold, out float exposure)
+{
+    color = CalcExposedColor(color, avgLuminance, threshold, exposure);
+    color = ToneMapFilmicALU(color);
+    return color;
+}
+
+float4 Tonemapping_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+    // Tone map the primary input
+    float avgLuminance = gAdditionalDiffuseMap.Load(uint3(0, 0, 0)).x;
+	avgLuminance = min(10.0, max(0.3, avgLuminance));
+	
+    float3 res = gDiffuseMap.Sample(gDiffuseMapSampler, pIn.iColor).rgb;
+
+    // res += gGlowMap.Sample(gGlowMapSampler, pIn.iColor).xyz * BloomMagnitude;
+    res += gGlowMap.Sample(gGlowMapSampler, pIn.iColor).xyz * 1.0;
+
+    float exposure = 0;
+    res = Tonemap_helper(res, avgLuminance, 0, exposure);
+
+    return float4(res, 1.0f);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(Tonemapping_PS)
+
+#endif 

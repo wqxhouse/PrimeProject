@@ -1,10 +1,15 @@
-#ifndef ColoredMinimalMesh_VS_cg
-#define ColoredMinimalMesh_VS_cg
+#ifndef CUBEMAP_PREFILTER_VS
+#define CUBEMAP_PREFILTER_VS
 
-#include "APIAbstraction.gpu"
-#include "StandardConstants.fx"
-#include "ColoredMinimalMesh_Structs.fx"
-#include "DeferredLightCommon.fx"
+struct VS_IN
+{
+	
+};
+
+struct PS_IN
+{
+	
+};
 
 COLORED_MINIMAL_MESH_PS_IN ColoredMinimalMesh_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
 {
@@ -28,8 +33,6 @@ COLORED_MINIMAL_MESH_PS_IN ColoredMinimalMesh_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
 //     vOut.iPosH = mul(make_float4(vIn.iPosL, 1.0), gW);
 //     //vOut.iNormalW = vIn.iNormal;
 //     vOut.iPosW =  vIn.iPosL;
-
-	vOut.iPosOS = vIn.iPosL;
     
     return vOut;
 }

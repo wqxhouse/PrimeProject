@@ -179,26 +179,18 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	#endif
 
-	bool renderShadowMap = false;
-	#if !APIABSTRACTION_IOS && !APIABSTRACTION_PS3 && !PE_PLAT_IS_PSVITA /* && !PE_API_IS_D3D11*/
-		renderShadowMap = true;
-	#endif
-	//if (renderShadowMap)
-	//{
-	//	// for shadow mapping:
-	//	EffectManager::Instance()->setShadowMapRenderTarget();
+	// hack 
+	// CameraManager::Instance()->setCamera(CameraManager::PLAYER, CameraManager::Instance()->getActiveCameraHandle());
 
-	//	DrawList::ZOnlyInstanceReadOnly()->optimize();
+	IRenderer::checkForErrors("renderjob update start\n");
 
-	//	ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+	Matrix4x4 viewProjMat;
+	viewProjMat.loadIdentity();
+	Matrix4x4 viewMat;
+	viewMat.loadIdentity();
+	Matrix4x4 projMat;
+	projMat.loadIdentity();
 
-	//	// the render context is acquired and release inside of this function
-	//	DrawList::ZOnlyInstanceReadOnly()->do_RENDER_Z_ONLY(NULL, threadOwnershipMask);
-
-	//	ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
-
-	//	EffectManager::Instance()->endCurrentRenderTarget();
-	//}
 
 	static float t = 0;
 	
@@ -214,33 +206,59 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 
 	EffectManager::Instance()->updateLightDirection(sprinkleDir);
 
-	IRenderer::checkForErrors("renderjob update start\n");
+	// TODO: since we don't have proj mat in constant buf at hand; we grab from cameramanager
+	// However, this will be off by one frame; but since proj mat doesn't always change, 
+	// it is convenient for now to use this instead of passing an additional proj mat in const buf
+	projMat = CameraManager::Instance()->getActiveCamera()->getCamSceneNode()->m_viewToProjectedTransform;
+
+
+	auto &globalShaderValues = DrawList::InstanceReadOnly()->m_globalShaderValues;
+	for (PrimitiveTypes::UInt32 isv = 0; isv < globalShaderValues.m_size; isv++)
+	{
+		ShaderAction *sv = globalShaderValues[isv].getObject<ShaderAction>();
+		if (globalShaderValues[isv].getDbgName() == "RAW_DATA_PER_OBJECTGROUP")
+		{
+			SetPerObjectGroupConstantsShaderAction *orig = (SetPerObjectGroupConstantsShaderAction *)sv;
+			viewProjMat = orig->m_data.gViewProj;
+			viewMat = orig->m_data.gViewInv.inverse();
+		}
+	}
 
 	IRenderer::RenderMode renderMode = ctx.getGPUScreen()->m_renderMode;
 	bool disableScreenSpaceEffects = renderMode == IRenderer::RenderMode_DefaultNoPostProcess;
 	if (!disableScreenSpaceEffects)
     {
+		EffectManager::Instance()->updateLight();
+		// -1) Assign light to clusters
+		EffectManager::Instance()->assignLightToClusters();
+
+		// printf("PRE: %d\n", (int)CameraManager::Instance()->getActiveCameraType());
+		// 0) Render cubemap
+		ProbeManager *pm = EffectManager::Instance()->getProbeManagerPtr();
+		pm->Render(threadOwnershipMask);
+
 		// 1) Fill GBuffer
 		EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGBuffer();
 		{
+			PIXEvent event(L"Render Scene GBuffer");
 			assert(DrawList::InstanceReadOnly() != DrawList::Instance());
 			DrawList::InstanceReadOnly()->optimize();
 
 			// TODO: skip shadow maps for now, since shadows are implemented differently
 			// in deferred pipeline.
-
+			
 			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
-			DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+
+			int x = -1;
+			DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&x, threadOwnershipMask, NULL, NULL);
 			EffectManager::Instance()->drawLightGbuffer();
 			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 		}
 		
-		//EffectManager::Instance()->endCurrentRenderTarget();
+		EffectManager::Instance()->endCurrentRenderTarget();
+		// printf("POST: %d\n", (int)CameraManager::Instance()->getActiveCameraType());
 
-		//{
-			//EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGBuffer();
-			//EffectManager::Instance()->drawLightGbuffer();
-			//EffectManager::Instance()->endCurrentRenderTarget();
+
 
 		//}
 #if APIABSTRACTION_D3D11
@@ -255,12 +273,16 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		
 		if (ctx._renderMode == 0)
 		{
-			// 2.1) Assign light to clusters
-			EffectManager::Instance()->assignLightToClusters();
-			//EffectManager::Instance()->rotateLight(m_angle);
+			
+			// 2.1) shared with cube map lighting - moved to front
 			// 2.2) Render lights
 			EffectManager::Instance()->setLightAccumTextureRenderTarget();
 			EffectManager::Instance()->drawClusteredLightHDRPass();
+
+			ID3D11RenderTargetView *lightClusterSRV = EffectManager::Instance()->m_pCurRenderTarget->m_pRenderTargetView;
+			ID3D11DepthStencilView *geomPassDepth = EffectManager::Instance()->m_hrootDepthBufferTextureGPU.getObject<TextureGPU>()->m_DepthStencilView;
+
+			EffectManager::Instance()->getSkybox()->Render(viewMat, projMat, lightClusterSRV, geomPassDepth);
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
 		else
@@ -273,20 +295,20 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
 
-		//create mipmaps for lightTexture
-		{
-			for (int i = 1; i < 11; i++)
-			{
-				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
-				EffectManager::Instance()->drawLightMipsPass(i, false);
-				EffectManager::Instance()->endCurrentRenderTarget();
+		////create mipmaps for lightTexture
+		//{
+		//	for (int i = 1; i < 11; i++)
+		//	{
+		//		EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+		//		EffectManager::Instance()->drawLightMipsPass(i, false);
+		//		EffectManager::Instance()->endCurrentRenderTarget();
 
-				EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
-				EffectManager::Instance()->drawLightMipsPass(i, true);
-				EffectManager::Instance()->endCurrentRenderTarget();
-			}
-			
-		}
+		//		EffectManager::Instance()->setLightMipsTextureRenderTarget(i);
+		//		EffectManager::Instance()->drawLightMipsPass(i, true);
+		//		EffectManager::Instance()->endCurrentRenderTarget();
+		//	}
+		//	
+		//}
 
 		//create raybuffer
 		{
@@ -300,9 +322,16 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		// EffectManager::Instance()->drawDeferredFinalToBackBuffer();
 		if (ctx._debugMode == 0)
 		{
-			EffectManager::Instance()->drawDeferredFinalPass();
-			EffectManager::Instance()->endCurrentRenderTarget();
+			{
+				PIXEvent event(L"Render Final Pass");
+				EffectManager::Instance()->drawDeferredFinalPass();
+				EffectManager::Instance()->endCurrentRenderTarget();
+			}
 
+			{
+				PIXEvent event(L"Post processing");
+				EffectManager::Instance()->_postProcess.Render();
+			}
 		}
 		else
 		{
@@ -310,10 +339,15 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		}
 
 		// Draw text & hud & etc.
-		DrawList::ZOnlyInstanceReadOnly()->optimize();
-		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
-		DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
-		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+		{
+			PIXEvent event(L"Render UI");
+			// clear by color target and depth by tonemapping in postprocessing
+			EffectManager::Instance()->m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, false, false);
+			DrawList::ZOnlyInstanceReadOnly()->optimize();
+			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
+			DrawList::ZOnlyInstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask, NULL, NULL);
+			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+		}
 
     }
     else
@@ -331,12 +365,12 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		#endif
 		
 		// set global shader value (applied to all draw calls) for shadow map texture
-		if (renderShadowMap)
-			EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());
+			/*	if (renderShadowMap)
+					EffectManager::Instance()->createSetShadowMapShaderValue(DrawList::InstanceReadOnly());*/
 
 		ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 
-        DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+        DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask, NULL, NULL);
 
 		ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 

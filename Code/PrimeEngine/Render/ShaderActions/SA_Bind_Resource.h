@@ -64,6 +64,11 @@ enum EGpuResourceSlot
 	// + Deferred
 	GpuResourceSlot_ClusteredLightIndexListResource = 71,
 
+	// + PBR IBL
+	GpuResourceSlot_LocalSpecularCubemapResource = 72,
+	GpuResourceSlot_SpecularCubemapLUTResource = 73,
+	GpuResourceSlot_GlobalSpecularCubemapResource = 74,
+
 	GpuResourceSlot_FirstUAV = 1024, // all values past thsi will be subreacted 1024
 	GpuResourceSlot_AnimationCSUAV = GpuResourceSlot_FirstUAV, // register(u0)
 	GpuResourceSlot_AnimationCSReduceUAV = GpuResourceSlot_FirstUAV, // register(u0)

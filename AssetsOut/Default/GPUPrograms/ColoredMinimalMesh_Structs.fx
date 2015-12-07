@@ -19,6 +19,7 @@ struct COLORED_MINIMAL_MESH_PS_IN
 	// + Deferred
 	float3 viewRay	: HELLOWORLD;
     float3 iColor   API_SEMANTIC(PSIN_COLOR);
+	float3 iPosOS : POS_OS;
 };
 
 // Vertex Shader Function Definition //////////////////////////////////////////////////////////////////////

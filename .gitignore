@@ -239,14 +239,19 @@ AssetsOut/*
 AssetsOut/Default/*
 !AssetsOut/Default/GPUPrograms/
 
-<<<<<<< HEAD
 # Exclude test level
 !AssetsOut/Basic/
 AssetsOut/Basic/*
 !AssetsOut/Basic/Levels/
 
-=======
->>>>>>> classicaldeferred
+# Exclude Final assets
+!AssetsOut/FinalProjectAssets
+
+# Exclude SpecularLookupTex
+!AssetsOut/Default/Textures/
+AssetsOut/Default/Textures/*
+!AssetsOut/Default/Textures/SpecularLookup.dds
+
 External/**
 GlobalConfig/**
 Python25/**
@@ -263,11 +268,8 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
 
-<<<<<<< HEAD
 *.exe
 *.dll
 *.bat
 
-=======
->>>>>>> classicaldeferred
 

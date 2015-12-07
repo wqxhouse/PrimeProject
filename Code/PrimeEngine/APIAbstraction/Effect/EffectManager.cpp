@@ -64,6 +64,7 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	, m_frameBufferCopyTexture(context, arena)
 {
 	m_arena = arena; m_pContext = &context;
+
 }
 
 void EffectManager::setupConstantBuffersAndShaderResources()
@@ -598,15 +599,20 @@ void EffectManager::buildFullScreenBoard()
 	m_hColoredMinimalMeshTech = getEffectHandle("ColoredMinimalMesh_Tech");
 
 	m_hAccumulationHDRPassEffect = getEffectHandle("DeferredLightPass_Clustered_Tech");
-	m_hfinalLDRPassEffect= getEffectHandle("deferredFinalLDR.fx");
+	m_hfinalHDRPassEffect= getEffectHandle("deferredFinalHDR.fx");
 	m_hdebugPassEffect = getEffectHandle("debug_Tech.fx");
 	//Liu
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
 	m_hLightMipsPassEffect = getEffectHandle("LightMipsPassTech");
 	m_hRayTracingPassEffect = getEffectHandle("RayTracingPassTech");
+
 	m_hGBufferLightPassEffect = getEffectHandle("ColoredMinimalMesh_GBuffer_Tech");
+
 	//Liu
 	createSphere(1,20,20);
+	createSkyBoxGeom();
+
+	m_hCubemapPrefilterPassEffect = getEffectHandle("CubemapPrefilterTech");
 }
 
 void EffectManager::setFrameBufferCopyRenderTarget()
@@ -660,12 +666,12 @@ void EffectManager::setTextureAndDepthTextureRenderTargetForGBuffer()
 
 	if (m_pContext->_renderMode == 0)
 	{
-		const int numRts = 4; // Liu
+		const int numRts = 3; // Liu
 		TextureGPU* rtts[numRts];
 		rtts[0] = m_halbedoTextureGPU.getObject<TextureGPU>();
 		rtts[1] = m_hnormalTextureGPU.getObject<TextureGPU>();
 		rtts[2] = m_hmaterialTextureGPU.getObject<TextureGPU>();
-		rtts[3] = m_hpositionTextureGPU.getObject<TextureGPU>();
+		// rtts[3] = m_hpositionTextureGPU.getObject<TextureGPU>();
 		
 		// TODO: make it work for xbox, now only D3D11
 		((D3D11Renderer *)m_pContext->getGPUScreen())->
@@ -751,12 +757,12 @@ void EffectManager::setLightMipsTextureRenderTarget(int level)
 
 	//m_pCurRenderTarget = m_hlightTextureGPU.getObject<TextureGPU>();
 }
-
-void EffectManager::setFinalLDRTextureRenderTarget()
-{
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(m_hfinalLDRTextureGPU.getObject<TextureGPU>(), true);
-	m_pCurRenderTarget = m_hfinalLDRTextureGPU.getObject<TextureGPU>();
-}
+//
+//void EffectManager::setFinalLDRTextureRenderTarget()
+//{
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(m_hfinalLDRTextureGPU.getObject<TextureGPU>(), true);
+//	m_pCurRenderTarget = m_hfinalLDRTextureGPU.getObject<TextureGPU>();
+//}
 
 void EffectManager::setTextureAndDepthTextureRenderTargetForGlow()
 {
@@ -969,9 +975,140 @@ void EffectManager::drawSecondGlowPass()
 	objSa.unbindFromPipeline(&curEffect);
 }
 
+void EffectManager::uploadDeferredClusteredConstants(float nearClip, float farClip)
+{
+	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	// Quad MVP
+	PE::SetPerObjectConstantsShaderAction objSa;
+	objSa.m_data.gW = Matrix4x4();
+	objSa.m_data.gW.loadIdentity();
+	objSa.m_data.gWVP = objSa.m_data.gW;
+	objSa.bindToPipeline(&curEffect);
+
+	// cbClusteredShadingConsts
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	/*CameraSceneNode *csn =
+		CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<CameraSceneNode>();*/
+	float n = nearClip;
+	float f = farClip;
+	float projA = f / (f - n);
+	float projB = (-f * n) / (f - n);
+	// Vector3 camPos = csn->m_base.getPos();
+	Vector3 camPos = Vector3();
+
+	// TODO: default camera far plane is 2000 (too large, consider make it small to get better depth-pos reconstruction)
+	pscs.m_data.csconsts.cNear = n;
+	pscs.m_data.csconsts.cFar = f;
+	pscs.m_data.csconsts.cProjA = projA;
+	pscs.m_data.csconsts.cProjB = projB;
+	pscs.m_data.camPos = camPos;
+	pscs.m_data.camZAxisWS = Vector3();
+
+	pscs.m_data.dirLightNum = _dirLightNum;
+
+	Vector3 size = m_cMax - m_cMin;
+	Vector3 scale = Vector3(float(CX) / size.m_x, float(CY) / size.m_y, float(CZ) / size.m_z);
+	pscs.m_data.scale = scale;
+	Vector3 bias;
+	bias.m_x = -scale.m_x * m_cMin.m_x;
+	bias.m_y = -scale.m_y * m_cMin.m_y;
+	bias.m_z = -scale.m_z * m_cMin.m_z;
+	pscs.m_data.bias = bias;
+	// pscs.m_data.bias = m_cMin;
+
+	// Convert PE Light to shader Light (huge overhead...; 
+	// but no time to change the fundamental structure of PE)
+	for (unsigned int i = 0; i < _dirLightNum; i++)
+	{
+		pscs.m_data.dirLights[i].cDir = _dirLights[i]->m_cbuffer.dir;
+		pscs.m_data.dirLights[i].cColor = _dirLights[i]->m_cbuffer.diffuse.asVector3Ref();
+	}
+
+	for (unsigned int i = 0; i < _pointLightNum; i++)
+	{
+		pscs.m_data.pointLights[i].cPos = _pointLights[i]->m_cbuffer.pos;
+		pscs.m_data.pointLights[i].cColor = _pointLights[i]->m_cbuffer.diffuse.asVector3Ref();
+		pscs.m_data.pointLights[i].cRadius = _pointLights[i]->m_cbuffer.range;
+		pscs.m_data.pointLights[i].cSpecPow = _pointLights[i]->m_cbuffer.spotPower;
+	}
+
+	for (unsigned int i = 0; i < _spotLightNum; i++)
+	{
+		pscs.m_data.spotLights[i].cPos = _spotLights[i]->m_cbuffer.pos;
+		pscs.m_data.spotLights[i].cColor = _spotLights[i]->m_cbuffer.diffuse.asVector3Ref();
+		pscs.m_data.spotLights[i].cSpotCutOff = _spotLights[i]->m_cbuffer.range;
+		pscs.m_data.spotLights[i].cDir = _spotLights[i]->m_cbuffer.dir;
+		pscs.m_data.spotLights[i].cPos = _spotLights[i]->m_cbuffer.pos;
+	}
+
+	// memcpy(pscs.m_data.lightIndices, &_lightIndices, sizeof(short) * _lightIndices.size());
+
+	pscs.bindToPipeline(&curEffect);
+}
+
+void EffectManager::drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2)
+{
+	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	PE::SA_Bind_Resource setTextureActionAlbedo(
+		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		rt0);
+	setTextureActionAlbedo.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionNormal(
+		*m_pContext, m_arena, ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded, 
+		rt1);
+	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionDepth(
+		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		depth);
+	setTextureActionDepth.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionClusters(
+		*m_pContext, m_arena, CLUSTERED_TEXTURE_3D_SAMPLER_SLOT,
+		SamplerState_NotNeeded,
+		_clusterTexShaderView);
+	setTextureActionClusters.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setLightIndicesStructuredBuffer(
+		*m_pContext, m_arena, GpuResourceSlot_ClusteredLightIndexListResource,
+		SamplerState_NotNeeded,
+		_lightIndicesBufferShaderView);
+	setLightIndicesStructuredBuffer.bindToPipeline(&curEffect);
+
+
+	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+
+	// draw quad
+	pibGPU->draw(1, 0);
+
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+
+	setTextureActionAlbedo.unbindFromPipeline(&curEffect);
+	setTextureActionNormal.unbindFromPipeline(&curEffect);
+	setTextureActionDepth.unbindFromPipeline(&curEffect);
+	setTextureActionClusters.unbindFromPipeline(&curEffect);
+}
+
 // + Deferred
 void EffectManager::drawClusteredLightHDRPass()
 {
+	PIXEvent event(L"Render Scene Clustered Deferred");
 	Effect &curEffect = *m_hAccumulationHDRPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
@@ -986,6 +1123,7 @@ void EffectManager::drawClusteredLightHDRPass()
 	TextureGPU *albedoTexture = m_halbedoTextureGPU.getObject<TextureGPU>();
 	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
 	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
+	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
 
 	PE::SA_Bind_Resource setTextureActionAlbedo(
 		*m_pContext, m_arena, DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
@@ -998,6 +1136,12 @@ void EffectManager::drawClusteredLightHDRPass()
 		normalTexture->m_samplerState,
 		API_CHOOSE_DX11_DX9_OGL(normalTexture->m_pShaderResourceView, normalTexture->m_pTexture, normalTexture->m_texture));
 	setTextureActionNormal.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setTextureActionMaterial(
+		*m_pContext, m_arena, WIND_TEXTURE_2D_SAMPLER_SLOT,
+		materialTexture->m_samplerState,
+		API_CHOOSE_DX11_DX9_OGL(materialTexture->m_pShaderResourceView, materialTexture->m_pTexture, materialTexture->m_texture));
+	setTextureActionMaterial.bindToPipeline(&curEffect);
 
 	PE::SA_Bind_Resource setTextureActionDepth(
 		*m_pContext, m_arena, DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
@@ -1016,6 +1160,18 @@ void EffectManager::drawClusteredLightHDRPass()
 		SamplerState_NotNeeded,
 		_lightIndicesBufferShaderView);
 	setLightIndicesStructuredBuffer.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setLocalCubemap(
+		*m_pContext, m_arena, GpuResourceSlot_LocalSpecularCubemapResource,
+		SamplerState_NotNeeded,
+		_probeManager.getLocalCubemapPrefilterTargetSRV());
+	setLocalCubemap.bindToPipeline(&curEffect);
+
+	PE::SA_Bind_Resource setIBLLut(
+		*m_pContext, m_arena, GpuResourceSlot_SpecularCubemapLUTResource,
+		SamplerState_NotNeeded,
+		_probeManager.getPbrLutTex());
+	setIBLLut.bindToPipeline(&curEffect);
 
 	// TODO: optimize constant buffer - reduce num of const buffers
 
@@ -1095,13 +1251,15 @@ void EffectManager::drawClusteredLightHDRPass()
 	setTextureActionNormal.unbindFromPipeline(&curEffect);
 	setTextureActionDepth.unbindFromPipeline(&curEffect);
 	setTextureActionClusters.unbindFromPipeline(&curEffect);
+	setLocalCubemap.unbindFromPipeline(&curEffect);
+	setIBLLut.unbindFromPipeline(&curEffect);
 	objSa.unbindFromPipeline(&curEffect);
 	pscs.unbindFromPipeline(&curEffect);
 }
 
 void EffectManager::drawDeferredFinalPass()
 {
-	Effect &curEffect = *m_hfinalLDRPassEffect.getObject<Effect>();
+	Effect &curEffect = *m_hfinalHDRPassEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
 
@@ -1113,7 +1271,8 @@ void EffectManager::drawDeferredFinalPass()
 #else
 	// For simplicity, just draw directly into back buffer
 	// TODO: with or without depth?
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
+	// m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(0, true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
+	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithNoDepth(m_hfinalHDRTextureGPU.getObject<TextureGPU>(), true);////setRenderTargetsAndViewportWithDepth(0, 0, true, true)
 #endif
 
 	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
@@ -1312,49 +1471,49 @@ Effect *EffectManager::operator[] (const char *pEffectFilename)
 
 void EffectManager::drawDeferredFinalToBackBuffer()
 {
-	// use motion blur for now since it doesnt do anything but draws the surface
-	Effect &curEffect = *m_hMotionBlurEffect.getObject<Effect>();
-	if (!curEffect.m_isReady)
-		return;
-
-#	if APIABSTRACTION_D3D9
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
-	// this is called in function above: IRenderer::Instance()->getDevice()->BeginScene();
-#elif APIABSTRACTION_OGL
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
-#	elif APIABSTRACTION_D3D11
-	// TODO: with or without depth?
-	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);//setRenderTargetsAndViewportWithDepth(0, 0, true, true)
-#	endif
-
-	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
-	pibGPU->setAsCurrent();
-
-	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
-	pvbGPU->setAsCurrent(&curEffect);
-
-	curEffect.setCurrent(pvbGPU);
-
-	PE::SA_Bind_Resource setTextureAction(*m_pContext, m_arena);
-	setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-		m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState,  
-		API_CHOOSE_DX11_DX9_OGL(m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
-	setTextureAction.bindToPipeline(&curEffect);
-
-	PE::SetPerObjectConstantsShaderAction objSa;
-	objSa.m_data.gW = Matrix4x4();
-	objSa.m_data.gW.loadIdentity();
-	objSa.m_data.gWVP = objSa.m_data.gW;
-
-	objSa.bindToPipeline(&curEffect);
-
-	pibGPU->draw(1, 0);
-
-	pibGPU->unbindFromPipeline();
-	pvbGPU->unbindFromPipeline(&curEffect);
-
-	setTextureAction.unbindFromPipeline(&curEffect);
-	objSa.unbindFromPipeline(&curEffect);
+//	// use motion blur for now since it doesnt do anything but draws the surface
+//	Effect &curEffect = *m_hMotionBlurEffect.getObject<Effect>();
+//	if (!curEffect.m_isReady)
+//		return;
+//
+//#	if APIABSTRACTION_D3D9
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+//	// this is called in function above: IRenderer::Instance()->getDevice()->BeginScene();
+//#elif APIABSTRACTION_OGL
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);
+//#	elif APIABSTRACTION_D3D11
+//	// TODO: with or without depth?
+//	m_pContext->getGPUScreen()->setRenderTargetsAndViewportWithDepth(0, 0, true, true);//setRenderTargetsAndViewportWithDepth(0, 0, true, true)
+//#	endif
+//
+//	IndexBufferGPU *pibGPU = m_hIndexBufferGPU.getObject<IndexBufferGPU>();
+//	pibGPU->setAsCurrent();
+//
+//	VertexBufferGPU *pvbGPU = m_hVertexBufferGPU.getObject<VertexBufferGPU>();
+//	pvbGPU->setAsCurrent(&curEffect);
+//
+//	curEffect.setCurrent(pvbGPU);
+//
+//	PE::SA_Bind_Resource setTextureAction(*m_pContext, m_arena);
+//	setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
+//		m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState,  
+//		API_CHOOSE_DX11_DX9_OGL(m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture, m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
+//	setTextureAction.bindToPipeline(&curEffect);
+//
+//	PE::SetPerObjectConstantsShaderAction objSa;
+//	objSa.m_data.gW = Matrix4x4();
+//	objSa.m_data.gW.loadIdentity();
+//	objSa.m_data.gWVP = objSa.m_data.gW;
+//
+//	objSa.bindToPipeline(&curEffect);
+//
+//	pibGPU->draw(1, 0);
+//
+//	pibGPU->unbindFromPipeline();
+//	pvbGPU->unbindFromPipeline(&curEffect);
+//
+//	setTextureAction.unbindFromPipeline(&curEffect);
+//	objSa.unbindFromPipeline(&curEffect);
 }
 
 // + Deferred
@@ -1438,11 +1597,11 @@ void EffectManager::debugDeferredRenderTarget(int which)
 	else if (which == 4)
 	{
 		setTextureAction.set(DIFFUSE_TEXTURE_2D_SAMPLER_SLOT, 
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_samplerState, 
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_samplerState, 
 			API_CHOOSE_DX11_DX9_OGL(
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_pTexture,
-			m_hfinalLDRTextureGPU.getObject<TextureGPU>()->m_texture));
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView,
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pTexture,
+			m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_texture));
 	}
 
 	setTextureAction.bindToPipeline(&curEffect);
@@ -1533,6 +1692,79 @@ void EffectManager::debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSe
 	pvbGPU->unbindFromPipeline(&curEffect);
 }
 
+void EffectManager::createSkyBoxGeom()
+{
+	static const int NumIndices = 36;
+	static const int NumVertices = 8;
+
+	Vector3 verts[NumVertices] =
+	{
+		Vector3(-1, 1, 1),
+		Vector3(1, 1, 1),
+		Vector3(1, -1, 1),
+		Vector3(-1, -1, 1),
+		Vector3(1, 1, -1),
+		Vector3(-1, 1, -1),
+		Vector3(-1, -1, -1),
+		Vector3(1, -1, -1),
+	};
+
+	unsigned short indices[NumIndices] =
+	{
+		0, 1, 2, 2, 3, 0,   // Front
+		1, 4, 7, 7, 2, 1,   // Right
+		4, 5, 6, 6, 7, 4,   // Back
+		5, 0, 3, 3, 6, 5,   // Left
+		5, 4, 1, 1, 0, 5,   // Top
+		3, 2, 7, 7, 6, 3    // Bottom
+	};
+
+
+	PositionBufferCPU vbcpu(*m_pContext, m_arena);
+	vbcpu.m_values.reset(NumIndices * 3);
+	for (int i = 0; i < NumVertices; i++)
+	{
+		vbcpu.m_values.add(verts[i].m_x);
+		vbcpu.m_values.add(verts[i].m_y);
+		vbcpu.m_values.add(verts[i].m_z);
+	}
+
+	ColorBufferCPU tcbcpu(*m_pContext, m_arena);
+	tcbcpu.m_values.reset(NumIndices);
+	for (int i = 0; i < NumIndices; i++)
+	{
+		tcbcpu.m_values.add(0.5f);
+	}
+
+	IndexBufferCPU ibcpu(*m_pContext, m_arena);
+	ibcpu.m_values.reset(NumIndices);
+	for (int i = 0; i < NumIndices; i++)
+	{
+		ibcpu.m_values.add(indices[i]);
+	}
+	ibcpu.m_indexRanges.reset(1);
+	ibcpu.m_vertsPerFacePerRange.reset(1);
+	IndexRange range(*m_pContext, m_arena);
+	range.m_start = 0;
+	range.m_end = NumIndices;
+	range.m_minVertIndex = 0;
+	range.m_maxVertIndex = NumVertices;
+	ibcpu.m_indexRanges.add(range);
+	ibcpu.m_vertsPerFacePerRange.add(3);
+	ibcpu.m_primitiveTopology = PEPrimitveTopology_TRIANGLES;
+	ibcpu.m_minVertexIndex = range.m_minVertIndex;
+	ibcpu.m_maxVertexIndex = range.m_maxVertIndex;
+	ibcpu.m_verticesPerPolygon = 3;
+
+	m_hSkyBoxGeomIBGpu = Handle("INDEX_BUFFER_GPU", sizeof(IndexBufferGPU));
+	IndexBufferGPU *pibgpu = new(m_hSkyBoxGeomIBGpu)IndexBufferGPU(*m_pContext, m_arena);
+	pibgpu->createGPUBuffer(ibcpu);
+
+	m_hSkyBoxGeomVBGpu = Handle("VERTEX_BUFFER_GPU", sizeof(VertexBufferGPU));
+	VertexBufferGPU *pvbgpu = new(m_hSkyBoxGeomVBGpu)VertexBufferGPU(*m_pContext, m_arena);
+	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
+}
+
 //Liu
 void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 {
@@ -1559,10 +1791,43 @@ void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 	m_hLightVertexBufferGPU = Handle("VERTEX_BUFFER_GPU", sizeof(VertexBufferGPU));
 	VertexBufferGPU *pvbgpu = new(m_hLightVertexBufferGPU) VertexBufferGPU(*m_pContext, m_arena);
 	pvbgpu->createGPUBufferFromSource_ColoredMinimalMesh(vbcpu, tcbcpu);
-	
-	
+}
 
-	
+void EffectManager::renderCubemapConvolutionSphere()
+{
+	Effect &curEffect = *m_hCubemapPrefilterPassEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	IndexBufferGPU *pibGPU = m_hLightIndexBufferGPU.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hLightVertexBufferGPU.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrent(pvbGPU);
+	pibGPU->draw(1, 0);
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
+}
+
+void EffectManager::renderSkyboxNewSphere()
+{
+	Handle hSkyboxEffect = getEffectHandle("SkyboxNewTech");
+	Effect &curEffect = *hSkyboxEffect.getObject<Effect>();
+	if (!curEffect.m_isReady)
+		return;
+
+	IndexBufferGPU *pibGPU = m_hSkyBoxGeomIBGpu.getObject<IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	VertexBufferGPU *pvbGPU = m_hSkyBoxGeomVBGpu.getObject<VertexBufferGPU>();
+	pvbGPU->setAsCurrent(&curEffect);
+	curEffect.setCurrentShaderOnly(pvbGPU);
+	pibGPU->draw(1, 0);
+	pibGPU->unbindFromPipeline();
+	pvbGPU->unbindFromPipeline(&curEffect);
 }
 //Liu
 void EffectManager::drawLightGbuffer()
@@ -1907,7 +2172,7 @@ void EffectManager::updateLightDirection(Vector3 sprinkleDir)
 
 	Vector3 box = Vector3(20,100,20);
 
-	for (int i = 0; i < lights.m_size; i++)
+	for (int i = 0; i < lights.m_size-1; i++)
 	{
 		Light *l = lights[i].getObject<Light>();
 		if (l->m_cbuffer.type != 0) continue;
@@ -1943,7 +2208,7 @@ void EffectManager::updateLightDirection(Vector3 sprinkleDir)
 //Liu
 void EffectManager::randomLightInfo(int num)
 {
-	RootSceneNode::Instance()->m_lights.reset(num,true);
+	RootSceneNode::Instance()->m_lights.reset(num + 1,true);
 	for (int i=0; i<num; i++)
 	{	
 		Handle hLight("LIGHT", sizeof(Light));
@@ -1970,10 +2235,31 @@ void EffectManager::randomLightInfo(int num)
 	
 	randomizeLight(pLight,&(pLight->m_oribitAxis) ,i);
 	pLight->addDefaultComponents();
+	
+	// diffuse multiplyer
+	pLight->m_cbuffer.diffuse = pLight->m_cbuffer.diffuse * 20;
 
 	RootSceneNode::Instance()->m_lights.add(hLight);
 	RootSceneNode::Instance()->addComponent(hLight);
 
+	}
+}
+
+void EffectManager::updateLight()
+{
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Handle hl = lights[i];
+		Light *l = hl.getObject<Light>();
+		if (l->m_cbuffer.type == 1)
+		{
+			Vector3 dir = _skybox.GetSunDirection();
+			Vector3 color = _skybox.GetSunColor();
+			Vector4 colorVec4 = Vector4(color.m_x, color.m_y, color.m_z, 1.0f);
+			l->m_cbuffer.dir = dir;
+			l->m_cbuffer.diffuse = colorVec4;
+		}
 	}
 }
 
@@ -1989,7 +2275,7 @@ void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
 	
 	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
 	//*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-	l->m_cbuffer.range = rand() % 10;
+	l->m_cbuffer.range = rand() % 5 +1;
 	
 }
 //Liu

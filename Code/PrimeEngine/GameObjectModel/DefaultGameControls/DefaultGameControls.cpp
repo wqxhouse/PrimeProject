@@ -38,6 +38,8 @@ static float Debug_Fly_Speed = 4.0f; //Units per second
 
 #define Debug_Rotate_Speed 2.0f //Radians per second
 
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
+
 
 namespace PE {
 
@@ -293,6 +295,40 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	{
 		m_pContext->_debugMode++;
 		m_pContext->_debugMode = m_pContext->_debugMode % 5;
+	}
+	else if (Event_KEY_X_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+
+		float solarTime;
+		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
+		printf("SolarTime = %.2f\n", solarTime);
+		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime + 0.02);
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(++phi, theta);*/
+	}
+	else if (Event_KEY_C_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+
+		float solarTime;
+		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
+		printf("SolarTime = %.2f\n", solarTime);
+		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime - 0.02);
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(--phi, theta);*/
+	}
+	else if (Event_KEY_V_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*	EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+			EffectManager::Instance()->getSkybox()->SetSunDirection(phi, ++theta);*/
+	}
+	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
 	}
 	else
 	{

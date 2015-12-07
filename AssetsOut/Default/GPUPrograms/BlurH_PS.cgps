@@ -1,0 +1,14 @@
+#ifndef BLURH_PS
+#define BLURH_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "StandardTextureResources.fx"
+#include "Blur_PS.fx"
+
+float4 BlurH_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	return Blur(pIn, float2(1, 0), 5.0);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(BlurH_PS)
+
+#endif 

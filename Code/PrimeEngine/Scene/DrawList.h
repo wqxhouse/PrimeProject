@@ -143,7 +143,7 @@ struct DrawList : public Component
 	}
 	
 	// Individual events -------------------------------------------------------
-	virtual void do_RENDER(Events::Event *pEvt, int &threadOwnershipMask);
+	virtual void do_RENDER(Events::Event *pEvt, int &threadOwnershipMask, Matrix4x4 *viewProjMat, Matrix4x4 *viewInv);
 
 	virtual void do_RENDER_Z_ONLY(Events::Event *pEvt, int &threadOwnershipMask);
 

@@ -339,7 +339,37 @@ namespace Components {
 	context.getNetworkManager()->initNetwork();
 	
 	//Liu
+
 	EffectManager::Instance()->randomLightInfo(100);
+
+
+	// Add a directional light
+	Handle hLight("LIGHT", sizeof(Light));
+	Vector3 sunDir = EffectManager::Instance()->getSkybox()->GetSunDirection();
+	Vector3 sunColor = EffectManager::Instance()->getSkybox()->GetSunColor();
+	Vector4 sunColorVec4 = Vector4(sunColor.m_x, sunColor.m_y, sunColor.m_z, 1.0f);
+	
+	Light *pLight = new(hLight)Light(
+		context,
+		arena,
+		hLight,
+		Vector3(5, 0, 0), //Position
+		Vector3(0, 0, 0),
+		Vector3(0, 0, 0),
+		sunDir, //Direction (z-axis)
+		Vector4(0, 0, 0, 1), //Ambient
+		sunColorVec4, //Diffuse
+		Vector4(0, 0, 0, 1), //Specular
+		Vector3(0.05, 0.05, 0.05), //Attenuation (x, y, z)
+		1, // Spot Power
+		20, //Range
+		false, //Whether or not it casts shadows
+		1,//0 = point, 1 = directional, 2 = spot
+		Vector3(1, 0, 0),
+		0
+		);
+	RootSceneNode::Instance()->m_lights.add(hLight);
+
 
 	return 1;
 }

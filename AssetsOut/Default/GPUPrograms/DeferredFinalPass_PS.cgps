@@ -65,6 +65,16 @@ float isoscelesTriangleNextAdjacent(float adjacentLength, float incircleRadius)
 
 float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 {
+	uint3 fragCoord = int3(pIn.iPosH.xy, 0);
+	float4 shadingColor = float4(gWindMap.Load(fragCoord).xyz, 1.0f);	
+
+	// gamma correction
+	return float4(pow(shadingColor.xyz, 1.0 / 2.2), 1.0);
+}
+
+/*
+float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
 	int3 loadIndices = int3(pIn.iPosH.xy, 0);
 	// get screen-space ray intersection point
 	float4 raySS = gWindMap.Load(loadIndices).xyzw;
@@ -118,11 +128,9 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 		// convert the in-radius into screen size then check what power N to raise 2 to reach it - that power N becomes mip level to sample from
 		float mipChannel = clamp(log2(incircleSize), 0.0f, maxMipLevel);
 		
-		/*
-		* Read color and accumulate it using trilinear filtering and weight it.
-		* Uses pre-convolved image (color buffer) and glossiness to weigh color contributions.
-		* Visibility is accumulated in the alpha channel. Break if visibility is 100% or greater (>= 1.0f).
-		*/
+		// Read color and accumulate it using trilinear filtering and weight it.
+		// Uses pre-convolved image (color buffer) and glossiness to weigh color contributions.
+		// Visibility is accumulated in the alpha channel. Break if visibility is 100% or greater (>= 1.0f).
 		float4 newColor = coneSampleWeightedColor(samplePos, mipChannel, glossMult);
 		
 		remainingAlpha -= newColor.a;
@@ -163,7 +171,7 @@ float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	return float4(raySS.rgb ,1.0f);//   
 	//return float4(0,0,0,1.0f);
 }
-
+*/
 
 
 /* //Liu ssr
