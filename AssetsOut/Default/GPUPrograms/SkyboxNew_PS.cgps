@@ -74,7 +74,16 @@ float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float xp = xz * Perez(zenith, gamma, coeffsx);
 	float yp = yz * Perez(zenith, gamma, coeffsy);
 
-	return RGB(Yp, xp, yp) * 20.0;
+	float4 color = RGB(Yp, xp, yp);
+	
+	// fix for intel
+	/*
+	if(isnan(color.x)) 
+	{
+		return float4(5, 5, 5, 1);
+	}
+	*/
+	return color * 20.0;
 }
 
 /*
