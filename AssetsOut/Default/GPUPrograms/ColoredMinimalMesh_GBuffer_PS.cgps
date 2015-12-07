@@ -14,7 +14,8 @@ DETAILED_MESH_GBUFFER_PS_OUT ColoredMinimalMesh_GBuffer_PS(COLORED_MINIMAL_MESH_
 
 	output.Albedo = float4(0.0f,0.0f,0.0f,0.0f);
 	//output.PosW = float4(pIn.iPosW, 0.0f);
-	output.Normal = float4(0,1,0,1.0);
+
+	output.Normal =  float4(0,1,0,1.0);//float4(normalize(pIn.iPosOS),1.0f);//float4(0,1,0,1.0);
 	output.Material = float4(0.5,0,0,1.0);
 
 	return output;

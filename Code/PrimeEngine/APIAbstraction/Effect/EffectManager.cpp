@@ -1864,7 +1864,7 @@ void EffectManager::drawLightGbuffer()
 
 		Matrix4x4 translationM = Matrix4x4();
 		translationM.loadIdentity();
-		translationM.setPos(translation - Vector3(0, 0.1f, 0));
+		translationM.setPos(translation );//- Vector3(0, 0.1f, 0)
 
 		objSa.m_data.gW = Matrix4x4();
 		objSa.m_data.gW.loadIdentity();
@@ -2275,7 +2275,7 @@ void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
 	
 	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
 	//*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-	l->m_cbuffer.range = rand() % 5 +1;
+	l->m_cbuffer.range = 1.5f;
 	
 }
 //Liu
