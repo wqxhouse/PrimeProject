@@ -69,6 +69,9 @@ private:
 		Coefficients cY;
 		Coefficients cx;
 		Coefficients cy;
+
+		Vector3 sunColor;
+		float night;
 	};
 
 	ConstantBuffer<VSConstants> _vsConstants;
@@ -77,6 +80,8 @@ private:
 	ID3D11BlendStatePtr _blendState;
 	ID3D11RasterizerStatePtr _rasterizerState;
 	ID3D11SamplerStatePtr _samplerState;
+
+	ID3D11ShaderResourceViewPtr _nightCubemap;
 
 	// PreethamSky params 
 	Vector3 _A, _B, _C, _D, _E, _Z;
@@ -98,6 +103,8 @@ private:
 	Coefficients _cY;
 	Coefficients _cx;
 	Coefficients _cy;
+
+	ID3D11SamplerStatePtr _linearSampler;
 
 	float _Yz;
 	float _xz;

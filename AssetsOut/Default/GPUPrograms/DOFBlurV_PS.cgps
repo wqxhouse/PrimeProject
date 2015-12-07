@@ -1,0 +1,12 @@
+#ifndef DOFBLURV_PS
+#define DOFBLURV_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "DOFBlur_PS.fx"
+
+float4 DOFBlurV_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	return float4(DOFBlur(pIn, float2(0, 1)), 1.0);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(DOFBlurV_PS)
+#endif 

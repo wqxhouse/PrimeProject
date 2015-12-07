@@ -10,7 +10,7 @@
 class PostProcess
 {
 public:
-	void Initialize(PE::GameContext *context, PE::MemoryArena arena, ID3D11ShaderResourceView *finalPassTarget);
+	void Initialize(PE::GameContext *context, PE::MemoryArena arena, ID3D11ShaderResourceView *finalPassTarget, ID3D11RenderTargetView *finalPassRTV, ID3D11ShaderResourceView *depthSRV);
 
 	void Render();
 
@@ -21,6 +21,8 @@ private:
 	PE::MemoryArena _arena;
 
 	ID3D11ShaderResourceViewPtr _finalPassSRV;
+	ID3D11RenderTargetViewPtr _finalPassRTV;
+	ID3D11ShaderResourceViewPtr _depthSRV;
 
 	ID3D11ShaderResourceViewPtr _adaptedLuminance;
 	std::vector<RenderTarget2D> _reductionTargets;
@@ -29,15 +31,33 @@ private:
 	RenderTarget2D _bloomTarget;
 	RenderTarget2D _blurTarget;
 
+	RenderTarget2D _depthBlurTarget;
+	RenderTarget2D _depthOfFieldFirstPassTarget;
+
 	void renderBloom();
 	void renderBlur();
 	void renderTonemapping();
 
+	void renderDepthBlur();
+	void renderDOFGather();
+
 	void computeAvgLuminance();
 
-	struct PostProcessConstants
+	struct DOFConstants
 	{
-		Float4Align float deltaSec;
+		float projA;
+		float projB;
+		float GatherBlurSize;
+		float pad1;
+		Vector4 DOFDepths;
 	};
-	
+
+	ConstantBuffer<DOFConstants> _dofConstants;
+
+	float _nearFocusStart;
+	float _nearFocusEnd;
+	float _farFocusStart;
+	float _farFoucsEnd;
+
+	ID3D11SamplerStatePtr _linearSampler;
 };
