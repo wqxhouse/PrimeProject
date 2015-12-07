@@ -2,6 +2,9 @@
 #include "PrimeEngine/APIAbstraction/Effect/Effect.h"
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 
+#include "PrimeEngine/Scene/CameraSceneNode.h"
+#include "PrimeEngine/Scene/CameraManager.h"
+
 int DispatchSize(int tgSize, int numElements)
 {
 	int dispatchSize = numElements / tgSize;
@@ -9,7 +12,7 @@ int DispatchSize(int tgSize, int numElements)
 	return dispatchSize;
 }
 
-void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID3D11ShaderResourceView *finalPassSRV)
+void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID3D11ShaderResourceView *finalPassSRV, ID3D11RenderTargetView *finalPassRTV, ID3D11ShaderResourceView *depthSRV)
 {
 	_pContext = context;
 	_arena = arena;
@@ -19,6 +22,11 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 	_device = pD3D11Renderer->m_pD3DDevice;
 
 	_finalPassSRV = finalPassSRV;
+	_finalPassRTV = finalPassRTV;
+	_depthSRV = depthSRV;
+
+	_depthBlurTarget.Initialize(_device, 1280, 720, DXGI_FORMAT_R16G16_FLOAT);
+	_depthOfFieldFirstPassTarget.Initialize(_device, 1280, 720, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	// bloom targets - size hard coded for now
 	_bloomTarget.Initialize(_device, 1280 / 2, 720 / 2, DXGI_FORMAT_R11G11B10_FLOAT);
@@ -38,12 +46,36 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 	}
 
 	_adaptedLuminance = _reductionTargets[_reductionTargets.size() - 1].SRView;
+
+	_dofConstants.Initialize(_device);
+
+	_nearFocusStart = 0.01f;
+	_nearFocusEnd = 0.01f;
+	_farFocusStart = 7.0f;
+	_farFoucsEnd = 9.0f;
+
+	D3D11_SAMPLER_DESC sampDesc;
+
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.MipLODBias = 0.0f;
+	sampDesc.MaxAnisotropy = 1;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	DXCall(_device->CreateSamplerState(&sampDesc, &_linearSampler));
 }
 
 void PostProcess::Render()
 {
-	computeAvgLuminance();
+	renderDepthBlur();
+	renderDOFGather();
 
+	computeAvgLuminance();
 	D3D11_VIEWPORT viewport;
 	viewport.Width = static_cast<float>(1280 / 2);
 	viewport.Height = static_cast<float>(720 / 2);
@@ -53,9 +85,9 @@ void PostProcess::Render()
 	viewport.TopLeftY = 0.0f;
 
 	_context->RSSetViewports(1, &viewport);
-
 	renderBloom();
 	renderBlur();
+
 	renderTonemapping();
 }
 
@@ -250,4 +282,114 @@ void PostProcess::renderTonemapping()
 	setInputTex.unbindFromPipeline(tonemappingPass);
 	setAvgLumTex.unbindFromPipeline(tonemappingPass);
 	setBloomTex.unbindFromPipeline(tonemappingPass);
+}
+
+void PostProcess::renderDepthBlur()
+{
+	PIXEvent event(L"Depth Blur");
+
+	PE::Components::Effect *depthBlurPass=
+		PE::EffectManager::Instance()->getEffectHandle("DepthBlurTech").getObject<PE::Components::Effect>();
+
+	PE::SA_Bind_Resource setInputTex(
+		*_pContext, _arena, PE::DEPTHMAP_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NotNeeded,
+		_depthSRV);
+	setInputTex.bindToPipeline(depthBlurPass);
+
+	ID3D11RenderTargetView *rtvs[1] = { _depthBlurTarget.RTView };
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+	PE::IndexBufferGPU *pibGPU = PE::EffectManager::Instance()->m_hIndexBufferGPU.getObject<PE::IndexBufferGPU>();
+	pibGPU->setAsCurrent();
+
+	PE::VertexBufferGPU *pvbGPU = PE::EffectManager::Instance()->m_hVertexBufferGPU.getObject<PE::VertexBufferGPU>();
+	pvbGPU->setAsCurrent(depthBlurPass);
+	depthBlurPass->setCurrent(pvbGPU);
+
+	// set cb
+	PE::Components::CameraSceneNode *csn =
+		PE::Components::CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<PE::Components::CameraSceneNode>();
+	float n = csn->m_near;
+	float f = csn->m_far;
+	float projA = f / (f - n);
+	float projB = (-f * n) / (f - n);
+
+	_dofConstants.Data.projA = projA;
+	_dofConstants.Data.projB = projB;
+	_dofConstants.Data.GatherBlurSize = 16;
+	_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
+	_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
+	_dofConstants.Data.DOFDepths.m_z = _farFocusStart;
+	_dofConstants.Data.DOFDepths.m_w = _farFoucsEnd;
+	_dofConstants.ApplyChanges(_context);
+	_dofConstants.SetPS(_context, 0);
+
+	// draw quad
+	pibGPU->draw(1, 0);
+
+	setInputTex.unbindFromPipeline(depthBlurPass);
+
+	rtvs[0] = nullptr;
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+}
+
+void PostProcess::renderDOFGather()
+{
+	PIXEvent event(L"DOF Gather");
+	PE::Components::Effect *DOFGatherPass =
+		PE::EffectManager::Instance()->getEffectHandle("DOFGatherTech").getObject<PE::Components::Effect>();
+
+	PE::IndexBufferGPU *pibGPU = PE::EffectManager::Instance()->m_hIndexBufferGPU.getObject<PE::IndexBufferGPU>();
+	PE::VertexBufferGPU *pvbGPU = PE::EffectManager::Instance()->m_hVertexBufferGPU.getObject<PE::VertexBufferGPU>();
+
+	ID3D11SamplerState *samplerStates[1] = { _linearSampler };
+	_context->PSSetSamplers(9, 1, samplerStates);
+
+	// First pass
+	ID3D11RenderTargetView *rtvs[1] = { _depthOfFieldFirstPassTarget.RTView };
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+	PE::SA_Bind_Resource setInputTex(
+		*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp,
+		_finalPassSRV);
+
+	PE::SA_Bind_Resource setInputDepthTex(
+		*_pContext, _arena, PE::ADDITIONAL_DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp,
+		_depthBlurTarget.SRView);
+
+	setInputTex.bindToPipeline();
+	setInputDepthTex.bindToPipeline();
+	pibGPU->setAsCurrent();
+	pvbGPU->setAsCurrent(DOFGatherPass);
+	DOFGatherPass->setCurrent(pvbGPU);
+	pibGPU->draw(1, 0);
+
+	setInputTex.unbindFromPipeline(DOFGatherPass);
+	// setInputDepthTex.unbindFromPipeline(DOFGatherPass);
+
+	// Second pass
+	rtvs[0] = _finalPassRTV;
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+	PE::SA_Bind_Resource setInputFirstPassTex(
+		*_pContext, _arena, PE::DIFFUSE_TEXTURE_2D_SAMPLER_SLOT,
+		PE::SamplerState_NoMips_NoMinTexelLerp_NoMagTexelLerp_Clamp,
+		_depthOfFieldFirstPassTarget.SRView);
+	setInputFirstPassTex.bindToPipeline(DOFGatherPass);
+	pibGPU->setAsCurrent();
+	pvbGPU->setAsCurrent(DOFGatherPass);
+	DOFGatherPass->setCurrent(pvbGPU);
+	pibGPU->draw(1, 0);
+	setInputFirstPassTex.unbindFromPipeline(DOFGatherPass);
+	setInputDepthTex.unbindFromPipeline(DOFGatherPass);
+
+
+	rtvs[0] = nullptr;
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+
+	samplerStates[0] = nullptr;
+	_context->PSSetSamplers(9, 1, samplerStates);
 }

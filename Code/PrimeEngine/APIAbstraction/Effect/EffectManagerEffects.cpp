@@ -445,6 +445,70 @@ namespace PE {
 
 	// Postprocessing
 	{
+		Handle hDepthBlur("EFFECT", sizeof(Effect));
+		Effect *pDepthBlur = new(hDepthBlur)Effect(*m_pContext, m_arena, hDepthBlur);
+		pDepthBlur->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DepthBlur", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"DepthBlurTech""Tech");
+		pDepthBlur->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+			
+		m_map.add("DepthBlurTech", hDepthBlur);
+	}
+
+	{
+		Handle hDOFBlurH("EFFECT", sizeof(Effect));
+		Effect *pDOFBlurH = new(hDOFBlurH)Effect(*m_pContext, m_arena, hDOFBlurH);
+		pDOFBlurH->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DOFBlurH_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"DOFBlurH");
+		pDOFBlurH->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DOFBlurH", hDOFBlurH);
+	}
+
+	{
+		Handle hDOFBlurV("EFFECT", sizeof(Effect));
+		Effect *pDOFBlurV = new(hDOFBlurV)Effect(*m_pContext, m_arena, hDOFBlurV);
+		pDOFBlurV->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DOFBlurV_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"DOFBlurV");
+		pDOFBlurV->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DOFBlurV", hDOFBlurV);
+	}
+
+	{
+		Handle hDOFGather("EFFECT", sizeof(Effect));
+		Effect *pDOFGather = new(hDOFGather)Effect(*m_pContext, m_arena, hDOFGather);
+		pDOFGather->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DOFGather_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend,
+			"DOFGatherTech");
+		pDOFGather->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DOFGatherTech", hDOFGather);
+	}
+
+	{
 		Handle hBloom("EFFECT", sizeof(Effect));
 		Effect *pBloom = new(hBloom)Effect(*m_pContext, m_arena, hBloom);
 		pBloom->loadTechnique(
@@ -788,6 +852,9 @@ namespace PE {
 
 	_probeManager.Initialize(m_pContext, m_arena);
 	_skybox.Initialize(m_pContext, m_arena);
-	_postProcess.Initialize(m_pContext, m_arena, m_hfinalHDRTextureGPU.getObject<TextureGPU>()->m_pShaderResourceView);
+
+	TextureGPU *finalPassTex = m_hfinalHDRTextureGPU.getObject<TextureGPU>();
+	_postProcess.Initialize(m_pContext, m_arena, finalPassTex->m_pShaderResourceView, 
+		finalPassTex->m_pRenderTargetView, m_hrootDepthBufferTextureGPU.getObject<TextureGPU>()->m_pDepthShaderResourceView);
 }
 }; // namespace PE
