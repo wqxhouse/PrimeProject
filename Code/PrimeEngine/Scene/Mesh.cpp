@@ -139,14 +139,15 @@ void chooseEffects(MaterialCPU &curMatCpu, bool hasBlendShapes, EPEVertexFormat 
 			}
 			else
 			{
-				effects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_A_Glow_Tech"));
-				shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_ZOnly_Tech"));
-
-#if PE_API_IS_D3D11
-				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Instanced_CS_Tech"));
-				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Reduce_Instanced_CS_Tech"));
-				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_Instanced_Tech"));
-#endif
+//				effects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_A_Glow_Tech"));
+//				shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_ZOnly_Tech"));
+//
+//#if PE_API_IS_D3D11
+//				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Instanced_CS_Tech"));
+//				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Reduce_Instanced_CS_Tech"));
+//				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_Instanced_Tech"));
+//#endif
+				effects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_GBuffer_Tech"));
 			}
 		}
 		else if (format == PEVertexFormat_StdMesh || format == PEVertexFormat_StdSkin)

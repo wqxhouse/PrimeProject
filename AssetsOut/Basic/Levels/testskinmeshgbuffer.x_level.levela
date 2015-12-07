@@ -1,0 +1,4 @@
+LevelLoader.CreateGameObject("PEObject1_nazi_rep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, -0.0, 1.0, 'testSkinMeshGbuffer.x_PEObject1_nazi_r.lua', 'Basic',0x0ea14380, 0x9c0411e5, 0xa9d0ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject0_pPlane1",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -8.326546, 0.0, -4.034357, 1.0, 'testSkinMeshGbuffer.x_PEObject0_pPlane.lua', 'Basic',0x06d73ec0, 0x9c0411e5, 0x81e5ce76, 0x21b31fb8)
+

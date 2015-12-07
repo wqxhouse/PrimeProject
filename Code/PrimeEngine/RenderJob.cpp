@@ -133,10 +133,18 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 
 			ctx.getGPUScreen()->ReleaseRenderContextOwnership(threadOwnershipMask);
 			DrawList::InstanceReadOnly()->do_RENDER(NULL, threadOwnershipMask);
+			EffectManager::Instance()->drawLightGbuffer();
 			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 		}
-		EffectManager::Instance()->endCurrentRenderTarget();
+		
+		//EffectManager::Instance()->endCurrentRenderTarget();
 
+		//{
+			//EffectManager::Instance()->setTextureAndDepthTextureRenderTargetForGBuffer();
+			//EffectManager::Instance()->drawLightGbuffer();
+			//EffectManager::Instance()->endCurrentRenderTarget();
+
+		//}
 #if APIABSTRACTION_D3D11
 		pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 #else

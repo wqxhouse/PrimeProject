@@ -336,6 +336,44 @@ namespace PE {
 		m_map.add("DetailedMesh_GBuffer_Tech", hEffect);
 	}
 
+	// + Deferred light GBuffer
+	{
+		Handle hEffect("EFFECT", sizeof(Effect));
+		Effect *pEffect = new(hEffect)Effect(*m_pContext, m_arena, hEffect);
+		pEffect->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL,
+			"ColoredMinimalMesh_GBuffer_PS", "main",
+			NULL, NULL,
+			PERasterizerState_SolidTriBackCull,
+			PEDepthStencilState_ZBuffer,
+			PEAlphaBlendState_NoBlend,
+			"ColoredMinimalMesh_GBuffer_Tech");
+
+		pEffect->m_psInputFamily = EffectPSInputFamily::DETAILED_MESH_PS_IN;
+		pEffect->m_effectDrawOrder = EffectDrawOrder::First;
+		m_map.add("ColoredMinimalMesh_GBuffer_Tech", hEffect);
+	}
+
+	// + Deferred GBuffer Detailed skin
+	{
+		Handle hEffect("EFFECT", sizeof(Effect));
+		Effect *pEffect = new(hEffect)Effect(*m_pContext, m_arena, hEffect);
+		pEffect->loadTechnique(
+			"DetailedSkin_Shadowed_VS", "main",
+			NULL, NULL,
+			"DetailedMesh_GBuffer_PS", "main",
+			NULL, NULL,
+			PERasterizerState_SolidTriBackCull,
+			PEDepthStencilState_ZBuffer,
+			PEAlphaBlendState_NoBlend,
+			"DetailedSkin_GBuffer_Tech");
+
+		pEffect->m_psInputFamily = EffectPSInputFamily::DETAILED_MESH_PS_IN;
+		pEffect->m_effectDrawOrder = EffectDrawOrder::First;
+		m_map.add("DetailedSkin_GBuffer_Tech", hEffect);
+	}
+
 	// Gbuffer with position
 	{
 		Handle hEffect("EFFECT", sizeof(Effect));

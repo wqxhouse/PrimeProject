@@ -604,6 +604,7 @@ void EffectManager::buildFullScreenBoard()
 	m_hDeferredLightPassEffect = getEffectHandle("DeferredLightPass_Classical_Tech");
 	m_hLightMipsPassEffect = getEffectHandle("LightMipsPassTech");
 	m_hRayTracingPassEffect = getEffectHandle("RayTracingPassTech");
+	m_hGBufferLightPassEffect = getEffectHandle("ColoredMinimalMesh_GBuffer_Tech");
 	//Liu
 	createSphere(1,20,20);
 }
@@ -1563,6 +1564,59 @@ void EffectManager::createSphere(float radius, int sliceCount, int stackCount)
 
 	
 }
+//Liu
+void EffectManager::drawLightGbuffer()
+{
+	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+
+	for (int i = 0; i < lights.m_size; i++)
+	{
+		Light *l = lights[i].getObject<Light>();
+		if (l->m_cbuffer.type != 0) continue;
+		float scale = 0.1f;
+		Vector3 translation = l->m_base.getPos();
+
+		Effect &curEffect = *m_hGBufferLightPassEffect.getObject<Effect>();
+		if (!curEffect.m_isReady)
+			return;
+
+		IndexBufferGPU *pibGPU = m_hLightIndexBufferGPU.getObject<IndexBufferGPU>();
+		pibGPU->setAsCurrent();
+
+
+		VertexBufferGPU *pvbGPU = m_hLightVertexBufferGPU.getObject<VertexBufferGPU>();
+		pvbGPU->setAsCurrent(&curEffect);
+
+		curEffect.setCurrent(pvbGPU);
+
+		PE::SetPerObjectConstantsShaderAction objSa;
+		Matrix4x4 scaleM = Matrix4x4();
+		scaleM.loadIdentity();
+		scaleM.importScale(scale, scale, scale);
+
+		Matrix4x4 rotationM = Matrix4x4();
+		rotationM.loadIdentity();
+
+		Matrix4x4 translationM = Matrix4x4();
+		translationM.loadIdentity();
+		translationM.setPos(translation - Vector3(0, 0.1f, 0));
+
+		objSa.m_data.gW = Matrix4x4();
+		objSa.m_data.gW.loadIdentity();
+		objSa.m_data.gW = translationM *rotationM* scaleM;
+
+		objSa.m_data.gWVP = m_currentViewProjMatrix*objSa.m_data.gW;
+		objSa.bindToPipeline(&curEffect);
+
+		pibGPU->draw(1, 0);
+
+		pibGPU->unbindFromPipeline();
+		pvbGPU->unbindFromPipeline(&curEffect);
+
+		objSa.unbindFromPipeline(&curEffect);
+	
+	}
+}
 
 //Liu
 void EffectManager::drawClassicalLightPass(float angle)
@@ -1591,11 +1645,11 @@ void EffectManager::drawClassicalLightPass(float angle)
 
 		IndexBufferGPU *pibGPU = m_hLightIndexBufferGPU.getObject<IndexBufferGPU>();
 		pibGPU->setAsCurrent();
-		pibGPU->setAsCurrent();
+		
 
 		VertexBufferGPU *pvbGPU = m_hLightVertexBufferGPU.getObject<VertexBufferGPU>();
 		pvbGPU->setAsCurrent(&curEffect);
-		pvbGPU->setAsCurrent(&curEffect);
+		
 		curEffect.setCurrent(pvbGPU);
 
 

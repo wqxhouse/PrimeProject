@@ -179,7 +179,12 @@ struct DETAILED_MESH_GBUFFER_PS_OUT
         { \
             return func(pIn); \
         }
-		
+
+	#define PS_wrapper_COLOREDMINIMAL_MESH_GBUFFER(func) \
+        DETAILED_MESH_GBUFFER_PS_OUT main(COLORED_MINIMAL_MESH_PS_IN pIn) \
+        { \
+            return func(pIn); \
+        }
 		
 #endif
 

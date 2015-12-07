@@ -1,0 +1,27 @@
+#ifndef COLOREDMINIMALMESH_GBUFFER_PS
+#define COLOREDMINIMALMESH_GBUFFER_PS
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "DetailedMesh_Structs.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
+
+DETAILED_MESH_GBUFFER_PS_OUT ColoredMinimalMesh_GBuffer_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	DETAILED_MESH_GBUFFER_PS_OUT output;
+
+	output.Albedo = float4(0.0f,0.0f,0.0f,0.0f);
+	output.PosW = float4(pIn.iPosW, 1.0);
+	output.Normal = float4(0,1,0,1.0);
+	output.Material = float4(0.5,0,0,1.0);
+
+	return output;
+
+}
+
+PS_wrapper_COLOREDMINIMAL_MESH_GBUFFER(ColoredMinimalMesh_GBuffer_PS)
+
+#endif
+

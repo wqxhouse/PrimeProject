@@ -372,6 +372,12 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 		gbufferEff = hg.getObject<Effect>();
 		gbufferWPosEff = hgPos.getObject<Effect>();
 
+		///////
+		Effect *gbufferSkinEff = NULL;
+		Handle hgSkin = EffectManager::Instance()->getEffectHandle("DetailedSkin_GBuffer_Tech");
+
+		gbufferSkinEff = hgSkin.getObject<Effect>();
+
 		if (m_pCurEffect == gbufferEff || m_pCurEffect == gbufferWPosEff)
 		{
 			if (m_pContext->_renderMode == 0)
@@ -382,6 +388,10 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 			{
 				m_pCurEffect = gbufferWPosEff;
 			}
+		}
+		else if (m_pCurEffect == gbufferSkinEff)
+		{
+			m_pCurEffect = gbufferSkinEff;
 		}
 		// + End
 		

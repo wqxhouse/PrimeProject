@@ -93,6 +93,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void randomLightInfo(int num);
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
+	void drawLightGbuffer();
 	//Liu
 	void drawRayTracingPass();
 	void drawLightMipsPass(int curlevel, bool isSecBlur);
@@ -236,6 +237,7 @@ public:
 	Handle m_hDeferredLightPassEffect;
 	Handle m_hLightMipsPassEffect;
 	Handle m_hRayTracingPassEffect;
+	Handle m_hGBufferLightPassEffect;
 
 	Array<Handle> m_pixelShaderSubstitutes;
 #	if APIABSTRACTION_D3D11
