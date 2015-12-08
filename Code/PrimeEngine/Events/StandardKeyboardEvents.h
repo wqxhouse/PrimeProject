@@ -104,6 +104,36 @@ struct Event_KEY_UP_HELD : public Event {
 	virtual ~Event_KEY_UP_HELD(){}
 };
 
+struct Event_KEY_O_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_O_HELD);
+	virtual ~Event_KEY_O_HELD(){}
+};
+
+struct Event_KEY_P_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_P_HELD);
+	virtual ~Event_KEY_P_HELD(){}
+};
+
+struct Event_KEY_T_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_T_HELD);
+	virtual ~Event_KEY_T_HELD(){}
+};
+
+struct Event_KEY_Y_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_Y_HELD);
+	virtual ~Event_KEY_Y_HELD(){}
+};
+
+struct Event_KEY_J_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_J_HELD);
+	virtual ~Event_KEY_J_HELD(){}
+};
+
+struct Event_KEY_H_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_H_HELD);
+	virtual ~Event_KEY_H_HELD(){}
+};
+
 }; // namespace Events
 }; // namespace PE
 

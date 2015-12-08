@@ -340,7 +340,7 @@ namespace Components {
 	
 	//Liu
 
-	EffectManager::Instance()->randomLightInfo(100);
+	EffectManager::Instance()->randomLightInfo(200);
 
 
 	// Add a directional light

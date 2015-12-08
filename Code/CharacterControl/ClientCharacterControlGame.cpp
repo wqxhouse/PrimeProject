@@ -319,10 +319,10 @@ int ClientCharacterControlGame::initGame()
 #endif
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testbrickspire.x_level.levela', 'Basic')");
 	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
-	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('lightingtest.x_level.levela', 'Basic')");
+	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('lightingtest.x_level.levela', 'Basic')");
 	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
+	m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testskinmeshgbuffer.x_level.levela', 'Basic')");
 	
-
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
 	return 1; // 1 (true) = success. no errors. TODO: add error checking

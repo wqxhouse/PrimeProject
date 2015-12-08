@@ -284,7 +284,7 @@ float4 RayTracingPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	float t = 1;
 
 	//get CS reflection ray
-	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
+	float3 n = (posWS.y>0.1f)?gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz : float3(0,1,0);//gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
 	float3 d = viewRay;
 	float3 refl = normalize(reflect(d, n));
 	float3 ScreenRefl = mul( float4(refl,0), gView).xyz;

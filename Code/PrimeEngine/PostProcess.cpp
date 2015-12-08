@@ -51,8 +51,8 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 
 	_nearFocusStart = 0.01f;
 	_nearFocusEnd = 0.01f;
-	_farFocusStart = 7.0f;
-	_farFoucsEnd = 9.0f;
+	_farFocusStart = 7;
+	_farFoucsEnd = 9;
 
 	D3D11_SAMPLER_DESC sampDesc;
 
@@ -72,8 +72,8 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 
 void PostProcess::Render()
 {
-	renderDepthBlur();
-	renderDOFGather();
+	//renderDepthBlur();
+	//renderDOFGather();
 
 	computeAvgLuminance();
 	D3D11_VIEWPORT viewport;
@@ -320,8 +320,8 @@ void PostProcess::renderDepthBlur()
 	_dofConstants.Data.GatherBlurSize = 16;
 	_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
 	_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
-	_dofConstants.Data.DOFDepths.m_z = _farFocusStart;
-	_dofConstants.Data.DOFDepths.m_w = _farFoucsEnd;
+	_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart>9 ? _pContext->_farFocusStart : 9;
+	_dofConstants.Data.DOFDepths.m_w = _pContext->_farFocusStart>9 ? _pContext->_farFocusStart : 9;
 	_dofConstants.ApplyChanges(_context);
 	_dofConstants.SetPS(_context, 0);
 

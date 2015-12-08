@@ -5,17 +5,10 @@
 function fillMetaInfoTable(args) -- the script fromat requires existance of this function
 
 -- user modifed data
-args['myScript']="SoldierNPC.lua"
-args['myScriptPackage']="CharacterControl"
+args['myScript']="StaticMesh.lua"
+args['myScriptPackage']="Default"
 
-args['skinName'] = "SoldierTransform.mesha"
-args['skinPackage'] = "Soldier"
+args['meshName'] = "cobbleplane.x_pplaneshape1_mesh.mesha"
+args['meshPackage'] = "Default"
 
-args['gunMeshName'] = "m98.x_m98main_mesh.mesha"
-args['gunMeshPackage'] = "CharacterControl"
-
-
-args['npcType'] = 'Guard'
-
-args['patrolWayPoint'] = '0'
 end -- required

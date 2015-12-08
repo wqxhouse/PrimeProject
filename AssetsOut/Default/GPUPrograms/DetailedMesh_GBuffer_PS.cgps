@@ -5,6 +5,7 @@
 #include "StandardTextureResources.fx"
 #include "samplerhelper.fx"
 #include "DetailedMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
 
 DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
 {
@@ -38,8 +39,9 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 	output.Normal = float4(perPixelNormal, 1.0);
 
 	float roughness = sample2D(gGlowMapSampler, pIn.iTexCoord, gGlowMap).r;
-	roughness = max(roughness, 0.01);
+	roughness =  cs_pad2 == 0? max(roughness, 0.01):cs_pad2;//max(roughness, 0.01) +
 	float metallic = sample2D(gSpecularMapSampler, pIn.iTexCoord, gSpecularMap).r;
+	metallic =  cs_pad3 == 0? metallic:cs_pad3;
 	
 	output.Albedo *= (1.0f - metallic);
 	output.Material = float4(roughness, metallic, 0, 0);

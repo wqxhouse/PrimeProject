@@ -365,7 +365,12 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask, Matrix4x
 		}
 	}
 
-	
+	//////////////////////////////////////////////////////////////////////////
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	pscs.m_data.pad2 = m_pContext->_roughness;
+	pscs.m_data.pad3 = m_pContext->_metallic;
+	pscs.bindToPipeline(m_pCurEffect);
+
 #endif
 
 	IRenderer::checkForErrors("starting to draw\n");
@@ -544,6 +549,10 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask, Matrix4x
 				sv->bindToPipeline(m_pCurEffect);
 			}
 		}
+		//////////////////////////////////////////////////////////////////////////
+		pscs.unbindFromPipeline(m_pCurEffect);
+
+
 
 		Handle houtput = m_outputs[icall];
 		

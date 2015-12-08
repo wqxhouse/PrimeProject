@@ -67,6 +67,14 @@ struct GameContext
 
 	int _curModel;
 	int _preModel;
+
+	float _roughness;
+	float _metallic;
+
+	bool isSSR;
+
+	float _farFocusStart;
+	float _farFocusEnd;
 };
 
 

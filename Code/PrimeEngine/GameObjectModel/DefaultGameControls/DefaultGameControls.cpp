@@ -281,17 +281,16 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	{
 		//m_pContext->_renderMode = 0;
 		//EffectManager::Instance()->resizeLightNums(10);
-		m_pContext->_preModel = m_pContext->_curModel;
-		m_pContext->_curModel++;
-		m_pContext->_curModel = m_pContext->_curModel % 2;
-
-		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
+		m_pContext->_roughness -= 0.05;
+		m_pContext->_roughness = max(m_pContext->_roughness, 0.01f);
+		
 	}
 	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
 	{
 		//m_pContext->_renderMode = 1;
 		//EffectManager::Instance()->resizeLightNums(-10);
-		
+		m_pContext->_roughness += 0.05;
+		m_pContext->_roughness = min(m_pContext->_roughness, 1.0f);
 	}
 
 	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
@@ -332,7 +331,12 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		/*	EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
 			EffectManager::Instance()->getSkybox()->SetSunDirection(phi, ++theta);*/
 
-		EffectManager::Instance()->changeRoughness(m_pContext->_curModel, true);
+		
+		m_pContext->_preModel = m_pContext->_curModel;
+		m_pContext->_curModel++;
+		m_pContext->_curModel = m_pContext->_curModel % 2;
+
+		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
 	}
 	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
 	{
@@ -340,7 +344,55 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
 		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
 
-		EffectManager::Instance()->changeRoughness(m_pContext->_curModel, false);
+		
+	}
+	else if (Event_KEY_O_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
+
+		m_pContext->_metallic -= 0.05;
+		m_pContext->_metallic = max(m_pContext->_metallic, 0.01f);
+	}
+	else if (Event_KEY_P_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
+
+		m_pContext->_metallic += 0.05;
+		m_pContext->_metallic = min(m_pContext->_metallic, 1.0f);
+	}
+
+	else if (Event_KEY_T_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		m_pContext->isSSR = !m_pContext->isSSR;
+		
+	}
+
+	else if (Event_KEY_Y_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+
+	}
+
+	else if (Event_KEY_J_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+
+		m_pContext->_farFocusStart -= 0.5f;
+		m_pContext->_farFocusStart = max(m_pContext->_farFocusStart, 9.0f);
+
+	}
+
+	else if (Event_KEY_H_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		m_pContext->_farFocusStart += 0.5f;
+		m_pContext->_farFocusStart = min(m_pContext->_farFocusStart, 1000.0f);
+	
 	}
 	else
 	{

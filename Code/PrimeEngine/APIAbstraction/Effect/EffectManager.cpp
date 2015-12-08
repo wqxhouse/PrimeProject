@@ -1288,7 +1288,8 @@ void EffectManager::drawDeferredFinalPass()
 	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
 	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
 	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
-	TextureGPU *rayTracingTexture = m_hrayTracingTextureGPU.getObject<TextureGPU>();
+	
+	TextureGPU *rayTracingTexture = m_hrayTracingTextureGPU.getObject<TextureGPU>();//m_pContext->isSSR ? m_hrayTracingTextureGPU.getObject<TextureGPU>() : m_haccumHDRTextureGPU.getObject<TextureGPU>();
 	
 	//
 	//TextureGPU *positionTexture = m_hpositionTextureGPU.getObject<TextureGPU>();
@@ -1865,7 +1866,7 @@ void EffectManager::drawLightGbuffer()
 
 		Matrix4x4 translationM = Matrix4x4();
 		translationM.loadIdentity();
-		translationM.setPos(translation );//- Vector3(0, 0.1f, 0)
+		translationM.setPos(translation );//- Vector3(0, 0f, 0)
 
 		objSa.m_data.gW = Matrix4x4();
 		objSa.m_data.gW.loadIdentity();
@@ -2171,7 +2172,7 @@ void EffectManager::updateLightDirection(Vector3 sprinkleDir)
 {
 	auto &lights = PE::RootSceneNode::Instance()->m_lights;
 
-	Vector3 box = Vector3(20,100,20);
+	Vector3 box = Vector3(12,10,6);
 
 	for (int i = 0; i < lights.m_size-1; i++)
 	{
@@ -2186,7 +2187,7 @@ void EffectManager::updateLightDirection(Vector3 sprinkleDir)
 		if (l->m_physicsRest >= 4.0){
 			// Restart animation
 			l->m_oribitAxis = sprinkleDir;
-			l->m_base.setPos(Vector3(0, 3, 0));
+			l->m_base.setPos(Vector3(0, 2, 0));
 			l->m_physicsRest -= 4.0;
 		}
 		else {
@@ -2306,7 +2307,7 @@ void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)
 	
 	l->m_cbuffer.diffuse = Vector4((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), 1.0);
 	//*axis = Vector3((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)), (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-	l->m_cbuffer.range = 1.5f;
+	l->m_cbuffer.range = 1.0f;
 	
 }
 //Liu
