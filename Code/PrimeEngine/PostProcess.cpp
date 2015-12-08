@@ -76,8 +76,8 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 
 void PostProcess::Render()
 {
-	renderDepthBlur();
-	renderDOFGather();
+	//renderDepthBlur();
+	//renderDOFGather();
 
 	computeAvgLuminance();
 	D3D11_VIEWPORT viewport;
@@ -325,8 +325,8 @@ void PostProcess::renderDepthBlur()
 	_dofConstants.Data.enableInstagram = _enableInstagram;
 	_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
 	_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
-	_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart>9 ? _pContext->_farFocusStart : 9;
-	_dofConstants.Data.DOFDepths.m_w = _pContext->_farFocusEnd>9 ? _pContext->_farFocusEnd : 9;
+	_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart>0 ? _pContext->_farFocusStart : 0;
+	_dofConstants.Data.DOFDepths.m_w = _pContext->_farFocusEnd>0 ? _pContext->_farFocusEnd : 0;
 	_dofConstants.ApplyChanges(_context);
 	_dofConstants.SetPS(_context, 0);
 

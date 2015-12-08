@@ -141,28 +141,34 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		if(GetAsyncKeyState('K') & 0x8000)
 		{
 			kdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_K_HELD));
+			new (h)Event_KEY_K_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (kdown)
+		/*else if (kdown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_K_HELD));
 			new (h)Event_KEY_K_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			kdown = false;
-		}
+		}*/
 
 		if(GetAsyncKeyState('L') & 0x8000)
 		{
 			ldown = true;
+			Handle h("EVENT", sizeof(Event_KEY_L_HELD));
+			new (h)Event_KEY_L_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (ldown)
+		/*else if (ldown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_L_HELD));
 			new (h) Event_KEY_L_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			ldown = false;
-		}
+		}*/
 
 		if (GetAsyncKeyState('X') & 0x8000)
 		{
@@ -261,28 +267,34 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		if (GetAsyncKeyState('O') & 0x8000)
 		{
 			odown = true;
+			Handle h("EVENT", sizeof(Event_KEY_O_HELD));
+			new (h)Event_KEY_O_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (odown)
+		/*else if (odown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_O_HELD));
 			new (h)Event_KEY_O_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			odown = false;
-		}
+		}*/
 
 		if (GetAsyncKeyState('P') & 0x8000)
 		{
 			pdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_P_HELD));
+			new (h)Event_KEY_P_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (pdown)
+		/*else if (pdown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_P_HELD));
 			new (h)Event_KEY_P_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			pdown = false;
-		}
+		}*/
 
 		if (GetAsyncKeyState('T') & 0x8000)
 		{
