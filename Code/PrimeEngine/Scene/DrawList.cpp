@@ -8,7 +8,7 @@
 #include "../Profiling/Profiling.h"
 
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
-
+#include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
 #include "PrimeEngine/Scene/CameraManager.h"
 
 namespace PE {
@@ -364,6 +364,8 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask, Matrix4x
 			sv->bindToPipeline(m_pCurEffect);
 		}
 	}
+
+	
 #endif
 
 	IRenderer::checkForErrors("starting to draw\n");

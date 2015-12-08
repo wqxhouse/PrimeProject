@@ -36,6 +36,7 @@
 
 #include "PrimeEngine/Scene/MeshInstance.h"
 #include "PrimeEngine/Scene/RootSceneNode.h"
+#include "PrimeEngine/TestModels.h"
 
 // Sibling/Children includes
 #include "EffectManager.h"
@@ -2217,7 +2218,7 @@ void EffectManager::randomLightInfo(int num)
 		*m_pContext, 
 		m_arena,
 		hLight,
-		Vector3(0,-i,0), //Position
+		Vector3(0,-i-100,0), //Position
 		Vector3(0,0,0), 
 		Vector3(0,0,0), 
 		Vector3(0,0,0), //Direction (z-axis)
@@ -2261,6 +2262,36 @@ void EffectManager::updateLight()
 			l->m_cbuffer.diffuse = colorVec4;
 		}
 	}
+}
+
+void EffectManager::changeRoughness(int curModel, bool isIncrease)
+{
+
+	auto &testModels = RootSceneNode::Instance()->m_testmodels;
+	int a = testModels.m_size;
+	TestModel *l = testModels[curModel].getObject<TestModel>();
+	if (isIncrease)
+	{
+		l->m_roughness += 0.05f;
+		l->m_roughness = min(l->m_roughness, 1.0f);
+	}
+	else
+	{
+		l->m_roughness -= 0.05f;
+		l->m_roughness = max(l->m_roughness, 0.01f);
+	}
+
+}
+
+void EffectManager::changeModel(int curModel, int preModel)
+{
+	auto &testModels = RootSceneNode::Instance()->m_testmodels;
+	int a = testModels.m_size;
+	TestModel *l = testModels[curModel].getObject<TestModel>();
+	l->m_sceneNode->m_base.setPos(Vector3(0, 0, 0));
+
+	TestModel *l1 = testModels[preModel].getObject<TestModel>();
+	l1->m_sceneNode->m_base.setPos(Vector3(0, -100, 0));
 }
 
 void EffectManager::randomizeLight(Light *l, Vector3 *axis, int i)

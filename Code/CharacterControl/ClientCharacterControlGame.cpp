@@ -12,6 +12,7 @@
 #include "CharacterControlContext.h"
 #if PE_PLAT_IS_WIN32
 #include "test.h"
+#include "PrimeEngine/TestModels.h"
 #endif
 
 using namespace PE;
@@ -225,6 +226,67 @@ int ClientCharacterControlGame::initGame()
         }
     }
 
+	{
+	PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+	SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+	pMainSN->addDefaultComponents();
+
+	pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+	PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+	MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+	pImrodMeshInst->addDefaultComponents();
+	pImrodMeshInst->initFromFile("cobbleplane.x_pplaneshape1_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+	pMainSN->addComponent(hImrodMeshInst);
+
+	Handle hTestModel("TESTMODEL", sizeof(TestModel));
+
+	TestModel *pTestModel = new(hTestModel)TestModel(
+		*m_pContext,
+		m_arena,
+		hTestModel,
+		pMainSN,
+		0
+		);
+	RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+	RootSceneNode::Instance()->addComponent(hSN);
+
+	
+	}
+
+	{
+	//////////////////////////////////////////////////////////////////////////
+	PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+	SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+	pMainSN->addDefaultComponents();
+
+	pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+	PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+	MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+	pImrodMeshInst->addDefaultComponents();
+	pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+	pMainSN->addComponent(hImrodMeshInst);
+
+	Handle hTestModel("LIGHT", sizeof(TestModel));
+
+	TestModel *pTestModel = new(hTestModel)TestModel(
+		*m_pContext,
+		m_arena,
+		hTestModel,
+		pMainSN,
+		0
+		);
+	RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+	RootSceneNode::Instance()->addComponent(hSN);
+	}
+	
+
+
 	
 #if PE_PLAT_IS_WIN32
 	
@@ -255,7 +317,7 @@ int ClientCharacterControlGame::initGame()
 #if PE_PLAT_IS_PSVITA // do it for ps3 becasue right now communication between pyClient and ps3 is not working
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('ccontrollvl0.x_level.levela', 'CharacterControl')");
 #endif
-	m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testskinmeshgbuffer.x_level.levela', 'Basic')");
+	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testbrickspire.x_level.levela', 'Basic')");
 	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
 	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('lightingtest.x_level.levela', 'Basic')");
 	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");

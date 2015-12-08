@@ -39,7 +39,8 @@ static float Debug_Fly_Speed = 4.0f; //Units per second
 #define Debug_Rotate_Speed 2.0f //Radians per second
 
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
-
+#include "PrimeEngine/Scene/RootSceneNode.h"
+#include "PrimeEngine/TestModels.h"
 
 namespace PE {
 
@@ -278,14 +279,21 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	}
 	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
 	{
-		m_pContext->_renderMode = 0;
+		//m_pContext->_renderMode = 0;
 		//EffectManager::Instance()->resizeLightNums(10);
+		m_pContext->_preModel = m_pContext->_curModel;
+		m_pContext->_curModel++;
+		m_pContext->_curModel = m_pContext->_curModel % 2;
+
+		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
 	}
 	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
 	{
-		m_pContext->_renderMode = 1;
+		//m_pContext->_renderMode = 1;
 		//EffectManager::Instance()->resizeLightNums(-10);
+		
 	}
+
 	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
 	{
 		m_pContext->_debugMode--;
@@ -323,12 +331,16 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		float phi, theta;
 		/*	EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
 			EffectManager::Instance()->getSkybox()->SetSunDirection(phi, ++theta);*/
+
+		EffectManager::Instance()->changeRoughness(m_pContext->_curModel, true);
 	}
 	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float phi, theta;
 		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
 		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
+
+		EffectManager::Instance()->changeRoughness(m_pContext->_curModel, false);
 	}
 	else
 	{

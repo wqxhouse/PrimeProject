@@ -64,6 +64,9 @@ struct GameContext
 
 	int _renderMode;
 	int _debugMode;
+
+	int _curModel;
+	int _preModel;
 };
 
 

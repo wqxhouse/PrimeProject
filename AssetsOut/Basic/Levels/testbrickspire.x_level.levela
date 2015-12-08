@@ -1,0 +1,8 @@
+LevelLoader.CreateGameObject("PEObject2_nazi_rep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 210.926907, 0.0, -0.0, 1.0, 'testBrickSpire.x_PEObject2_nazi_r.lua', 'Basic',0x0f162080, 0x9d2411e5, 0x9857ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject0_pPlane1",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -8.326546, 0.0, -4.034357, 1.0, 'testBrickSpire.x_PEObject0_pPlane.lua', 'Basic',0x026030b0, 0x9d2411e5, 0xa286ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject1_TImrod",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, -0.0, 1.0, 'testBrickSpire.x_PEObject1_TImrod.lua', 'Basic',0x095ab070, 0x9d2411e5, 0x9174ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject3_transf",0.0, 0.0, 1.0, 0.0, 0.0, 1.0, -0.0, 0.0, -1.0, -0.0, 0.0, 0.0, -28.345216, 0.0, 1166.142507, 1.0, 'testBrickSpire.x_PEObject3_transf.lua', 'Basic',0x19effd4f, 0x9d2411e5, 0x908bce76, 0x21b31fb8)
+
