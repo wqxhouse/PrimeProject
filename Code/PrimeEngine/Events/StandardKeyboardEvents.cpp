@@ -30,6 +30,6 @@ namespace Events {
 	PE_IMPLEMENT_CLASS1(Event_KEY_Y_HELD, Event);
 	PE_IMPLEMENT_CLASS1(Event_KEY_J_HELD, Event);
 	PE_IMPLEMENT_CLASS1(Event_KEY_H_HELD, Event);
-
+	PE_IMPLEMENT_CLASS1(Event_KEY_Z_HELD, Event);
 };
 };

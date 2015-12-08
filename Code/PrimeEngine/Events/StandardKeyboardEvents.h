@@ -134,6 +134,11 @@ struct Event_KEY_H_HELD : public Event {
 	virtual ~Event_KEY_H_HELD(){}
 };
 
+struct Event_KEY_Z_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_Z_HELD);
+	virtual ~Event_KEY_Z_HELD(){}
+};
+
 }; // namespace Events
 }; // namespace PE
 

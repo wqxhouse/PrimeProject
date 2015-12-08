@@ -326,11 +326,21 @@ int ClientGame::runGameFrame()
 				}
 
 				{
-					sprintf(PEString::s_buf, "Button K/L: Switch Between Shading Algorithms");
+					
+					sprintf(PEString::s_buf, "Roughness: %.2f Metallic: %.2f", m_pContext->_roughness, m_pContext->_metallic); //Button K/L: Switch Between Shading Algorithms
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0,
 						Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
+
+				{
+
+					sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.1f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
 
 				{
 					int curBuf = m_pContext->_debugMode;
@@ -363,7 +373,7 @@ int ClientGame::runGameFrame()
 					sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.10f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+						Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
 
 				{
@@ -379,7 +389,7 @@ int ClientGame::runGameFrame()
 					sprintf(PEString::s_buf, "Current Shading: %s", shading.c_str());
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+						Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
 
 				
@@ -391,7 +401,7 @@ int ClientGame::runGameFrame()
 					sprintf(PEString::s_buf, "Light number: %d", lightNum);
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+						Vector3(0.06f, 0.175f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
 
                 PE::IRenderer::checkForErrors("");

@@ -351,14 +351,15 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 
 	else if (Event_KEY_T_HELD::GetClassId() == pEvt->getClassId())
 	{
-		float phi, theta;
-		m_pContext->isSSR = !m_pContext->isSSR;
+		m_pContext->_farFocusEnd -= 0.5f;
+		m_pContext->_farFocusEnd = max(m_pContext->_farFocusEnd, 9.0f);
 		
 	}
 
 	else if (Event_KEY_Y_HELD::GetClassId() == pEvt->getClassId())
 	{
-		float phi, theta;
+		m_pContext->_farFocusEnd += 0.5f;
+		m_pContext->_farFocusEnd = min(m_pContext->_farFocusEnd, 1000.0f);
 
 	}
 
@@ -393,6 +394,12 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		PostProcess *p = &EffectManager::Instance()->_postProcess;
 		p->getEnableColorCorrection() ? p->SetEnableColorCorrection(false) : p->SetEnableColorCorrection(true);
 
+	}
+	else if (Event_KEY_Z_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_curCubeMap++;
+		m_pContext->_curCubeMap = m_pContext->_curCubeMap % 6;
+		EffectManager::Instance()->getSkybox()->SetCubemap(m_pContext->_cubmapID[m_pContext->_curCubeMap]);
 	}
 	else
 	{

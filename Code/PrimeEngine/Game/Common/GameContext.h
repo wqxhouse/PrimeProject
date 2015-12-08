@@ -75,6 +75,10 @@ struct GameContext
 
 	float _farFocusStart;
 	float _farFocusEnd;
+
+	int _curCubeMap;
+
+	int _cubmapID[6];
 };
 
 

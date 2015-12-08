@@ -318,16 +318,25 @@ int ClientCharacterControlGame::initGame()
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('ccontrollvl0.x_level.levela', 'CharacterControl')");
 #endif
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testbrickspire.x_level.levela', 'Basic')");
-	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
+	 m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
 	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('lightingtest.x_level.levela', 'Basic')");
 	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
-	m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testskinmeshgbuffer.x_level.levela', 'Basic')");
+	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testskinmeshgbuffer.x_level.levela', 'Basic')");
 	
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
-	//int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Ennis.dds");
-	//int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\GraceCathedral.dds");
-	//// int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\GraceCathedral.dds");
+	int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Ennis.dds");
+	m_pContext->_cubmapID[0] = id0;
+	int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Doge.dds");
+	m_pContext->_cubmapID[1] = id1;
+	int id2 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Glacier.dds");
+	m_pContext->_cubmapID[2] = id2;
+	int id3 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Pisa.dds");
+	m_pContext->_cubmapID[3] = id3;
+	int id4 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Uffizi.dds");
+	m_pContext->_cubmapID[4] = id4;
+	int id5 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\GraceCathedral.dds");
+	m_pContext->_cubmapID[5] = id5;
 	//EffectManager::Instance()->getSkybox()->SetCubemap(id0);
 
 	return 1; // 1 (true) = success. no errors. TODO: add error checking

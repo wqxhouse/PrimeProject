@@ -59,6 +59,7 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		static bool ydown = false;
 		static bool jdown = false;
 		static bool hdown = false;
+		static bool zdown = false;
 		//Check for Button Down events
 
 		//Check for Button Up events
@@ -285,54 +286,79 @@ void DX9_KeyboardMouse::generateButtonEvents()
 
 		if (GetAsyncKeyState('T') & 0x8000)
 		{
-			tdown = true;
+			//tdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_T_HELD));
+			new (h)Event_KEY_T_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (tdown)
+		/*else if (tdown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_T_HELD));
 			new (h)Event_KEY_T_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			tdown = false;
-		}
+		}*/
 
 		if (GetAsyncKeyState('Y') & 0x8000)
 		{
-			ydown = true;
-		}
-		else if (ydown)
-		{
+			//ydown = true;
 			Handle h("EVENT", sizeof(Event_KEY_Y_HELD));
 			new (h)Event_KEY_Y_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
-
-			ydown = false;
 		}
+		/*else if (ydown)
+		{
+		Handle h("EVENT", sizeof(Event_KEY_Y_HELD));
+		new (h)Event_KEY_Y_HELD;
+		m_pQueueManager->add(h, Events::QT_INPUT);
+
+		ydown = false;
+		}*/
 
 		if (GetAsyncKeyState('J') & 0x8000)
 		{
-			jdown = true;
+			//jdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_J_HELD));
+			new (h)Event_KEY_J_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (jdown)
+		/*else if (jdown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_J_HELD));
 			new (h)Event_KEY_J_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			jdown = false;
-		}
+		}*/
 
 		if (GetAsyncKeyState('H') & 0x8000)
 		{
-			hdown = true;
+			//hdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_H_HELD));
+			new (h)Event_KEY_H_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		else if (hdown)
+		/*else if (hdown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_H_HELD));
 			new (h)Event_KEY_H_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 
 			hdown = false;
+		}*/
+
+		if (GetAsyncKeyState('Z') & 0x8000)
+		{
+			zdown = true;
+		}
+		else if (zdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_Z_HELD));
+			new (h)Event_KEY_Z_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			zdown = false;
 		}
 	}
 #endif

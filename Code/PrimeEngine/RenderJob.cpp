@@ -204,7 +204,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		);
 	//sprinkleDir.normalize();
 
-	EffectManager::Instance()->updateLightDirection(sprinkleDir);
+	//EffectManager::Instance()->updateLightDirection(sprinkleDir);
 
 	// TODO: since we don't have proj mat in constant buf at hand; we grab from cameramanager
 	// However, this will be off by one frame; but since proj mat doesn't always change, 
@@ -251,7 +251,7 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 
 			int x = -1;
 			DrawList::InstanceReadOnly()->do_RENDER(*(Events::Event **)&x, threadOwnershipMask, NULL, NULL);
-			EffectManager::Instance()->drawLightGbuffer();
+			//EffectManager::Instance()->drawLightGbuffer();
 			ctx.getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
 		}
 		
@@ -314,8 +314,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		//if (ctx.isSSR)
 		//{
 			//EffectManager::Instance()->setLightAccumTextureRenderTarget();
-			EffectManager::Instance()->drawRayTracingPass();
-			EffectManager::Instance()->endCurrentRenderTarget();
+			//EffectManager::Instance()->drawRayTracingPass();
+			//EffectManager::Instance()->endCurrentRenderTarget();
 		//}
 
 
