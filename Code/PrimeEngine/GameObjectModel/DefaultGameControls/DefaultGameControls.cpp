@@ -305,25 +305,17 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	}
 	else if (Event_KEY_X_HELD::GetClassId() == pEvt->getClassId())
 	{
-		float phi, theta;
-
 		float solarTime;
 		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
 		printf("SolarTime = %.2f\n", solarTime);
 		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime + 0.02);
-		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(++phi, theta);*/
 	}
 	else if (Event_KEY_C_HELD::GetClassId() == pEvt->getClassId())
 	{
-		float phi, theta;
-
 		float solarTime;
 		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
 		printf("SolarTime = %.2f\n", solarTime);
 		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime - 0.02);
-		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(--phi, theta);*/
 	}
 	else if (Event_KEY_V_HELD::GetClassId() == pEvt->getClassId())
 	{
@@ -337,14 +329,6 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		m_pContext->_curModel = m_pContext->_curModel % 2;
 
 		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
-	}
-	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
-	{
-		float phi, theta;
-		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
-		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
-
-		
 	}
 	else if (Event_KEY_O_HELD::GetClassId() == pEvt->getClassId())
 	{
@@ -392,7 +376,23 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		float phi, theta;
 		m_pContext->_farFocusStart += 0.5f;
 		m_pContext->_farFocusStart = min(m_pContext->_farFocusStart, 1000.0f);
-	
+
+	}
+	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager *ef = EffectManager::Instance();
+		ef->getEnableIndirectLighting() ? ef->setEnableIndirectLighting(false) : ef->setEnableIndirectLighting(true);
+	}
+	else if (Event_KEY_N_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager *ef = EffectManager::Instance();
+		ef->getEnableLocalCubemap() ? ef->setEnableLocalCubemap(false) : ef->setEnableLocalCubemap(true);
+	}
+	else if (Event_KEY_M_HELD::GetClassId() == pEvt->getClassId())
+	{
+		PostProcess *p = &EffectManager::Instance()->_postProcess;
+		p->getEnableColorCorrection() ? p->SetEnableColorCorrection(false) : p->SetEnableColorCorrection(true);
+
 	}
 	else
 	{

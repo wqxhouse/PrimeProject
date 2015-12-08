@@ -215,20 +215,20 @@ void DX9_KeyboardMouse::generateButtonEvents()
 
 		if (GetAsyncKeyState('B') & 0x8000)
 		{
-			// bdown = true;
+			bdown = true;
 
+			/*	Handle h("EVENT", sizeof(Event_KEY_B_HELD));
+				new (h)Event_KEY_B_HELD;
+				m_pQueueManager->add(h, Events::QT_INPUT)*/;
+		}
+		else if (bdown)
+		{
 			Handle h("EVENT", sizeof(Event_KEY_B_HELD));
 			new (h)Event_KEY_B_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
-		}
-		//else if (bdown)
-		//{
-		//	Handle h("EVENT", sizeof(Event_KEY_B_HELD));
-		//	new (h)Event_KEY_B_HELD;
-		//	m_pQueueManager->add(h, Events::QT_INPUT);
 
-		//	bdown = false;
-		//}
+			bdown = false;
+		}
 
 		if (GetAsyncKeyState('N') & 0x8000)
 		{

@@ -58,6 +58,11 @@ cbuffer cbClusteredShadingConsts : register(b4)
 	cbDirectionalLight cs_dirLights[MAX_DIR_LIGHTS] : packoffset(c5); 	 // 2 * 8 = 16 | 16 + 5 = 21
 	cbPointLight cs_pointLights[MAX_POINT_LIGHTS] 	: packoffset(c21);	 // 2 * 1024 = 2048 | 2048 + 21 = 2069
 	cbSpotLight cs_spotLights[MAX_SPOT_LIGHTS] 		: packoffset(c2069); // 3 * 512 = 1536 | 1536 + 2069 = 3605 < 4096 -> ok
+	
+	uint enableIndirectLighting : packoffset(c3605.x);
+	uint enableLocalCubemap : packoffset(c3605.y);
+	uint padd0 : packoffset(c3605.z);
+	uint padd1 : packoffset(c3605.w);
 };
 
 // texture register maxed t70 used in animations
@@ -66,6 +71,7 @@ StructuredBuffer<uint> gLightIndices : register(t71);
 // IBL
 TextureCube<float3> LocalSpecularCubemap : register(t72);
 Texture2D<float2> SpecularCubemapLookup : register(t73);
+TextureCube<float3> GlobalSpecularCubemap : register(t74);
 
 // 3D texture for clusters
 Texture3D<ClusterData> gClusters : register(t8);

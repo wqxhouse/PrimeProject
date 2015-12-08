@@ -51,7 +51,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	void loadDefaultEffects();
 	void setupConstantBuffersAndShaderResources();
-	
+
 	Components::Effect *operator[] (const char *pEffectFilename);
 
 	Handle getEffectHandle(const char *pEffectFilename)
@@ -59,12 +59,12 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 		return m_map.findHandle(pEffectFilename);
 	}
 
-		// Singleton
+	// Singleton
 	static void Construct(PE::GameContext &context, PE::MemoryArena arena)
 	{
 		Handle handle("EFFECT_MANAGER", sizeof(EffectManager));
-		/* EffectManager *p = */ new(handle) EffectManager(context, arena);
-		
+		/* EffectManager *p = */ new(handle)EffectManager(context, arena);
+
 		// Singleton
 		SetInstanceHandle(handle);
 
@@ -100,18 +100,25 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 	void createSkyBoxGeom();
 
 	void renderCubemapConvolutionSphere();
-	void renderSkyboxNewSphere();
+	void renderSkyboxNewSphere(int isSky);
 	void randomLightInfo(int num);
+
 	void randomizeLight(PE::Components::Light *l, Vector3 *axis,int i);
 	void rotateLight(float angle,int counter);
 	void drawLightGbuffer();
 	void updateLightDirection(Vector3 sprinkleDir);
+
+	
+	//void rotateLight(float angle, int counter);
+
 	//Liu
 	void drawRayTracingPass();
 	void drawLightMipsPass(int curlevel, bool isSecBlur);
 	void setLightMipsTextureRenderTarget(int level);
+
 	void changeModel(int i, int j);
 	void changeRoughness(int curModel, bool isIncrease);
+
 
 	void updateLight();
 
@@ -138,7 +145,7 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	// + Deferred
 	void uploadDeferredClusteredConstants(float nearClip, float farClip);
-	void drawClusteredQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2);
+	void drawDeferredCubemapLightingQuadOnly(ID3D11ShaderResourceView *depth, ID3D11ShaderResourceView *rt0, ID3D11ShaderResourceView *rt1, ID3D11ShaderResourceView *rt2);
 	void drawClusteredLightHDRPass();
 	void drawDeferredFinalPass();
 	void drawDeferredFinalToBackBuffer();
@@ -147,6 +154,12 @@ struct EffectManager : public PE::PEAllocatableAndDefragmentable
 
 	void debugDrawRenderTarget(bool drawGlowRenderTarget, bool drawSeparatedGlow, bool drawGlow1stPass, bool drawGlow2ndPass, bool drawShadowRenderTarget);
 	void debugDeferredRenderTarget(int which);
+
+	void setEnableLocalCubemap(bool tf) { _enableLocalCubemap = tf; }
+	bool getEnableLocalCubemap() { return _enableLocalCubemap; }
+
+	void setEnableIndirectLighting(bool tf) { _enableIndirectLighting = tf; }
+	bool getEnableIndirectLighting() { return _enableIndirectLighting; }
 
 public:
 	// Singleton
@@ -286,6 +299,10 @@ public:
 	ProbeManager _probeManager;
 	SkyboxNew _skybox;
 	PostProcess _postProcess;
+
+	bool _enableIndirectLighting;
+	bool _enableLocalCubemap;
+
 }; // class EffectManager
 
 }; // namespace PE

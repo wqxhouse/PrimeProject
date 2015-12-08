@@ -51,8 +51,10 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 
 	_nearFocusStart = 0.01f;
 	_nearFocusEnd = 0.01f;
-	_farFocusStart = 7;
-	_farFoucsEnd = 9;
+
+	_farFocusStart = 20.0f;
+	_farFoucsEnd = 100.0f;
+
 
 	D3D11_SAMPLER_DESC sampDesc;
 
@@ -68,6 +70,8 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	DXCall(_device->CreateSamplerState(&sampDesc, &_linearSampler));
+
+	_enableInstagram = true;
 }
 
 void PostProcess::Render()
@@ -318,6 +322,7 @@ void PostProcess::renderDepthBlur()
 	_dofConstants.Data.projA = projA;
 	_dofConstants.Data.projB = projB;
 	_dofConstants.Data.GatherBlurSize = 16;
+	_dofConstants.Data.enableInstagram = _enableInstagram;
 	_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
 	_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
 	_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart>9 ? _pContext->_farFocusStart : 9;

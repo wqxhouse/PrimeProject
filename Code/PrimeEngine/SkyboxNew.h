@@ -24,6 +24,14 @@ public:
 	void SetSolarAzimuth(float azimuth);
 	void SetTurbidity(float turbidity);
 
+	int AddCubemap(const std::wstring &filepath);
+	void SetCubemap(int index);
+	void SetSky();
+	inline bool isSky() { return _isSky; }
+	inline int GetCurrentCubemapId() { return _curCubemap; }
+	ID3D11ShaderResourceView *getGlobalCubemapSRV(int index) { return _skyCubemaps[index]; }
+
+
 private:
 	ID3D11DevicePtr _device;
 	ID3D11DeviceContextPtr _context;
@@ -91,6 +99,9 @@ private:
 	float _sunPhi;
 
 	// ===========================================
+	void RenderSky(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView);
+	void RenderSkyCubemap(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView);
+
 	void CalculateZenitalAbsolutes();
 	void CalculateCoefficents();
 	void CalculateLightColor();
@@ -122,4 +133,8 @@ private:
 	Vector3 _lightDirection;
 
 	float PI_;
+
+	bool _isSky;
+	int _curCubemap;
+	std::vector<ID3D11ShaderResourceViewPtr> _skyCubemaps;
 };

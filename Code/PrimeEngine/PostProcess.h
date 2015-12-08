@@ -14,6 +14,11 @@ public:
 
 	void Render();
 
+	inline void SetEnableColorCorrection(int tf) { _enableInstagram = tf; }
+	inline bool getEnableColorCorrection() {
+		return _enableInstagram;
+	};
+
 private:
 	ID3D11DevicePtr _device;
 	ID3D11DeviceContextPtr _context;
@@ -48,7 +53,7 @@ private:
 		float projA;
 		float projB;
 		float GatherBlurSize;
-		float pad1;
+		unsigned int enableInstagram;
 		Vector4 DOFDepths;
 	};
 
@@ -60,4 +65,6 @@ private:
 	float _farFoucsEnd;
 
 	ID3D11SamplerStatePtr _linearSampler;
+
+	bool _enableInstagram;
 };

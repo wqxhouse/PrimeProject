@@ -346,7 +346,7 @@ namespace Components {
 	// Add a directional light
 	Handle hLight("LIGHT", sizeof(Light));
 	Vector3 sunDir = EffectManager::Instance()->getSkybox()->GetSunDirection();
-	Vector3 sunColor = EffectManager::Instance()->getSkybox()->GetSunColor();
+	Vector3 sunColor = EffectManager::Instance()->getSkybox()->GetSunColor() * 20;
 	Vector4 sunColorVec4 = Vector4(sunColor.m_x, sunColor.m_y, sunColor.m_z, 1.0f);
 	
 	Light *pLight = new(hLight)Light(

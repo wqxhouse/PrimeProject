@@ -351,6 +351,24 @@ namespace PE {
 		m_map.add("SkyboxNewTech", _skyBoxEffect);
 	}
 
+	{
+		Handle _skyBoxCubemapEffect("EFFECT", sizeof(Effect));
+		PE::Components::Effect *pSkyboxCubemapEffect = new (_skyBoxCubemapEffect)PE::Components::Effect(*m_pContext, m_arena, _skyBoxCubemapEffect);
+		pSkyboxCubemapEffect->loadTechnique(
+			"ColoredMinimalMesh_SkyboxNew_VS", "main",
+			NULL, NULL, // geometry shader
+			"SkyboxNew_Cubemap_PS", "main",
+			NULL, NULL, // compute shader
+			PE::E_PERasterizerState::PERasterizerState_SolidTriNoCull,
+			PE::E_PEDepthStencilState::PEDepthStencilState_ZBuffer, PE::E_PEAlphaBlendState::PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"SkyboxNewCubemapTech");
+
+		pSkyboxCubemapEffect->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+		pSkyboxCubemapEffect->m_effectDrawOrder = EffectDrawOrder::First;
+		m_map.add("SkyboxNewCubemapTech", _skyBoxCubemapEffect);
+	}
+
+
 	// + Deferred GBuffer
 	{
 		Handle hEffect("EFFECT", sizeof(Effect));
@@ -445,6 +463,23 @@ namespace PE {
 
 		m_map.add("DeferredLightPass_Clustered_Tech", hLightHDRClusteredFx);
 	}
+
+	{
+		Handle hDeferredCubemapLighting("EFFECT", sizeof(Effect));
+		Effect *pDeferredCubemapLighting = new(hDeferredCubemapLighting)Effect(*m_pContext, m_arena, hDeferredCubemapLighting);
+		pDeferredCubemapLighting->loadTechnique(
+			"ColoredMinimalMesh_VS", "main",
+			NULL, NULL, // geometry shader
+			"DeferredCubemapLighting_PS", "main",
+			NULL, NULL, // compute shader
+			PERasterizerState_SolidTriNoCull,
+			PEDepthStencilState_NoZBuffer, PEAlphaBlendState_NoBlend, // depth stencil, blend states
+			"DeferredCubemapLightingTech");
+		pDeferredCubemapLighting->m_psInputFamily = EffectPSInputFamily::REDUCED_MESH_PS_IN;
+
+		m_map.add("DeferredCubemapLightingTech", hDeferredCubemapLighting);
+	}
+
 
 	// + Debug Pass
 	{
@@ -894,5 +929,9 @@ namespace PE {
 	TextureGPU *finalPassTex = m_hfinalHDRTextureGPU.getObject<TextureGPU>();
 	_postProcess.Initialize(m_pContext, m_arena, finalPassTex->m_pShaderResourceView, 
 		finalPassTex->m_pRenderTargetView, m_hrootDepthBufferTextureGPU.getObject<TextureGPU>()->m_pDepthShaderResourceView);
+
+
+	_enableIndirectLighting = true;
+	_enableLocalCubemap = true;
 }
 }; // namespace PE

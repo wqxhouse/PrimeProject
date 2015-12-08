@@ -97,7 +97,8 @@ void SkyboxNew::Initialize(PE::GameContext *context, PE::MemoryArena arena)
 		D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
 		&resource, &_nightCubemap, nullptr));
 
-	
+	_isSky = true;
+	_curCubemap = -1;
 }
 
 Vector3 sphericalConv(float theta, float phi)
@@ -115,12 +116,8 @@ float deg2rad(float deg)
 //	return -sphericalConv(deg2rad(_sunTheta), deg2rad(_sunPhi));
 //}
 
-
-void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView)
+void SkyboxNew::RenderSky(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView)
 {
-	PIXEvent event(L"Render skybox");
-	// calcPreetham(deg2rad(_sunTheta), 4.0f, 1.1f);
-
 	float blendFactor[4] = { 1, 1, 1, 1 };
 	_context->RSSetState(_rasterizerState);
 	_context->OMSetBlendState(_blendState, blendFactor, 0xFFFFFFFF);
@@ -178,7 +175,7 @@ void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D1
 	_context->PSSetShaderResources(0, 1, srvs);
 
 
-	PE::EffectManager::Instance()->renderSkyboxNewSphere();
+	PE::EffectManager::Instance()->renderSkyboxNewSphere(1);
 
 	ID3D11SamplerState *sampStates[1] = { nullptr };
 	_context->PSSetSamplers(0, 1, sampStates);
@@ -191,6 +188,70 @@ void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D1
 
 	rtvs[0] = nullptr;
 	_context->OMSetRenderTargets(1, rtvs, nullptr);
+}
+
+void SkyboxNew::RenderSkyCubemap(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView)
+{
+	float blendFactor[4] = { 1, 1, 1, 1 };
+	_context->RSSetState(_rasterizerState);
+	_context->OMSetBlendState(_blendState, blendFactor, 0xFFFFFFFF);
+	_context->OMSetDepthStencilState(_dsState, 0);
+	_context->PSSetSamplers(0, 1, &(_samplerState.GetInterfacePtr()));
+
+	ID3D11RenderTargetView *rtvs[1] = { rtView };
+	_context->OMSetRenderTargets(1, rtvs, dsView);
+
+	UINT numViewports = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
+	D3D11_VIEWPORT oldViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+	_context->RSGetViewports(&numViewports, oldViewports);
+
+	// Set a viewport with MinZ pushed back
+	D3D11_VIEWPORT newViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+	for (UINT i = 0; i < numViewports; ++i)
+	{
+		newViewports[i] = oldViewports[0];
+		newViewports[i].MinDepth = 1.0f;
+		newViewports[i].MaxDepth = 1.0f;
+	}
+	_context->RSSetViewports(numViewports, newViewports);
+
+	ID3D11ShaderResourceView *srvs[1] = { _skyCubemaps[_curCubemap] };
+	_context->PSSetShaderResources(0, 1, srvs);
+
+	_vsConstants.Data.View = viewMat;
+	_vsConstants.Data.Proj = projMat;
+	_vsConstants.ApplyChanges(_context);
+	_vsConstants.SetVS(_context, 0);
+
+	PE::EffectManager::Instance()->renderSkyboxNewSphere(0);
+
+	ID3D11SamplerState *sampStates[1] = { nullptr };
+	_context->PSSetSamplers(0, 1, sampStates);
+
+	srvs[0] = nullptr;
+	_context->PSSetShaderResources(0, 1, srvs);
+
+	// Set the viewport back to what it was
+	_context->RSSetViewports(numViewports, oldViewports);
+
+	rtvs[0] = nullptr;
+	_context->OMSetRenderTargets(1, rtvs, nullptr);
+}
+
+void SkyboxNew::Render(const Matrix4x4 &viewMat, const Matrix4x4 &projMat, ID3D11RenderTargetView *rtView, ID3D11DepthStencilView *dsView)
+{
+	PIXEvent event(L"Render skybox");
+	// calcPreetham(deg2rad(_sunTheta), 4.0f, 1.1f);
+
+	if (_isSky)
+	{
+		RenderSky(viewMat, projMat, rtView, dsView);
+	}
+	else
+	{
+		RenderSkyCubemap(viewMat, projMat, rtView, dsView);
+	}
+
 }
 
 
@@ -387,4 +448,31 @@ void SkyboxNew::SetSolarTime(float solarTime)
 		(float)(cos(solarAzimuth) * sin(lightZenith)));
 
 	_lightDirection = lightDir;
+}
+
+int SkyboxNew::AddCubemap(const std::wstring &filepath)
+{
+	ID3D11ShaderResourceViewPtr srv;
+	ID3D11ResourcePtr resource;
+	DXCall(DirectX::CreateDDSTextureFromFileEx(_device, filepath.c_str(), 0, D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
+		&resource, &srv, nullptr));
+
+	_skyCubemaps.push_back(srv);
+
+	return _skyCubemaps.size() - 1;
+}
+
+void SkyboxNew::SetCubemap(int index)
+{
+	if (index < _skyCubemaps.size())
+	{
+		_curCubemap = index;
+		_isSky = false;
+	}
+}
+
+void SkyboxNew::SetSky()
+{
+	_isSky = true;
 }
