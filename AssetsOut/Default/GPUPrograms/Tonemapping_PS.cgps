@@ -3,6 +3,14 @@
 #include "ColoredMinimalMesh_Structs.fx"
 #include "StandardTextureResources.fx"
 
+cbuffer DepthBlurConsts : register(b0)
+{
+	float2 ProjectionAB;
+	float GatherBlurSize;
+	uint enableInstagram;
+	float4 DOFDepths;
+}
+
 // static const float KeyValue = 0.1150f;
 static const float KeyValue = 0.2f;	
 
@@ -79,8 +87,10 @@ float4 Tonemapping_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
     float exposure = 0;
     res = Tonemap_helper(res, avgLuminance, 0, exposure);
 	
-	res = convertColorSpace(res);
-	
+	if(enableInstagram > 0)
+	{
+		res = convertColorSpace(res);
+	}
 
     return float4(res, 1.0f);
 }

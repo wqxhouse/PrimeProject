@@ -137,23 +137,42 @@ float4 DeferredLightPass_Clustered_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
 	}
 
 	// Apply IBL
-	float3 viewWS = normalize(camPos - posWS);
-	float3 reflectWS = reflect(-viewWS, normal.xyz);
+	if (enableIndirectLighting > 0)
+	{
+		float3 viewWS = normalize(camPos - posWS);
+		float3 reflectWS = reflect(-viewWS, normal.xyz);
 
-	uint width, height, numMips;
-	LocalSpecularCubemap.GetDimensions(0, width, height, numMips);
+		uint width, height, numMips;
+		
+		if(enableLocalCubemap > 0)
+		{
+			LocalSpecularCubemap.GetDimensions(0, width, height, numMips);
+		}
+		else
+		{
+			GlobalSpecularCubemap.GetDimensions(0, width, height, numMips);
+		}
 
-	const float SqrtRoughness = sqrt(roughness);
-	// Compute the mip level, assuming the top level is a roughness of 0.01
-	float mipLevel = saturate(SqrtRoughness - 0.01f) * (numMips - 1.0f);
+		const float SqrtRoughness = sqrt(roughness);
+		// Compute the mip level, assuming the top level is a roughness of 0.01
+		float mipLevel = saturate(SqrtRoughness - 0.01f) * (numMips - 1.0f);
 
-	// Compute fresnel
-	float viewAngle = saturate(dot(viewWS, normal.xyz));
-	float2 AB = SpecularCubemapLookup.SampleLevel(gDiffuseMapSampler, float2(viewAngle, SqrtRoughness), 0.0f);
-	float fresnel = metallic * AB.x + AB.y;
-	fresnel *= saturate(metallic * 100.0f);
+		// Compute fresnel
+		float viewAngle = saturate(dot(viewWS, normal.xyz));
+		float2 AB = SpecularCubemapLookup.SampleLevel(gDiffuseMapSampler, float2(viewAngle, SqrtRoughness), 0.0f);
+		float fresnel = metallic * AB.x + AB.y;
+		fresnel *= saturate(metallic * 100.0f);
 
-	finalColor += LocalSpecularCubemap.SampleLevel(gDiffuseMapSampler, reflectWS, mipLevel) * fresnel;
+		if (enableLocalCubemap > 0)
+		{
+			finalColor += LocalSpecularCubemap.SampleLevel(gDiffuseMapSampler, reflectWS, mipLevel) * fresnel;
+		}
+		else
+		{
+			finalColor += GlobalSpecularCubemap.SampleLevel(gDiffuseMapSampler, reflectWS, mipLevel) * fresnel;
+		}
+	}
+	
 	
 	return float4(finalColor.xyz,1.0);
 }

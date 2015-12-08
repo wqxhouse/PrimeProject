@@ -364,17 +364,20 @@ void EffectManager::assignLightToClusters()
 	for (int i = 0; i < lights.m_size; i++)
 	{
 		Light *l = lights[i].getObject<Light>();
-		if (l->m_cbuffer.type == 0) // p
+		if (l->_showLight)
 		{
-			_pointLights[curPointLight++] = l;
-		}
-		else if (l->m_cbuffer.type == 1)
-		{
-			_dirLights[curDirLight++] = l;
-		}
-		else if (l->m_cbuffer.type == 2)
-		{
-			_spotLights[curSpotLight++] = l;
+			if (l->m_cbuffer.type == 0) // p
+			{
+				_pointLights[curPointLight++] = l;
+			}
+			else if (l->m_cbuffer.type == 1)
+			{
+				_dirLights[curDirLight++] = l;
+			}
+			else if (l->m_cbuffer.type == 2)
+			{
+				_spotLights[curSpotLight++] = l;
+			}
 		}
 	}
 
@@ -1167,6 +1170,16 @@ void EffectManager::drawClusteredLightHDRPass()
 		_probeManager.getLocalCubemapPrefilterTargetSRV());
 	setLocalCubemap.bindToPipeline(&curEffect);
 
+	if (!_skybox.isSky())
+	{
+		PE::SA_Bind_Resource setGlobalCubemap(
+			*m_pContext, m_arena, GpuResourceSlot_GlobalSpecularCubemapResource,
+			SamplerState_NotNeeded,
+			_skybox.getGlobalCubemapSRV(_skybox.GetCurrentCubemapId()));
+		setGlobalCubemap.bindToPipeline(&curEffect);
+	}
+
+
 	PE::SA_Bind_Resource setIBLLut(
 		*m_pContext, m_arena, GpuResourceSlot_SpecularCubemapLUTResource,
 		SamplerState_NotNeeded,
@@ -1201,6 +1214,9 @@ void EffectManager::drawClusteredLightHDRPass()
 	pscs.m_data.camZAxisWS = csn->m_base.getN();
 
 	pscs.m_data.dirLightNum = _dirLightNum;
+
+	pscs.m_data.enableLocalCubemap = _enableLocalCubemap;
+	pscs.m_data.enableIndirectLighting = _enableIndirectLighting;
 
 	Vector3 size = m_cMax - m_cMin;
 	Vector3 scale = Vector3(float(CX) / size.m_x, float(CY) / size.m_y, float(CZ) / size.m_z);
@@ -1812,9 +1828,18 @@ void EffectManager::renderCubemapConvolutionSphere()
 	pvbGPU->unbindFromPipeline(&curEffect);
 }
 
-void EffectManager::renderSkyboxNewSphere()
+void EffectManager::renderSkyboxNewSphere(int isSky)
 {
-	Handle hSkyboxEffect = getEffectHandle("SkyboxNewTech");
+	Handle hSkyboxEffect;
+	if (isSky)
+	{
+		hSkyboxEffect = getEffectHandle("SkyboxNewTech");
+	}
+	else
+	{
+		hSkyboxEffect = getEffectHandle("SkyboxNewCubemapTech");
+	}
+
 	Effect &curEffect = *hSkyboxEffect.getObject<Effect>();
 	if (!curEffect.m_isReady)
 		return;
@@ -2160,11 +2185,19 @@ void EffectManager::updateLight()
 		Light *l = hl.getObject<Light>();
 		if (l->m_cbuffer.type == 1)
 		{
-			Vector3 dir = _skybox.GetSunDirection();
-			Vector3 color = _skybox.GetSunColor() * 20;
-			Vector4 colorVec4 = Vector4(color.m_x, color.m_y, color.m_z, 1.0f);
-			l->m_cbuffer.dir = dir;
-			l->m_cbuffer.diffuse = colorVec4;
+			if (_skybox.isSky())
+			{
+				l->_showLight = true;
+				Vector3 dir = _skybox.GetSunDirection();
+				Vector3 color = _skybox.GetSunColor() * 20;
+				Vector4 colorVec4 = Vector4(color.m_x, color.m_y, color.m_z, 1.0f);
+				l->m_cbuffer.dir = dir;
+				l->m_cbuffer.diffuse = colorVec4;
+			}
+			else
+			{
+				l->_showLight = false;
+			}
 		}
 	}
 }

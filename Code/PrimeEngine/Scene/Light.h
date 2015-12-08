@@ -61,7 +61,7 @@ struct Light : public Component
 		m_cbuffer.range = range;
 		isTheShadowCaster = isShadowCaster;
 		m_cbuffer.type = (PrimitiveTypes::Float32)(type);
-		
+		_showLight = true;
 	}
 
 	Light(
@@ -120,6 +120,7 @@ struct Light : public Component
 	Matrix4x4 m_viewToProjectedTransform; // objects in local (view) space are multiplied by this to get them to screen space
 	Vector3 m_oribitAxis;
 	SetPerObjectGroupConstantsShaderAction::hlsl_Light m_cbuffer; // gpu mirror : values that will be set into gpu registers vi shader action hlsl_cbPerObjectGroup_c1
+	bool _showLight;
 };
 
 }; // namespace Components

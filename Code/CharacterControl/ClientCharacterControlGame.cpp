@@ -261,6 +261,11 @@ int ClientCharacterControlGame::initGame()
 
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
+	//int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Ennis.dds");
+	//int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\GraceCathedral.dds");
+	//// int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\GraceCathedral.dds");
+	//EffectManager::Instance()->getSkybox()->SetCubemap(id0);
+
 	return 1; // 1 (true) = success. no errors. TODO: add error checking
 }
 

@@ -1,0 +1,19 @@
+#ifndef SKYBOX_NEW_CUBEMAP_PS
+#define SKYBOX_NEW_CUBEMAP_PS
+#include "ColoredMinimalMesh_Structs.fx"
+
+TextureCube<float3> Cubemap : register(t0);
+SamplerState LinearSampler : register(s0);
+
+float4 SkyboxNew_Cubemap_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float3 world_pos = normalize(pIn.iPosOS);
+	float3 skyColor = Cubemap.Sample(LinearSampler, world_pos).xyz;
+	return float4(skyColor, 1);
+	
+	//return float4(1, 0.2, 0.2, 1);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(SkyboxNew_Cubemap_PS)
+
+#endif

@@ -94,6 +94,11 @@ namespace PE {
 			cbPointLight pointLights[1024];
 			cbSpotLight spotLights[512];
 
+			unsigned int enableIndirectLighting;
+			unsigned int enableLocalCubemap;
+			unsigned int paddd;
+			unsigned int paddd2;
+
 		} m_data;
 
 #	if APIABSTRACTION_OGL
