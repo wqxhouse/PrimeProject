@@ -311,12 +311,12 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		//}
 
 		//create raybuffer
-		//if (ctx.isSSR)
-		//{
-			//EffectManager::Instance()->setLightAccumTextureRenderTarget();
-			//EffectManager::Instance()->drawRayTracingPass();
-			//EffectManager::Instance()->endCurrentRenderTarget();
-		//}
+		if (ctx.isSSR)
+		{
+			EffectManager::Instance()->setLightAccumTextureRenderTarget();
+			EffectManager::Instance()->drawRayTracingPass();
+			EffectManager::Instance()->endCurrentRenderTarget();
+		}
 
 
 		// 3) Render post process & final pass

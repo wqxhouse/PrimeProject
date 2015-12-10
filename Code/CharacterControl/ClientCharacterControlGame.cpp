@@ -366,7 +366,7 @@ int ClientCharacterControlGame::initGame()
 	
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
-#if 1
+#if 0 
 	int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Ennis.dds");
 	m_pContext->_cubmapID[0] = id0;
 	int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Doge.dds");
