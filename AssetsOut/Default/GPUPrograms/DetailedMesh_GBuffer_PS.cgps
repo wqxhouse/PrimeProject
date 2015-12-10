@@ -39,9 +39,15 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 	output.Normal = float4(perPixelNormal, 1.0);
 
 	float roughness = sample2D(gGlowMapSampler, pIn.iTexCoord, gGlowMap).r;
-	roughness =  cs_pad2 == 0? max(roughness, 0.01):cs_pad2;//max(roughness, 0.01) +
+	// roughness +=  cs_pad2 == 0? max(roughness, 0.01):cs_pad2;//max(roughness, 0.01) +
+	roughness += cs_pad2;
+	roughness = min(max(roughness, 0.01), 1.0);
+
 	float metallic = sample2D(gSpecularMapSampler, pIn.iTexCoord, gSpecularMap).r;
-	metallic =  cs_pad3 == 0? metallic:cs_pad3;
+
+	// metallic +=  cs_pad3 == 0? metallic:cs_pad3;
+	metallic += cs_pad3;
+	metallic = min(max(metallic, 0.0), 1.0);
 	
 	output.Albedo *= (1.0f - metallic);
 	output.Material = float4(roughness, metallic, 0, 0);
