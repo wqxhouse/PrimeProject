@@ -170,6 +170,22 @@ struct Event_KEY_EQUAL_HELD : public Event {
 	virtual ~Event_KEY_EQUAL_HELD(){}
 };
 
+struct Event_KEY_NUM_0: public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_0);
+	virtual ~Event_KEY_NUM_0(){}
+};
+
+struct Event_KEY_NUM_1 : public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_1);
+	virtual ~Event_KEY_NUM_1(){}
+};
+
+struct Event_KEY_NUM_2 : public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_2);
+	virtual ~Event_KEY_NUM_2(){}
+};
+
+
 
 
 }; // namespace Events

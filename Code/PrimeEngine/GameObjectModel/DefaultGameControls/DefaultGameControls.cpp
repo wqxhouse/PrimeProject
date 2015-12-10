@@ -452,6 +452,10 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 			EffectManager::Instance()->_postProcess.setEnableDOF(false) :
 			EffectManager::Instance()->_postProcess.setEnableDOF(true);
 	}
+	else if (Event_KEY_NUM_0::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->isSSR ? m_pContext->isSSR = false : m_pContext->isSSR = true;
+	}
 
 	else
 	{

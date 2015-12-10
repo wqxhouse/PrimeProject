@@ -313,7 +313,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		//create raybuffer
 		if (ctx.isSSR)
 		{
-			EffectManager::Instance()->setLightAccumTextureRenderTarget();
+			PIXEvent event(L"SSR Pass");
+			// EffectManager::Instance()->setLightAccumTextureRenderTarget();
 			EffectManager::Instance()->drawRayTracingPass();
 			EffectManager::Instance()->endCurrentRenderTarget();
 		}
