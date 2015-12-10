@@ -257,8 +257,10 @@ int ClientCharacterControlGame::initGame()
 	}
 
 	{
+
 		//////////////////////////////////////////////////////////////////////////
 #if 0
+
 		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
 		pMainSN->addDefaultComponents();
@@ -269,6 +271,7 @@ int ClientCharacterControlGame::initGame()
 		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
 
 		pImrodMeshInst->addDefaultComponents();
+
 		pImrodMeshInst->initFromFile("Ganfaul.mesha", "Ganfaul_Mesh", m_pContext->m_gameThreadThreadOwnershipMask);
 
 		pMainSN->addComponent(hImrodMeshInst);
@@ -284,7 +287,9 @@ int ClientCharacterControlGame::initGame()
 			);
 		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
 		RootSceneNode::Instance()->addComponent(hSN);
+
 #endif
+
 	}
 	
 
