@@ -14,10 +14,19 @@ public:
 
 	void Render();
 
-	inline void SetEnableColorCorrection(int tf) { _enableInstagram = tf; }
+	inline void SetEnableColorCorrection(bool tf) { _enableInstagram = tf; }
 	inline bool getEnableColorCorrection() {
 		return _enableInstagram;
 	};
+
+	inline void setEnableManualExposure(bool tf) { _enableManualExposure = tf; }
+	inline bool getEnableManualExposure() { return _enableManualExposure; }
+
+	inline void setManualExposure(float manualExposure) { _manualExposure = manualExposure; }
+	inline float getManualExposure() { return _manualExposure; }
+
+	inline float getKeyValaue() { return _keyValue; }
+	inline void setKeyValue(float keyvalue) { _keyValue = keyvalue; }
 
 private:
 	ID3D11DevicePtr _device;
@@ -48,6 +57,8 @@ private:
 
 	void computeAvgLuminance();
 
+	void uploadConstants();
+
 	struct DOFConstants
 	{
 		float projA;
@@ -55,6 +66,11 @@ private:
 		float GatherBlurSize;
 		unsigned int enableInstagram;
 		Vector4 DOFDepths;
+
+		float KeyValue;
+		unsigned int enableManualExposure;
+		float manualExposure;
+		float pad1;
 	};
 
 	ConstantBuffer<DOFConstants> _dofConstants;
@@ -67,4 +83,7 @@ private:
 	ID3D11SamplerStatePtr _linearSampler;
 
 	bool _enableInstagram;
+	bool _enableManualExposure;
+	float _manualExposure;
+	float _keyValue;
 };

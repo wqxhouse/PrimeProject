@@ -2,15 +2,8 @@
 #define DOFGATHER_PS
 #include "ColoredMinimalMesh_Structs.fx"
 #include "StandardTextureResources.fx"
+#include "ExposureCommon.fx"
 SamplerState LinearSampler : register(s9);
-
-cbuffer DepthBlurConsts : register(b0)
-{
-	float2 ProjectionAB;
-	float GatherBlurSize;
-	float pad;
-	float4 DOFDepths;
-}
 
 static const uint NumDiscSamples = 16;
 static const float2 DiscKernel[NumDiscSamples] = {

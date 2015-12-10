@@ -2,14 +2,7 @@
 #define DEPTHBLUR_PS
 #include "ColoredMinimalMesh_Structs.fx"
 #include "StandardTextureResources.fx"
-
-cbuffer DepthBlurConsts : register(b0)
-{
-	float2 ProjectionAB;
-	float GatherBlurSize;
-	float pad;
-	float4 DOFDepths;
-}
+#include "ExposureCommon.fx"
 
 float BlurFactor(in float depth) 
 {
