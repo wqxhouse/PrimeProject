@@ -99,6 +99,8 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 		psvPerObjectGroup->m_data.gDoMotionBlur = 0;
 		psvPerObjectGroup->m_data.gEyePosW = pDrawEvent ? pDrawEvent->m_eyePos : pZOnlyDrawEvent->m_eyePos;
 
+		psvPerObjectGroup->m_data.gDoMotionBlur = EffectManager::Instance()->_normalIntensity;
+
 
 		// the light that drops shadows is defined by a boolean isShadowCaster in maya light objects
 		PrimitiveTypes::UInt32 iDestLight = 0;

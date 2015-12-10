@@ -456,7 +456,20 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	{
 		m_pContext->isSSR ? m_pContext->isSSR = false : m_pContext->isSSR = true;
 	}
-
+	else if (Event_KEY_NUM_1::GetClassId() == pEvt->getClassId())
+	{
+		float intensity = EffectManager::Instance()->_normalIntensity;
+		intensity += 0.03;
+		intensity = min(intensity, 1.0f);
+		EffectManager::Instance()->_normalIntensity = intensity;
+	}
+	else if (Event_KEY_NUM_2::GetClassId() == pEvt->getClassId())
+	{
+		float intensity = EffectManager::Instance()->_normalIntensity;
+		intensity -= 0.03;
+		intensity = max(intensity, 0.0f);
+		EffectManager::Instance()->_normalIntensity = intensity;
+	}
 	else
 	{
 		Component::handleEvent(pEvt);

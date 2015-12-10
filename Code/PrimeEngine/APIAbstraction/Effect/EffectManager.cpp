@@ -65,7 +65,7 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	, m_frameBufferCopyTexture(context, arena)
 {
 	m_arena = arena; m_pContext = &context;
-
+	_normalIntensity = 1.0f;
 }
 
 void EffectManager::setupConstantBuffersAndShaderResources()

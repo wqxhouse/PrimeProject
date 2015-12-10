@@ -27,6 +27,8 @@ DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_I
 		
 		float3x3 TBN = make_float3x3(T, B, N);
 		
+		perPixelNormal = lerp(float3(0, 0, 1), perPixelNormal, xyzgEyePosW_wDoMotionBlur.w);
+		
 		// Tranform from tangent space to world space
 		perPixelNormal = normalize(mul(perPixelNormal, TBN));
 	}
