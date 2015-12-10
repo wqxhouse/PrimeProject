@@ -326,7 +326,7 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		
 		m_pContext->_preModel = m_pContext->_curModel;
 		m_pContext->_curModel++;
-		m_pContext->_curModel = m_pContext->_curModel % 2;
+		m_pContext->_curModel = m_pContext->_curModel % 3;
 
 		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
 	}
@@ -405,8 +405,16 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_Z_HELD::GetClassId() == pEvt->getClassId())
 	{
 		m_pContext->_curCubeMap++;
-		m_pContext->_curCubeMap = m_pContext->_curCubeMap % 6;
-		EffectManager::Instance()->getSkybox()->SetCubemap(m_pContext->_cubmapID[m_pContext->_curCubeMap]);
+		m_pContext->_curCubeMap = m_pContext->_curCubeMap % 7;
+		if (m_pContext->_curCubeMap == 6)
+		{
+			EffectManager::Instance()->getSkybox()->SetSky();
+		}
+		else
+		{
+			EffectManager::Instance()->getSkybox()->SetCubemap(m_pContext->_cubmapID[m_pContext->_curCubeMap]);
+		}
+		
 	}
 	else if (Event_KEY_LEFT_BRACKET_HELD::GetClassId() == pEvt->getClassId())
 	{

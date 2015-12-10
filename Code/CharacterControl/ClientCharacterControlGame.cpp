@@ -259,7 +259,7 @@ int ClientCharacterControlGame::initGame()
 	{
 
 		//////////////////////////////////////////////////////////////////////////
-#if 0
+#if 1
 
 		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
@@ -292,7 +292,41 @@ int ClientCharacterControlGame::initGame()
 
 	}
 	
+	{
 
+		//////////////////////////////////////////////////////////////////////////
+#if 1
+
+		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+		pMainSN->addDefaultComponents();
+
+		pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+		pImrodMeshInst->addDefaultComponents();
+
+		pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+		pMainSN->addComponent(hImrodMeshInst);
+
+		Handle hTestModel("LIGHT", sizeof(TestModel));
+
+		TestModel *pTestModel = new(hTestModel)TestModel(
+			*m_pContext,
+			m_arena,
+			hTestModel,
+			pMainSN,
+			0
+			);
+		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+		RootSceneNode::Instance()->addComponent(hSN);
+
+#endif
+
+	}
 
 	
 #if PE_PLAT_IS_WIN32
@@ -325,14 +359,14 @@ int ClientCharacterControlGame::initGame()
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('ccontrollvl0.x_level.levela', 'CharacterControl')");
 #endif
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testbrickspire.x_level.levela', 'Basic')");
-	 m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
+	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
 	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('lightingtest.x_level.levela', 'Basic')");
 	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testskinmeshgbuffer.x_level.levela', 'Basic')");
 	
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
-#if 0
+#if 1
 	int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Ennis.dds");
 	m_pContext->_cubmapID[0] = id0;
 	int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Doge.dds");
