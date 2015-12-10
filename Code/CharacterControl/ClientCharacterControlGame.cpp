@@ -258,31 +258,31 @@ int ClientCharacterControlGame::initGame()
 
 	{
 	//////////////////////////////////////////////////////////////////////////
-	PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
-	SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
-	pMainSN->addDefaultComponents();
+		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+		pMainSN->addDefaultComponents();
 
-	pMainSN->m_base.setPos(Vector3(0, -100, 0));
+		pMainSN->m_base.setPos(Vector3(0, -100, 0));
 
-	PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
-	MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
 
-	pImrodMeshInst->addDefaultComponents();
-	pImrodMeshInst->initFromFile("Ganfaul.mesha", "Ganfaul_Mesh", m_pContext->m_gameThreadThreadOwnershipMask);
+		pImrodMeshInst->addDefaultComponents();
+		pImrodMeshInst->initFromFile("Ganfaul_Mesh.mesha", "Ganfaul_Mesh", m_pContext->m_gameThreadThreadOwnershipMask);
 
-	pMainSN->addComponent(hImrodMeshInst);
+		pMainSN->addComponent(hImrodMeshInst);
 
-	Handle hTestModel("LIGHT", sizeof(TestModel));
+		Handle hTestModel("LIGHT", sizeof(TestModel));
 
-	TestModel *pTestModel = new(hTestModel)TestModel(
-		*m_pContext,
-		m_arena,
-		hTestModel,
-		pMainSN,
-		0
-		);
-	RootSceneNode::Instance()->m_testmodels.add(hTestModel);
-	RootSceneNode::Instance()->addComponent(hSN);
+		TestModel *pTestModel = new(hTestModel)TestModel(
+			*m_pContext,
+			m_arena,
+			hTestModel,
+			pMainSN,
+			0
+			);
+		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+		RootSceneNode::Instance()->addComponent(hSN);
 	}
 	
 

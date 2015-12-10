@@ -71,7 +71,7 @@ void Skeleton::initFromFiles(const char *skeletonAssetName, const char *skeleton
 	vbd.StructureByteStride = sizeof(JointParentData);
 
 
-	PEASSERT(byteSize == pSkel->m_jointParents.m_size * sizeof(JointParentData), "Wrong array size");
+	PEASSERT(byteSize >= pSkel->m_jointParents.m_size * sizeof(JointParentData), "Wrong array size");
 	D3D11_SUBRESOURCE_DATA vinitData;
 	vinitData.pSysMem = pSkel->m_jointParents.getFirstPtr();
 	vinitData.SysMemPitch = 0;
@@ -108,7 +108,7 @@ void Skeleton::initFromFiles(const char *skeletonAssetName, const char *skeleton
 	vbd.StructureByteStride = sizeof(Matrix4x4);
 
 	SkeletonCPU &skel = *m_hSkeletonCPU.getObject<SkeletonCPU>();
-	PEASSERT(byteSize == skel.m_numJoints * sizeof(Matrix4x4), "Worng array size");
+	PEASSERT(byteSize >= skel.m_numJoints * sizeof(Matrix4x4), "Worng array size");
 
 	vinitData.pSysMem = skel.getBindInversesPtr();
 
