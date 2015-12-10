@@ -81,8 +81,8 @@ void PostProcess::Render()
 {
 	uploadConstants();
 
-	renderDepthBlur();
-	renderDOFGather();
+	//renderDepthBlur();
+	//renderDOFGather();
 
 	computeAvgLuminance();
 	D3D11_VIEWPORT viewport;

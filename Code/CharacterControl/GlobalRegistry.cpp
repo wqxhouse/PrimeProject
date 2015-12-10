@@ -65,6 +65,10 @@ void CharacterControl::Register(PE::Components::LuaEnvironment *pLuaEnv, PE::Glo
 				Event_CREATE_WAYPOINT::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 				SoldierNPCAnimSM_Event_STOP::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 				SoldierNPCAnimSM_Event_WALK::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+				SoldierNPCAnimSM_Event_HipHop::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+				SoldierNPCAnimSM_Event_FootWork::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+				SoldierNPCAnimSM_Event_Gangnam::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+				SoldierNPCAnimSM_Event_Cheering::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 				SoldierNPCMovementSM_Event_MOVE_TO::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 				SoldierNPCMovementSM_Event_TARGET_REACHED::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 				SoldierNPCMovementSM_Event_STOP::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);

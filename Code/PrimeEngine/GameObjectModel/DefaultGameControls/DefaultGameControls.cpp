@@ -326,7 +326,7 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		
 		m_pContext->_preModel = m_pContext->_curModel;
 		m_pContext->_curModel++;
-		m_pContext->_curModel = m_pContext->_curModel % 3;
+		m_pContext->_curModel = m_pContext->_curModel % RootSceneNode::Instance()->m_testmodels.m_size;
 
 		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
 	}

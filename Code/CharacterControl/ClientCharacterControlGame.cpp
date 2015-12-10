@@ -148,27 +148,6 @@ int ClientCharacterControlGame::initGame()
 				
 				pSkelInst->addComponent(hMeshInstance);
 			}
-
-			
-// 			{
-// 				// create a scene node for gun attached to a joint
-// 				PE::Handle hMyGunSN = PE::Handle("SCENE_NODE", sizeof(JointSceneNode));
-// 				JointSceneNode *pGunSN = new(hMyGunSN) JointSceneNode(*m_pContext, m_arena, hMyGunSN, 38);
-// 				pGunSN->addDefaultComponents();
-// 				{
-// 					PE::Handle hMyGunMesh = PE::Handle("MeshInstance", sizeof(MeshInstance));
-// 					MeshInstance *pGunMeshInstance = new(hMyGunMesh) MeshInstance(*m_pContext, m_arena, hMyGunMesh);
-// 
-// 					pGunMeshInstance->addDefaultComponents();
-// 					pGunMeshInstance->initFromFile(pEvt->m_gunMeshName, pEvt->m_gunMeshPackage, pEvt->m_threadOwnershipMask);
-// 
-// 					// add gun to joint
-// 					pGunSN->addComponent(hMyGunMesh);
-// 				}
-// 				// add gun scene node to the skin
-// 				pSkelInst->addComponent(hMyGunSN);
-// 			}
-
 		
 			Events::SoldierNPCAnimSM_Event_WALK evt;
 			pSkelInst->handleEvent(&evt);
@@ -226,6 +205,42 @@ int ClientCharacterControlGame::initGame()
         }
 	}
 
+	//Simple one imord
+		{
+#if 1
+
+			PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+			SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+			pMainSN->addDefaultComponents();
+
+			pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+			PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+			MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+			pImrodMeshInst->addDefaultComponents();
+
+			pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+			pMainSN->addComponent(hImrodMeshInst);
+
+			Handle hTestModel("LIGHT", sizeof(TestModel));
+
+			TestModel *pTestModel = new(hTestModel)TestModel(
+				*m_pContext,
+				m_arena,
+				hTestModel,
+				pMainSN,
+				0
+				);
+			RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+			RootSceneNode::Instance()->addComponent(hSN);
+
+#endif
+
+		}
+
+	//scene with 4 Ganfauls playing different animations
 	{
 		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
@@ -240,6 +255,142 @@ int ClientCharacterControlGame::initGame()
 		pImrodMeshInst->initFromFile("cobbleplane.x_pplaneshape1_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
 
 		pMainSN->addComponent(hImrodMeshInst);
+
+		for (int ix = 0; ix < 2; ++ix)
+		{
+			for (int iy = 0; iy < 2; ++iy)
+			{
+				PE::Handle subhSN("SCENE_NODE", sizeof(SceneNode));
+				SceneNode *pSubSN = new(subhSN)SceneNode(*m_pContext, m_arena, subhSN);
+				pSubSN->addDefaultComponents();
+
+				pSubSN->m_base.setPos(Vector3(ix * 5.0f, 0, iy * 5.0f));
+
+				{
+					PE::Handle hSoldierAnimSM("SoldierNPCAnimationSM", sizeof(SoldierNPCAnimationSM));
+					SoldierNPCAnimationSM *pSoldierAnimSM = new(hSoldierAnimSM)SoldierNPCAnimationSM(*m_pContext, m_arena, hSoldierAnimSM);
+					pSoldierAnimSM->addDefaultComponents();
+
+					pSoldierAnimSM->m_debugAnimIdOffset = 0;// rand() % 3;
+
+
+					PE::Handle hSkeletonInstance("SkeletonInstance", sizeof(SkeletonInstance));
+					SkeletonInstance *pSkelInst = new(hSkeletonInstance)SkeletonInstance(*m_pContext, m_arena, hSkeletonInstance,
+						hSoldierAnimSM);
+					pSkelInst->addDefaultComponents();
+
+					pSkelInst->initFromFiles("Ganfaul-t-pose_Hips.skela", "Ganfaul", m_pContext->m_gameThreadThreadOwnershipMask);
+
+					pSkelInst->setAnimSet("Ganfaul_idle_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul-walking_Hips.animseta", "Ganfaul");
+
+					pSkelInst->setAnimSet("Ganfaul_hiphop_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul_footwork_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul_gangnam_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul_cheering_Hips.animseta", "Ganfaul");
+					
+
+					{
+						PE::Handle hMeshInstance("MeshInstance", sizeof(MeshInstance));
+						MeshInstance *pMeshInstance = new(hMeshInstance)MeshInstance(*m_pContext, m_arena, hMeshInstance);
+						pMeshInstance->addDefaultComponents();
+
+						pMeshInstance->initFromFile("Ganfaul.mesha", "Ganfaul", m_pContext->m_gameThreadThreadOwnershipMask);
+
+						pSkelInst->addComponent(hMeshInstance);
+					}
+
+					switch (ix*2 + iy)
+					{
+					case 0:
+					{
+						Events::SoldierNPCAnimSM_Event_HipHop evt0;
+						pSkelInst->handleEvent(&evt0);
+					}
+						break;
+					case 1:
+					{
+						Events::SoldierNPCAnimSM_Event_FootWork evt1;
+						pSkelInst->handleEvent(&evt1);
+					}
+						break;
+					case 2:
+					{
+						Events::SoldierNPCAnimSM_Event_Gangnam evt2;
+						pSkelInst->handleEvent(&evt2);
+					}
+						break;
+					case 3:
+					{
+						Events::SoldierNPCAnimSM_Event_Cheering evt3;
+						pSkelInst->handleEvent(&evt3);
+					}
+						break;
+					default:
+						break;
+					}
+					
+
+					// add skeleton to scene node
+					pSubSN->addComponent(pSkelInst);
+				}
+
+				pMainSN->addComponent(subhSN);
+			}
+		}
+
+		Handle hTestModel("TESTMODEL", sizeof(TestModel));
+
+		TestModel *pTestModel = new(hTestModel)TestModel(
+			*m_pContext,
+			m_arena,
+			hTestModel,
+			pMainSN,
+			0
+			);
+		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+		RootSceneNode::Instance()->addComponent(hSN);
+
+
+	}
+
+	//scene with 9 imords
+	{
+		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+		pMainSN->addDefaultComponents();
+
+		pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+		pImrodMeshInst->addDefaultComponents();
+		pImrodMeshInst->initFromFile("cobbleplane.x_pplaneshape1_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+		pMainSN->addComponent(hImrodMeshInst);
+
+		for (int ix = 0; ix < 3; ++ix)
+		{
+			for (int iy = 0; iy < 3; ++iy)
+			{
+				PE::Handle subhSN("SCENE_NODE", sizeof(SceneNode));
+				SceneNode *pSubSN = new(subhSN)SceneNode(*m_pContext, m_arena, subhSN);
+				pSubSN->addDefaultComponents();
+
+				pSubSN->m_base.setPos(Vector3(ix * 2.0f, 0, iy * 2.0f));
+
+				PE::Handle hImrodMeshInstSub = PE::Handle("MeshInstance", sizeof(MeshInstance));
+				MeshInstance *pImrodMeshInstSub = new(hImrodMeshInstSub)MeshInstance(*m_pContext, m_arena, hImrodMeshInstSub);
+
+				pImrodMeshInstSub->addDefaultComponents();
+				pImrodMeshInstSub->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+				pSubSN->addComponent(hImrodMeshInstSub);
+
+				pMainSN->addComponent(subhSN);
+			}
+		}
 
 		Handle hTestModel("TESTMODEL", sizeof(TestModel));
 
@@ -259,7 +410,7 @@ int ClientCharacterControlGame::initGame()
 	{
 
 		//////////////////////////////////////////////////////////////////////////
-#if 1
+#if 0
 
 		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
@@ -292,41 +443,7 @@ int ClientCharacterControlGame::initGame()
 
 	}
 	
-	{
 
-		//////////////////////////////////////////////////////////////////////////
-#if 1
-
-		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
-		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
-		pMainSN->addDefaultComponents();
-
-		pMainSN->m_base.setPos(Vector3(0, -100, 0));
-
-		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
-		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
-
-		pImrodMeshInst->addDefaultComponents();
-
-		pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
-
-		pMainSN->addComponent(hImrodMeshInst);
-
-		Handle hTestModel("LIGHT", sizeof(TestModel));
-
-		TestModel *pTestModel = new(hTestModel)TestModel(
-			*m_pContext,
-			m_arena,
-			hTestModel,
-			pMainSN,
-			0
-			);
-		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
-		RootSceneNode::Instance()->addComponent(hSN);
-
-#endif
-
-	}
 
 	
 #if PE_PLAT_IS_WIN32
