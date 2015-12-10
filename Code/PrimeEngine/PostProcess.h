@@ -25,7 +25,7 @@ public:
 	inline void setManualExposure(float manualExposure) { _manualExposure = manualExposure; }
 	inline float getManualExposure() { return _manualExposure; }
 
-	inline float getKeyValaue() { return _keyValue; }
+	inline float getKeyValue() { return _keyValue; }
 	inline void setKeyValue(float keyvalue) { _keyValue = keyvalue; }
 
 private:
