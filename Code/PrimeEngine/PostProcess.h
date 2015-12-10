@@ -28,6 +28,36 @@ public:
 	inline float getKeyValue() { return _keyValue; }
 	inline void setKeyValue(float keyvalue) { _keyValue = keyvalue; }
 
+	inline void setFarFocusStart(float farFocusStart)
+	{
+		_farFocusStart = farFocusStart;
+	}
+
+	inline void setFarFocusEnd(float farFoucsEnd)
+	{
+		_farFoucsEnd = farFoucsEnd;
+	}
+
+	inline float getFarFocusStart()
+	{
+		return _farFocusStart;
+	}
+
+	inline float getFarFoucsEnd() {
+		return _farFoucsEnd;
+	};
+
+	inline bool getEnableDOF()
+	{
+		return _enableDOF;
+	}
+
+	inline void setEnableDOF(bool tf)
+	{
+		_enableDOF = tf;
+	}
+
+
 private:
 	ID3D11DevicePtr _device;
 	ID3D11DeviceContextPtr _context;
@@ -86,4 +116,6 @@ private:
 	bool _enableManualExposure;
 	float _manualExposure;
 	float _keyValue;
+
+	bool _enableDOF;
 };

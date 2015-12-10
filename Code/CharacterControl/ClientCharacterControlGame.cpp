@@ -356,6 +356,7 @@ int ClientCharacterControlGame::initGame()
 
 	//scene with 9 imords
 	{
+
 		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
 		pMainSN->addDefaultComponents();

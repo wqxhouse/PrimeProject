@@ -61,6 +61,8 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		static bool hdown = false;
 		static bool zdown = false;
 
+		static bool rdown = false;
+
 		static bool zeroDown = false;
 		//Check for Button Down events
 
@@ -375,6 +377,21 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			zdown = false;
 		}
 
+		if (GetAsyncKeyState('R') & 0x8000)
+		{
+			rdown = true;
+		}
+		else if (rdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_R_HELD));
+			new (h)Event_KEY_R_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			rdown = false;
+		}
+
+
+
 		if (GetAsyncKeyState('8') & 0x8000)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_LEFT_BRACKET_HELD));
@@ -402,14 +419,14 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			zeroDown = false;
 		}
 
-		if (GetAsyncKeyState('7') & 0x8000)
+		if (GetAsyncKeyState('6') & 0x8000)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_MINUS_HELD));
 			new (h)Event_KEY_MINUS_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
 
-		if (GetAsyncKeyState('8') & 0x8000)
+		if (GetAsyncKeyState('7') & 0x8000)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_EQUAL_HELD));
 			new (h)Event_KEY_EQUAL_HELD;

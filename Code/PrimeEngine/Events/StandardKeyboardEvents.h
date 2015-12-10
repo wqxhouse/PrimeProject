@@ -139,6 +139,12 @@ struct Event_KEY_Z_HELD : public Event {
 	virtual ~Event_KEY_Z_HELD(){}
 };
 
+struct Event_KEY_R_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_R_HELD);
+	virtual ~Event_KEY_R_HELD(){}
+};
+
+
 struct Event_KEY_LEFT_BRACKET_HELD : public Event {
 	PE_DECLARE_CLASS(Event_KEY_LEFT_BRACKET_HELD);
 	virtual ~Event_KEY_LEFT_BRACKET_HELD(){}

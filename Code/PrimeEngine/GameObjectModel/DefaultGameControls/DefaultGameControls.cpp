@@ -351,33 +351,40 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 
 	else if (Event_KEY_T_HELD::GetClassId() == pEvt->getClassId())
 	{
-		m_pContext->_farFocusEnd -= 0.05f;
+		/*m_pContext->_farFocusEnd -= 0.05f;
 		m_pContext->_farFocusEnd = max(m_pContext->_farFocusEnd, 0.0f);
-		
+		*/
+
+		float farFocusEnd = EffectManager::Instance()->_postProcess.getFarFoucsEnd() - 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusEnd(farFocusEnd);
 	}
 
 	else if (Event_KEY_Y_HELD::GetClassId() == pEvt->getClassId())
 	{
-		m_pContext->_farFocusEnd += 0.05f;
-		m_pContext->_farFocusEnd = min(m_pContext->_farFocusEnd, 1000.0f);
+		float farFocusEnd = EffectManager::Instance()->_postProcess.getFarFoucsEnd() + 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusEnd(farFocusEnd);
+		//m_pContext->_farFocusEnd += 0.05f;
+		//m_pContext->_farFocusEnd = min(m_pContext->_farFocusEnd, 1000.0f);
 
 	}
 
 	else if (Event_KEY_J_HELD::GetClassId() == pEvt->getClassId())
 	{
-		float phi, theta;
+		//m_pContext->_farFocusStart -= 0.05f;
+		//m_pContext->_farFocusStart = max(m_pContext->_farFocusStart, 0.0f);
 
-		m_pContext->_farFocusStart -= 0.05f;
-		m_pContext->_farFocusStart = max(m_pContext->_farFocusStart, 0.0f);
-
+		float farFocusStart = EffectManager::Instance()->_postProcess.getFarFocusStart() - 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusStart(farFocusStart);
 	}
 
 	else if (Event_KEY_H_HELD::GetClassId() == pEvt->getClassId())
 	{
-		float phi, theta;
-		m_pContext->_farFocusStart += 0.05f;
-		m_pContext->_farFocusStart = min(m_pContext->_farFocusStart, 1000.0f);
+		//float phi, theta;
+		//m_pContext->_farFocusStart += 0.05f;
+		//m_pContext->_farFocusStart = min(m_pContext->_farFocusStart, 1000.0f);ASSERT()
 
+		float farFocusStart = EffectManager::Instance()->_postProcess.getFarFocusStart() + 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusStart(farFocusStart);
 	}
 	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
 	{
@@ -430,12 +437,20 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_MINUS_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() + 0.005;
+		printf("Keyval: %.2f\n", keyVal);
 		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
 	}
 	else if (Event_KEY_EQUAL_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() - 0.005;
+		printf("Keyval: %.2f\n", keyVal);
 		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
+	}
+	else if (Event_KEY_R_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager::Instance()->_postProcess.getEnableDOF() ?
+			EffectManager::Instance()->_postProcess.setEnableDOF(false) :
+			EffectManager::Instance()->_postProcess.setEnableDOF(true);
 	}
 
 	else
