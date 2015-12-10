@@ -107,6 +107,15 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 		pSkelInst->setAnimSet("Ganfaul_idle_Hips.animseta", "Ganfaul");
 		pSkelInst->setAnimSet("Ganfaul-walking_Hips.animseta", "Ganfaul");
 
+		pSkelInst->setAnimSet("Ganfaul_hiphop_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_footwork_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_gangnam_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_cheering_Hips.animseta", "Ganfaul");
+		
+		
+		
+		
+
 		//pSkelInst->setAnimSet("soldier_Soldier_Skeleton.animseta", "Soldier");
 
 		PE::Handle hMeshInstance("MeshInstance", sizeof(MeshInstance));

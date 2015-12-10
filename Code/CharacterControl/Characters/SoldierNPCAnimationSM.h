@@ -30,6 +30,29 @@ struct SoldierNPCAnimSM_Event_WALK : public PE::Events::Event {
 
 // todo add events for shooting (sent by weapons state machine
 
+struct SoldierNPCAnimSM_Event_HipHop : public PE::Events::Event {
+	PE_DECLARE_CLASS(SoldierNPCAnimSM_Event_HipHop);
+
+	SoldierNPCAnimSM_Event_HipHop() {}
+};
+
+struct SoldierNPCAnimSM_Event_FootWork : public PE::Events::Event {
+	PE_DECLARE_CLASS(SoldierNPCAnimSM_Event_FootWork);
+
+	SoldierNPCAnimSM_Event_FootWork() {}
+};
+
+struct SoldierNPCAnimSM_Event_Gangnam : public PE::Events::Event {
+	PE_DECLARE_CLASS(SoldierNPCAnimSM_Event_Gangnam);
+
+	SoldierNPCAnimSM_Event_Gangnam() {}
+};
+
+struct SoldierNPCAnimSM_Event_Cheering : public PE::Events::Event {
+	PE_DECLARE_CLASS(SoldierNPCAnimSM_Event_Cheering);
+
+	SoldierNPCAnimSM_Event_Cheering() {}
+};
 };
 
 namespace Components {
@@ -56,6 +79,15 @@ struct SoldierNPCAnimationSM : public PE::Components::DefaultAnimationSM
 	virtual void do_SoldierNPCAnimSM_Event_STOP(PE::Events::Event *pEvt);
 	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCAnimSM_Event_WALK)
 	virtual void do_SoldierNPCAnimSM_Event_WALK(PE::Events::Event *pEvt);
+
+	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCAnimSM_Event_HipHop)
+		virtual void do_SoldierNPCAnimSM_Event_HipHop(PE::Events::Event *pEvt);
+	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCAnimSM_Event_FootWork)
+		virtual void do_SoldierNPCAnimSM_Event_FootWork(PE::Events::Event *pEvt);
+	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCAnimSM_Event_Gangnam)
+		virtual void do_SoldierNPCAnimSM_Event_Gangnam(PE::Events::Event *pEvt);
+	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCAnimSM_Event_Cheering)
+		virtual void do_SoldierNPCAnimSM_Event_Cheering(PE::Events::Event *pEvt);
 
 
 	AnimId m_curId;
