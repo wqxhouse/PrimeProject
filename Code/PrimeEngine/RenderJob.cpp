@@ -314,8 +314,8 @@ void runDrawThreadSingleFrame(PE::GameContext &ctx)
 		//if (ctx.isSSR)
 		//{
 			//EffectManager::Instance()->setLightAccumTextureRenderTarget();
-			//EffectManager::Instance()->drawRayTracingPass();
-			//EffectManager::Instance()->endCurrentRenderTarget();
+			EffectManager::Instance()->drawRayTracingPass();
+			EffectManager::Instance()->endCurrentRenderTarget();
 		//}
 
 
