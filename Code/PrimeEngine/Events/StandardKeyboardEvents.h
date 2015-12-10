@@ -185,6 +185,10 @@ struct Event_KEY_NUM_2 : public Event {
 	virtual ~Event_KEY_NUM_2(){}
 };
 
+struct Event_KEY_NUM_3 : public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_3);
+	virtual ~Event_KEY_NUM_3(){}
+};
 
 
 

@@ -72,7 +72,7 @@ struct GameContext
 	float _metallic;
 
 	bool isSSR;
-
+	bool isSmallBalls;
 	int _curCubeMap;
 
 	int _cubmapID[6];

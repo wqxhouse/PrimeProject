@@ -66,6 +66,8 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		static bool zeroDown = false;
 
 		static bool numpadZeroDown = false;
+
+		static bool isSmallBall = false;
 		//Check for Button Down events
 
 		//Check for Button Up events
@@ -460,6 +462,19 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			new (h)Event_KEY_NUM_2;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
+
+		if (GetAsyncKeyState(VK_NUMPAD3) & 0x8000)
+		{
+			isSmallBall = true;
+		}
+		else if (isSmallBall == true)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_3));
+			new (h)Event_KEY_NUM_3;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+			isSmallBall = false;
+		}
+
 	}
 #endif
 }
