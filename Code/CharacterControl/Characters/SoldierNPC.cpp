@@ -88,7 +88,7 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 
 		pSN->addComponent(hRotateSN);
 
-		pRotateSN->m_base.turnLeft(3.1415);
+		//pRotateSN->m_base.turnLeft(3.1415);
 
 		PE::Handle hSoldierAnimSM("SoldierNPCAnimationSM", sizeof(SoldierNPCAnimationSM));
 		SoldierNPCAnimationSM *pSoldierAnimSM = new(hSoldierAnimSM) SoldierNPCAnimationSM(*m_pContext, m_arena, hSoldierAnimSM);
@@ -101,42 +101,45 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 			hSoldierAnimSM);
 		pSkelInst->addDefaultComponents();
 
-		pSkelInst->initFromFiles("soldier_Soldier_Skeleton.skela", "Soldier", pEvt->m_threadOwnershipMask);
+		pSkelInst->initFromFiles("Ganfaul-t-pose_Hips.skela", "Ganfaul", pEvt->m_threadOwnershipMask);
 
-		pSkelInst->setAnimSet("soldier_Soldier_Skeleton.animseta", "Soldier");
+		pSkelInst->setAnimSet("Ganfaul-idle_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul-walking_Hips.animseta", "Ganfaul");
+
 
 		PE::Handle hMeshInstance("MeshInstance", sizeof(MeshInstance));
 		MeshInstance *pMeshInstance = new(hMeshInstance) MeshInstance(*m_pContext, m_arena, hMeshInstance);
 		pMeshInstance->addDefaultComponents();
 		
-		pMeshInstance->initFromFile(pEvt->m_meshFilename, pEvt->m_package, pEvt->m_threadOwnershipMask);
-		
+		//pMeshInstance->initFromFile(pEvt->m_meshFilename, pEvt->m_package, pEvt->m_threadOwnershipMask);
+		pMeshInstance->initFromFile("Ganfaul.mesha", "Ganfaul", pEvt->m_threadOwnershipMask);
+
 		pSkelInst->addComponent(hMeshInstance);
 
 		// add skin to scene node
 		pRotateSN->addComponent(hSkeletonInstance);
 
-		#if !APIABSTRACTION_D3D11
-		{
-			PE::Handle hMyGunMesh = PE::Handle("MeshInstance", sizeof(MeshInstance));
-			MeshInstance *pGunMeshInstance = new(hMyGunMesh) MeshInstance(*m_pContext, m_arena, hMyGunMesh);
+		//#if !APIABSTRACTION_D3D11
+		//{
+		//	PE::Handle hMyGunMesh = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		//	MeshInstance *pGunMeshInstance = new(hMyGunMesh) MeshInstance(*m_pContext, m_arena, hMyGunMesh);
 
-			pGunMeshInstance->addDefaultComponents();
-			pGunMeshInstance->initFromFile(pEvt->m_gunMeshName, pEvt->m_gunMeshPackage, pEvt->m_threadOwnershipMask);
+		//	pGunMeshInstance->addDefaultComponents();
+		//	pGunMeshInstance->initFromFile(pEvt->m_gunMeshName, pEvt->m_gunMeshPackage, pEvt->m_threadOwnershipMask);
 
-			// create a scene node for gun attached to a joint
+		//	// create a scene node for gun attached to a joint
 
-			PE::Handle hMyGunSN = PE::Handle("SCENE_NODE", sizeof(JointSceneNode));
-			JointSceneNode *pGunSN = new(hMyGunSN) JointSceneNode(*m_pContext, m_arena, hMyGunSN, 38);
-			pGunSN->addDefaultComponents();
+		//	PE::Handle hMyGunSN = PE::Handle("SCENE_NODE", sizeof(JointSceneNode));
+		//	JointSceneNode *pGunSN = new(hMyGunSN) JointSceneNode(*m_pContext, m_arena, hMyGunSN, 38);
+		//	pGunSN->addDefaultComponents();
 
-			// add gun to joint
-			pGunSN->addComponent(hMyGunMesh);
+		//	// add gun to joint
+		//	pGunSN->addComponent(hMyGunMesh);
 
-			// add gun scene node to the skin
-			pSkelInst->addComponent(hMyGunSN);
-		}
-		#endif
+		//	// add gun scene node to the skin
+		//	pSkelInst->addComponent(hMyGunSN);
+		//}
+		//#endif
 				
 		pMainSN->addComponent(hSN);
 

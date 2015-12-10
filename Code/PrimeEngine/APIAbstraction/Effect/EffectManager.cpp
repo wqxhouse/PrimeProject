@@ -1287,7 +1287,7 @@ void EffectManager::drawDeferredFinalPass()
 	TextureGPU *rootDepthTexture = m_hrootDepthBufferTextureGPU.getObject<TextureGPU>();
 	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
 	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
-	TextureGPU *rayTracingTexture = m_hrayTracingTextureGPU.getObject<TextureGPU>();
+	TextureGPU *rayTracingTexture = m_haccumHDRTextureGPU.getObject<TextureGPU>();//m_hrayTracingTextureGPU
 	
 	//
 	//TextureGPU *positionTexture = m_hpositionTextureGPU.getObject<TextureGPU>();

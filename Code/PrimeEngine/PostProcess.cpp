@@ -52,7 +52,7 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 	_nearFocusStart = 0.01f;
 	_nearFocusEnd = 0.01f;
 	_farFocusStart = 7.0f;
-	_farFoucsEnd = 9.0f;
+	_farFoucsEnd = 20.0f;
 
 	D3D11_SAMPLER_DESC sampDesc;
 
@@ -72,8 +72,8 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 
 void PostProcess::Render()
 {
-	renderDepthBlur();
-	renderDOFGather();
+	//renderDepthBlur();
+	//renderDOFGather();
 
 	computeAvgLuminance();
 	D3D11_VIEWPORT viewport;

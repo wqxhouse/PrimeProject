@@ -17,4 +17,5 @@ args['gunMeshPackage'] = "CharacterControl"
 
 args['npcType'] = 'Guard'
 
+args['patrolWayPoint'] = '0'
 end -- required

@@ -198,7 +198,7 @@ int ClientCharacterControlGame::initGame()
 	
     bool spawnALotOfMeshes = false;
     
-    int maxX = 10; // maybe need more to get framerate lower
+    int maxX = 1; // maybe need more to get framerate lower
     
     if (spawnALotOfMeshes)
     {
@@ -215,8 +215,11 @@ int ClientCharacterControlGame::initGame()
                 PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
                 MeshInstance *pImrodMeshInst = new(hImrodMeshInst) MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
         
-                pImrodMeshInst->addDefaultComponents();
-				pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->    m_gameThreadThreadOwnershipMask);
+				pImrodMeshInst->addDefaultComponents();
+				pImrodMeshInst->initFromFile("Ganfaul.mesha", "Ganfaul_Mesh", m_pContext->m_gameThreadThreadOwnershipMask);
+
+              /*  pImrodMeshInst->addDefaultComponents();
+				pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->    m_gameThreadThreadOwnershipMask);*/
 
                 pMainSN->addComponent(hImrodMeshInst);
         

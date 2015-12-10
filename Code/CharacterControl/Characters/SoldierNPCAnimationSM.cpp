@@ -40,7 +40,7 @@ void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_STOP(PE::Events::Event *pE
 	{
 		m_curId = SoldierNPCAnimationSM::STAND;
 		
-		setAnimation(0, SoldierNPCAnimationSM::STAND,
+		setAnimation(0, 0,//SoldierNPCAnimationSM::STAND
 		0, 0, 1, 1,
 		PE::LOOPING);
 	}
@@ -51,7 +51,7 @@ void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_WALK(PE::Events::Event *pE
 	if (m_curId != SoldierNPCAnimationSM::WALK)
 	{
 		m_curId = SoldierNPCAnimationSM::WALK;
-		setAnimation(0, SoldierNPCAnimationSM::WALK,
+		setAnimation(1, 0, //0,SoldierNPCAnimationSM::WALK
 			0, 0, 1, 1,
 			PE::LOOPING);
 	}
