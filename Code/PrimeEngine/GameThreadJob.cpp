@@ -318,91 +318,91 @@ int ClientGame::runGameFrame()
 						Vector3(0.75f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
 				
-				{
-					sprintf(PEString::s_buf, "Button U/I: Switch Between Buffers");
-					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				//{
+				//	sprintf(PEString::s_buf, "Button U/I: Switch Between Buffers");
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
-				{
-					
-					sprintf(PEString::s_buf, "Roughness: %.2f Metallic: %.2f", m_pContext->_roughness, m_pContext->_metallic); //Button K/L: Switch Between Shading Algorithms
-					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				//{
+				//	
+				//	sprintf(PEString::s_buf, "Roughness: %.2f Metallic: %.2f", m_pContext->_roughness, m_pContext->_metallic); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
-				{
+				//{
 
-					sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
-					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.1f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.1f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
 
-				{
-					int curBuf = m_pContext->_debugMode;
-					std::string mode = "";
-					if (curBuf == 0)
-					{
-						mode += "Final Pass";
-					}
-					else if (curBuf == 1)
-					{
-						mode += "Albedo Buffer";
-					}
-					else if (curBuf == 2)
-					{
-						mode += "Normal Buffer";
-					}
-					else if (curBuf == 3 & m_pContext->_renderMode == 0)
-					{
-						mode += "Depth Buffer";
-					}
-					else if (curBuf == 3 & m_pContext->_renderMode == 1)
-					{
-						mode += "Position Buffer";
-					}
-					else if (curBuf == 4)
-					{
-						mode += "Lighting Buffer (Before Gamma Correction)";
-					}
+				//{
+				//	int curBuf = m_pContext->_debugMode;
+				//	std::string mode = "";
+				//	if (curBuf == 0)
+				//	{
+				//		mode += "Final Pass";
+				//	}
+				//	else if (curBuf == 1)
+				//	{
+				//		mode += "Albedo Buffer";
+				//	}
+				//	else if (curBuf == 2)
+				//	{
+				//		mode += "Normal Buffer";
+				//	}
+				//	else if (curBuf == 3 & m_pContext->_renderMode == 0)
+				//	{
+				//		mode += "Depth Buffer";
+				//	}
+				//	else if (curBuf == 3 & m_pContext->_renderMode == 1)
+				//	{
+				//		mode += "Position Buffer";
+				//	}
+				//	else if (curBuf == 4)
+				//	{
+				//		mode += "Lighting Buffer (Before Gamma Correction)";
+				//	}
 
-					sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
-					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				//	sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
-				{
-					std::string shading = "";
-					if (m_pContext->_renderMode == 0)
-					{
-						shading = "Clustered Deferred (Culling by 3D clustered)";
-					}
-					else 
-					{
-						shading = "Classical Deferred (Culling by light volume)";
-					}
-					sprintf(PEString::s_buf, "Current Shading: %s", shading.c_str());
-					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				//{
+				//	std::string shading = "";
+				//	if (m_pContext->_renderMode == 0)
+				//	{
+				//		shading = "Clustered Deferred (Culling by 3D clustered)";
+				//	}
+				//	else 
+				//	{
+				//		shading = "Classical Deferred (Culling by light volume)";
+				//	}
+				//	sprintf(PEString::s_buf, "Current Shading: %s", shading.c_str());
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
-				
-				// light num
-				{
-					auto &lights = PE::RootSceneNode::Instance()->m_lights;
-					int lightNum = lights.m_size;
+				//
+				//// light num
+				//{
+				//	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+				//	int lightNum = lights.m_size;
 
-					sprintf(PEString::s_buf, "Light number: %d", lightNum);
-					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(0.06f, 0.175f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				//	sprintf(PEString::s_buf, "Light number: %d", lightNum);
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.175f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
                 PE::IRenderer::checkForErrors("");
 
