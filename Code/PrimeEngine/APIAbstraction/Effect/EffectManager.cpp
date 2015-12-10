@@ -65,7 +65,7 @@ EffectManager::EffectManager(PE::GameContext &context, PE::MemoryArena arena)
 	, m_frameBufferCopyTexture(context, arena)
 {
 	m_arena = arena; m_pContext = &context;
-
+	_normalIntensity = 1.0f;
 }
 
 void EffectManager::setupConstantBuffersAndShaderResources()
@@ -1307,7 +1307,9 @@ void EffectManager::drawDeferredFinalPass()
 	TextureGPU *normalTexture = m_hnormalTextureGPU.getObject<TextureGPU>();
 	TextureGPU *materialTexture = m_hmaterialTextureGPU.getObject<TextureGPU>();
 	
-	TextureGPU *rayTracingTexture = m_hrayTracingTextureGPU.getObject<TextureGPU>();//m_haccumHDRTextureGPU.getObject<TextureGPU>();//m_pContext->isSSR ? m_hrayTracingTextureGPU.getObject<TextureGPU>() : m_haccumHDRTextureGPU.getObject<TextureGPU>();
+
+	TextureGPU *rayTracingTexture = m_pContext->isSSR ? m_hrayTracingTextureGPU.getObject<TextureGPU>() : m_haccumHDRTextureGPU.getObject<TextureGPU>();
+
 	
 	//
 	//TextureGPU *positionTexture = m_hpositionTextureGPU.getObject<TextureGPU>();

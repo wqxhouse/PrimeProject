@@ -64,6 +64,8 @@ void DX9_KeyboardMouse::generateButtonEvents()
 		static bool rdown = false;
 
 		static bool zeroDown = false;
+
+		static bool numpadZeroDown = false;
 		//Check for Button Down events
 
 		//Check for Button Up events
@@ -433,6 +435,31 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
 		
+		if (GetAsyncKeyState(VK_NUMPAD0) & 0x8000)
+		{
+			numpadZeroDown = true;
+		}
+		else if (numpadZeroDown == true)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_0));
+			new (h)Event_KEY_NUM_0;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+			numpadZeroDown = false;
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD1) & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_1));
+			new (h)Event_KEY_NUM_1;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD2) & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_2));
+			new (h)Event_KEY_NUM_2;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
 	}
 #endif
 }

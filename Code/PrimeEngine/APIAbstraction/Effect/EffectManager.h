@@ -303,6 +303,8 @@ public:
 	bool _enableIndirectLighting;
 	bool _enableLocalCubemap;
 
+	float _normalIntensity;
+
 }; // class EffectManager
 
 }; // namespace PE
