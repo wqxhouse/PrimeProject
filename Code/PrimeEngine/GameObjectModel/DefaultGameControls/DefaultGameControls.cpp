@@ -401,6 +401,35 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		m_pContext->_curCubeMap = m_pContext->_curCubeMap % 6;
 		EffectManager::Instance()->getSkybox()->SetCubemap(m_pContext->_cubmapID[m_pContext->_curCubeMap]);
 	}
+	else if (Event_KEY_LEFT_BRACKET_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float manualExp = EffectManager::Instance()->_postProcess.getManualExposure() - 0.1;
+		printf("%.2f\n", manualExp);
+		EffectManager::Instance()->_postProcess.setManualExposure(manualExp);
+	}
+	else if (Event_KEY_RIGHT_BRACKET_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float manualExp = EffectManager::Instance()->_postProcess.getManualExposure() + 0.1;
+		printf("%.2f\n", manualExp);
+		EffectManager::Instance()->_postProcess.setManualExposure(manualExp);
+	}
+	else if (Event_KEY_ZERO_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager::Instance()->_postProcess.getEnableManualExposure() ?
+			EffectManager::Instance()->_postProcess.setEnableManualExposure(false) :
+			EffectManager::Instance()->_postProcess.setEnableManualExposure(true);
+	}
+	else if (Event_KEY_MINUS_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() + 0.005;
+		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
+	}
+	else if (Event_KEY_EQUAL_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() - 0.005;
+		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
+	}
+
 	else
 	{
 		Component::handleEvent(pEvt);

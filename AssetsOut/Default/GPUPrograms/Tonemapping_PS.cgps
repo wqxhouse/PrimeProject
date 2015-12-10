@@ -2,17 +2,10 @@
 #define TONEMAPPING_PS
 #include "ColoredMinimalMesh_Structs.fx"
 #include "StandardTextureResources.fx"
-
-cbuffer DepthBlurConsts : register(b0)
-{
-	float2 ProjectionAB;
-	float GatherBlurSize;
-	uint enableInstagram;
-	float4 DOFDepths;
-}
+#include "ExposureCommon.fx"
 
 // static const float KeyValue = 0.1150f;
-static const float KeyValue = 0.2f;	
+// static const float KeyValue = 0.2f;	
 
 float3 convertColorSpace(float3 x1) {
     float3 x2 = x1 * x1;
@@ -52,19 +45,6 @@ float3 ToneMapFilmicALU(in float3 color)
     return pow(color, 2.2f);
 }
 
-float3 CalcExposedColor(float3 color, float avgLuminance, float offset, out float exposure)
-{
-    // Use geometric mean
-    avgLuminance = max(avgLuminance, 0.001f);
-	
-    float linearExposure = (KeyValue / avgLuminance);
-    exposure = log2(max(linearExposure, 0.0001f));
-	
-    exposure += offset;
-    // exposure -= ExposureScale;
-	
-    return exp2(exposure) * color;
-}
 
 float3 Tonemap_helper(float3 color, float avgLuminance, float threshold, out float exposure)
 {

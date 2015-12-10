@@ -72,12 +72,17 @@ void PostProcess::Initialize(PE::GameContext *context, PE::MemoryArena arena, ID
 	DXCall(_device->CreateSamplerState(&sampDesc, &_linearSampler));
 
 	_enableInstagram = true;
+	_enableManualExposure = false;
+	_manualExposure = 0.1f;
+	_keyValue = 0.4f;
 }
 
 void PostProcess::Render()
 {
-	//renderDepthBlur();
-	//renderDOFGather();
+	uploadConstants();
+
+	renderDepthBlur();
+	renderDOFGather();
 
 	computeAvgLuminance();
 	D3D11_VIEWPORT viewport;
@@ -288,6 +293,31 @@ void PostProcess::renderTonemapping()
 	setBloomTex.unbindFromPipeline(tonemappingPass);
 }
 
+void PostProcess::uploadConstants()
+{
+	PE::Components::CameraSceneNode *csn =
+		PE::Components::CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<PE::Components::CameraSceneNode>();
+	float n = csn->m_near;
+	float f = csn->m_far;
+	float projA = f / (f - n);
+	float projB = (-f * n) / (f - n);
+
+	_dofConstants.Data.projA = projA;
+	_dofConstants.Data.projB = projB;
+	_dofConstants.Data.GatherBlurSize = 16;
+	_dofConstants.Data.enableInstagram = _enableInstagram;
+	_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
+	_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
+	_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart > 9 ? _pContext->_farFocusStart : 9;
+	_dofConstants.Data.DOFDepths.m_w = _pContext->_farFocusEnd > 9 ? _pContext->_farFocusEnd : 9;
+	_dofConstants.Data.enableManualExposure = _enableManualExposure;
+	_dofConstants.Data.manualExposure = _manualExposure;
+	_dofConstants.Data.KeyValue = _keyValue;
+
+	_dofConstants.ApplyChanges(_context);
+	_dofConstants.SetPS(_context, 0);
+}
+
 void PostProcess::renderDepthBlur()
 {
 	PIXEvent event(L"Depth Blur");
@@ -312,23 +342,23 @@ void PostProcess::renderDepthBlur()
 	depthBlurPass->setCurrent(pvbGPU);
 
 	// set cb
-	PE::Components::CameraSceneNode *csn =
-		PE::Components::CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<PE::Components::CameraSceneNode>();
-	float n = csn->m_near;
-	float f = csn->m_far;
-	float projA = f / (f - n);
-	float projB = (-f * n) / (f - n);
+	//PE::Components::CameraSceneNode *csn =
+	//	PE::Components::CameraManager::Instance()->getActiveCamera()->m_hCameraSceneNode.getObject<PE::Components::CameraSceneNode>();
+	//float n = csn->m_near;
+	//float f = csn->m_far;
+	//float projA = f / (f - n);
+	//float projB = (-f * n) / (f - n);
 
-	_dofConstants.Data.projA = projA;
-	_dofConstants.Data.projB = projB;
-	_dofConstants.Data.GatherBlurSize = 16;
-	_dofConstants.Data.enableInstagram = _enableInstagram;
-	_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
-	_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
-	_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart>0 ? _pContext->_farFocusStart : 0;
-	_dofConstants.Data.DOFDepths.m_w = _pContext->_farFocusEnd>0 ? _pContext->_farFocusEnd : 0;
-	_dofConstants.ApplyChanges(_context);
-	_dofConstants.SetPS(_context, 0);
+	//_dofConstants.Data.projA = projA;
+	//_dofConstants.Data.projB = projB;
+	//_dofConstants.Data.GatherBlurSize = 16;
+	//_dofConstants.Data.enableInstagram = _enableInstagram;
+	//_dofConstants.Data.DOFDepths.m_x = _nearFocusStart;
+	//_dofConstants.Data.DOFDepths.m_y = _nearFocusEnd;
+	//_dofConstants.Data.DOFDepths.m_z = _pContext->_farFocusStart>9 ? _pContext->_farFocusStart : 9;
+	//_dofConstants.Data.DOFDepths.m_w = _pContext->_farFocusEnd>9 ? _pContext->_farFocusEnd : 9;
+	//_dofConstants.ApplyChanges(_context);
+	//_dofConstants.SetPS(_context, 0);
 
 	// draw quad
 	pibGPU->draw(1, 0);
