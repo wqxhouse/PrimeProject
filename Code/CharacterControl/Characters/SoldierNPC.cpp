@@ -104,7 +104,7 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 		//pSkelInst->initFromFiles("soldier_Soldier_Skeleton.skela", "Soldier", pEvt->m_threadOwnershipMask);
 		pSkelInst->initFromFiles("Ganfaul-t-pose_Hips.skela", "Ganfaul", pEvt->m_threadOwnershipMask);
 
-		pSkelInst->setAnimSet("Ganfaul-idle_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_idle_Hips.animseta", "Ganfaul");
 		pSkelInst->setAnimSet("Ganfaul-walking_Hips.animseta", "Ganfaul");
 
 		//pSkelInst->setAnimSet("soldier_Soldier_Skeleton.animseta", "Soldier");
