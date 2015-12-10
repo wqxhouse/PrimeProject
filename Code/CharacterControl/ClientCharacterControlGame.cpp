@@ -259,7 +259,7 @@ int ClientCharacterControlGame::initGame()
 	{
 
 		//////////////////////////////////////////////////////////////////////////
-#if 1
+#if 0
 
 		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);

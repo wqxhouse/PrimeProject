@@ -437,11 +437,13 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 	else if (Event_KEY_MINUS_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() + 0.005;
+		printf("Keyval: %.2f\n", keyVal);
 		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
 	}
 	else if (Event_KEY_EQUAL_HELD::GetClassId() == pEvt->getClassId())
 	{
 		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() - 0.005;
+		printf("Keyval: %.2f\n", keyVal);
 		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
 	}
 	else if (Event_KEY_R_HELD::GetClassId() == pEvt->getClassId())

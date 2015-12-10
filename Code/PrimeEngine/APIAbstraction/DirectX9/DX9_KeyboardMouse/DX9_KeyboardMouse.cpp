@@ -426,7 +426,7 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
 
-		if (GetAsyncKeyState('7 ') & 0x8000)
+		if (GetAsyncKeyState('7') & 0x8000)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_EQUAL_HELD));
 			new (h)Event_KEY_EQUAL_HELD;

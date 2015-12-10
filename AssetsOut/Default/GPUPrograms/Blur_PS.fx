@@ -18,7 +18,7 @@ float4 Blur(COLORED_MINIMAL_MESH_PS_IN pIn, float2 texScale, float sigma)
         float weight = CalcGaussianWeight(i, sigma);
         weightSum += weight;
         float2 texCoord = pIn.iColor;
-        texCoord += (i / int2(640, 360)) * texScale; // hard code resolution for now
+        texCoord += (float2(i, i) / float2(640, 360)) * texScale; // hard code resolution for now
         float4 sample = gDiffuseMap.Sample(gDiffuseMapSampler, texCoord);
         color += sample * weight;
     }
