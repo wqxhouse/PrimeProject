@@ -470,6 +470,10 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		intensity = max(intensity, 0.0f);
 		EffectManager::Instance()->_normalIntensity = intensity;
 	}
+	else if (Event_KEY_NUM_3::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->isSmallBalls ? m_pContext->isSmallBalls = false : m_pContext->isSmallBalls = true;
+	}
 	else
 	{
 		Component::handleEvent(pEvt);
