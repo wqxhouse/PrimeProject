@@ -1,0 +1,57 @@
+#include "APIAbstraction.gpu"
+cbuffer PerFrame : register(b0)
+{
+	// x = game time, y = frame time
+	float4 gGameTimes;
+}
+
+Texture2D<float4> InputMap : register(t0);
+Texture2D<float> ReductionMap : register(t0);
+RWTexture2D<float> OutputMap : register(u0);
+
+groupshared float LumSamples[256];
+
+#define NumThreads 256
+#define ReductionTGSize 16
+
+[numthreads(ReductionTGSize, ReductionTGSize, 1)]
+void LuminanceReductionFinalCS(in uint3 GroupID : SV_GroupID, in uint3 GroupThreadID : SV_GroupThreadID,
+                      in uint ThreadIndex : SV_GroupIndex)
+{
+    uint2 textureSize;
+    ReductionMap.GetDimensions(textureSize.x, textureSize.y);
+
+    uint2 samplePos = GroupID.xy * ReductionTGSize + GroupThreadID.xy;
+    samplePos = min(samplePos, textureSize - 1);
+
+    float pixelLuminance = ReductionMap[samplePos];
+
+    // Store in shared memory
+    LumSamples[ThreadIndex] = pixelLuminance;
+    GroupMemoryBarrierWithGroupSync();
+
+    // Reduce
+	[unroll]
+	for(uint s = NumThreads / 2; s > 0; s >>= 1)
+    {
+		if(ThreadIndex < s)
+			LumSamples[ThreadIndex] += LumSamples[ThreadIndex + s];
+
+		GroupMemoryBarrierWithGroupSync();
+	}
+
+    if(ThreadIndex == 0)
+    {
+		// Perform adaptation
+		float lastLum = OutputMap[uint2(0, 0)];
+		float currentLum = exp(LumSamples[0] / NumThreads);
+
+		// Adapt the luminance using Pattanaik's technique
+		const float Tau = 1.0f;
+		float adaptedLum = lastLum + (currentLum - lastLum) * (1 - exp(-gGameTimes.y * Tau));
+										
+		//float adaptedLum = currentLum;
+		
+		OutputMap[uint2(0, 0)] = adaptedLum;
+    }
+}

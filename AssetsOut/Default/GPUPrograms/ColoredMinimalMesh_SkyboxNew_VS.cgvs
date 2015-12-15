@@ -1,0 +1,28 @@
+#ifndef SKYBOX_NEW_VS
+#define SKYBOX_NEW_VS
+#include "ColoredMinimalMesh_Structs.fx"
+
+cbuffer SkyboxConstants : register(b0)
+{
+	float4x4 viewMat;
+	float4x4 projMat;
+}
+
+COLORED_MINIMAL_MESH_PS_IN SkyboxNew_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
+{
+	COLORED_MINIMAL_MESH_PS_IN vOut;
+    float3 positionVS = mul(vIn.iPosL, (float3x3)viewMat);
+    vOut.iPosH = mul(float4(positionVS, 1.0f), projMat);
+	vOut.iPosOS = vIn.iPosL;
+
+	// dummy params
+	vOut.iColor = float3(1, 1, 1);
+	vOut.viewRay = float3(1, 1, 1);
+	vOut.iPosW = float3(1, 1, 1);
+	
+	return vOut;
+}
+
+VS_wrapper_COLORED_MINIMAL_MESH(SkyboxNew_VS)
+
+#endif

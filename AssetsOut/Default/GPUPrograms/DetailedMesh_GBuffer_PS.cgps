@@ -1,0 +1,78 @@
+#ifndef DETAILEDMESH_GBUFFER_PS
+#define DETAILEDMESH_GBUFFER_PS
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "DetailedMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
+
+DETAILED_MESH_GBUFFER_PS_OUT DetailedMesh_GBuffer_PS(DETAILED_MESH_SHADOWED_PS_IN pIn)
+{
+	DETAILED_MESH_GBUFFER_PS_OUT output;
+	
+	float3 perPixelNormal = pIn.iNormalW;
+	if (xHasNrm_yHasSpec_zHasGlow_wHasDiff.x > 0.1)
+	{
+		// retrieve the normal vector from bump map
+		perPixelNormal = sample2D(gBumpMapSampler, pIn.iTexCoord, gBumpMap).xyz;
+
+		//Uncompress from [0,1] to [-1,1]
+		perPixelNormal = 2.0*perPixelNormal - 1.0;
+		
+		//Build orthonormal basis
+		float3 N = normalize(pIn.iNormalW);
+		float3 T = normalize(pIn.iTangentW - dot(pIn.iTangentW, N)*N);
+		float3 B = cross(N,T);
+		
+		float3x3 TBN = make_float3x3(T, B, N);
+		
+		perPixelNormal = lerp(float3(0, 0, 1), perPixelNormal, xyzgEyePosW_wDoMotionBlur.w);
+		
+		// Tranform from tangent space to world space
+		perPixelNormal = normalize(mul(perPixelNormal, TBN));
+	}
+	else
+	{
+		perPixelNormal = normalize(perPixelNormal);
+	}
+	
+	output.Albedo = sample2D(gDiffuseMapSampler, pIn.iTexCoord, gDiffuseMap) * gVDiffuse;
+	output.Normal = float4(perPixelNormal, 1.0);
+
+	float roughness = sample2D(gGlowMapSampler, pIn.iTexCoord, gGlowMap).r;
+	// roughness +=  cs_pad2 == 0? max(roughness, 0.01):cs_pad2;//max(roughness, 0.01) +
+	roughness += cs_pad2;
+	roughness = min(max(roughness, 0.01), 1.0);
+
+	float metallic = sample2D(gSpecularMapSampler, pIn.iTexCoord, gSpecularMap).r;
+
+	// metallic +=  cs_pad3 == 0? metallic:cs_pad3;
+	metallic += cs_pad3;
+	metallic = min(max(metallic, 0.0), 1.0);
+	
+	output.Albedo *= (1.0f - metallic);
+	output.Material = float4(roughness, metallic, 0, 0);
+
+	/*
+	if(pIn.iPosW.y == 0)
+	{
+	output.Material = float4(0.5,0,0,1.0);
+	//output.Normal = float4(0,1.0,0,1.0);
+	}
+	else
+	{
+	output.Material = float4(0,0,0,1.0);
+	//output.Normal = float4(perPixelNormal, 1.0);
+	}
+	*/
+	
+	//output.Normal = float4(0,1.0,0,1.0);
+
+	return output;
+}
+
+PS_wrapper_DETAILED_MESH_GBUFFER(DetailedMesh_GBuffer_PS)
+
+#endif
+

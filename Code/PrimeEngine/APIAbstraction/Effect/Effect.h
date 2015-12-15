@@ -132,6 +132,7 @@ struct Effect : public Component
 	static void setConstantBuffer(ID3D11Device *pDevice, ID3D11DeviceContext *pDeviceContex, ID3D11Buffer * pBuf, PrimitiveTypes::UInt32 slotId, void *pVal, PrimitiveTypes::UInt32 size);
 #endif
 	void setCurrent(VertexBufferGPU *pCurVertexBuffer);
+	void setCurrentShaderOnly(VertexBufferGPU *pCurVertexBuffer);
 
 	static void readIntoBufferReplaceEOL(PE::GameContext &context, char *&pdata, const char *filename);
 

@@ -1,0 +1,2 @@
+LevelLoader.CreateGameObject("PEObject3_transf",0.0, 0.0, 2.0, 0.0, 0.0, 3.0, -0.0, 0.0, -2.0, -0.0, 0.0, 0.0, -135.412356, -1410.252, 522.203471, 1.0, 'testBrickSpire.x_PEObject3_transf.lua', 'Basic',0x19effd4f, 0x9d2411e5, 0x908bce76, 0x21b31fb8)
+

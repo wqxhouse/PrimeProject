@@ -5,7 +5,7 @@
 // Sibling/Children Includes
 
 #include "DefaultGameControls.h"
-
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 
 
 // definitions of keyboard and controller events. s.a. Button pressed, etc
@@ -38,6 +38,9 @@ static float Debug_Fly_Speed = 4.0f; //Units per second
 
 #define Debug_Rotate_Speed 2.0f //Radians per second
 
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
+#include "PrimeEngine/Scene/RootSceneNode.h"
+#include "PrimeEngine/TestModels.h"
 
 namespace PE {
 
@@ -274,17 +277,210 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		m_pQueueManager->add(h, QT_GENERAL);
 
 	}
-
-	else
-
+	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
 	{
+		//m_pContext->_renderMode = 0;
+		//EffectManager::Instance()->resizeLightNums(10);
+		m_pContext->_roughness -= 0.005;
+		m_pContext->_roughness = max(m_pContext->_roughness, 0.01f);
+		
+	}
+	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
+	{
+		//m_pContext->_renderMode = 1;
+		//EffectManager::Instance()->resizeLightNums(-10);
+		m_pContext->_roughness += 0.005;
+		m_pContext->_roughness = min(m_pContext->_roughness, 1.0f);
+	}
 
-		Component::handleEvent(pEvt);
+	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_debugMode--;
+		m_pContext->_debugMode = max(m_pContext->_debugMode, 0);
+	}
+	else if (Event_KEY_PERIOD_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_debugMode++;
+		m_pContext->_debugMode = m_pContext->_debugMode % 5;
+	}
+	else if (Event_KEY_X_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float solarTime;
+		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
+		printf("SolarTime = %.2f\n", solarTime);
+		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime + 0.02);
+	}
+	else if (Event_KEY_C_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float solarTime;
+		solarTime = EffectManager::Instance()->getSkybox()->GetSolarTime();
+		printf("SolarTime = %.2f\n", solarTime);
+		EffectManager::Instance()->getSkybox()->SetSolarTime(solarTime - 0.02);
+	}
+	else if (Event_KEY_V_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*	EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+			EffectManager::Instance()->getSkybox()->SetSunDirection(phi, ++theta);*/
+
+		
+		m_pContext->_preModel = m_pContext->_curModel;
+		m_pContext->_curModel++;
+		m_pContext->_curModel = m_pContext->_curModel % RootSceneNode::Instance()->m_testmodels.m_size;
+
+		EffectManager::Instance()->changeModel(m_pContext->_curModel, m_pContext->_preModel);
+	}
+	else if (Event_KEY_O_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
+
+		m_pContext->_metallic -= 0.005;
+		m_pContext->_metallic = max(m_pContext->_metallic, 0.01f);
+	}
+	else if (Event_KEY_P_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float phi, theta;
+		/*EffectManager::Instance()->getSkybox()->GetSunDirection(phi, theta);
+		EffectManager::Instance()->getSkybox()->SetSunDirection(phi, --theta);*/
+
+		m_pContext->_metallic += 0.005;
+		m_pContext->_metallic = min(m_pContext->_metallic, 1.0f);
+	}
+
+	else if (Event_KEY_T_HELD::GetClassId() == pEvt->getClassId())
+	{
+		/*m_pContext->_farFocusEnd -= 0.05f;
+		m_pContext->_farFocusEnd = max(m_pContext->_farFocusEnd, 0.0f);
+		*/
+
+		float farFocusEnd = EffectManager::Instance()->_postProcess.getFarFoucsEnd() - 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusEnd(farFocusEnd);
+	}
+
+	else if (Event_KEY_Y_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float farFocusEnd = EffectManager::Instance()->_postProcess.getFarFoucsEnd() + 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusEnd(farFocusEnd);
+		//m_pContext->_farFocusEnd += 0.05f;
+		//m_pContext->_farFocusEnd = min(m_pContext->_farFocusEnd, 1000.0f);
 
 	}
 
-}
+	else if (Event_KEY_J_HELD::GetClassId() == pEvt->getClassId())
+	{
+		//m_pContext->_farFocusStart -= 0.05f;
+		//m_pContext->_farFocusStart = max(m_pContext->_farFocusStart, 0.0f);
 
+		float farFocusStart = EffectManager::Instance()->_postProcess.getFarFocusStart() - 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusStart(farFocusStart);
+	}
+
+	else if (Event_KEY_H_HELD::GetClassId() == pEvt->getClassId())
+	{
+		//float phi, theta;
+		//m_pContext->_farFocusStart += 0.05f;
+		//m_pContext->_farFocusStart = min(m_pContext->_farFocusStart, 1000.0f);ASSERT()
+
+		float farFocusStart = EffectManager::Instance()->_postProcess.getFarFocusStart() + 0.05f;
+		EffectManager::Instance()->_postProcess.setFarFocusStart(farFocusStart);
+	}
+	else if (Event_KEY_B_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager *ef = EffectManager::Instance();
+		ef->getEnableIndirectLighting() ? ef->setEnableIndirectLighting(false) : ef->setEnableIndirectLighting(true);
+	}
+	else if (Event_KEY_N_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager *ef = EffectManager::Instance();
+		ef->getEnableLocalCubemap() ? ef->setEnableLocalCubemap(false) : ef->setEnableLocalCubemap(true);
+	}
+	else if (Event_KEY_M_HELD::GetClassId() == pEvt->getClassId())
+	{
+		PostProcess *p = &EffectManager::Instance()->_postProcess;
+		p->getEnableColorCorrection() ? p->SetEnableColorCorrection(false) : p->SetEnableColorCorrection(true);
+
+	}
+	else if (Event_KEY_Z_HELD::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->_curCubeMap++;
+		m_pContext->_curCubeMap = m_pContext->_curCubeMap % 7;
+		if (m_pContext->_curCubeMap == 6)
+		{
+			EffectManager::Instance()->getSkybox()->SetSky();
+		}
+		else
+		{
+			EffectManager::Instance()->getSkybox()->SetCubemap(m_pContext->_cubmapID[m_pContext->_curCubeMap]);
+		}
+		
+	}
+	else if (Event_KEY_LEFT_BRACKET_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float manualExp = EffectManager::Instance()->_postProcess.getManualExposure() - 0.1;
+		printf("%.2f\n", manualExp);
+		EffectManager::Instance()->_postProcess.setManualExposure(manualExp);
+	}
+	else if (Event_KEY_RIGHT_BRACKET_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float manualExp = EffectManager::Instance()->_postProcess.getManualExposure() + 0.1;
+		printf("%.2f\n", manualExp);
+		EffectManager::Instance()->_postProcess.setManualExposure(manualExp);
+	}
+	else if (Event_KEY_ZERO_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager::Instance()->_postProcess.getEnableManualExposure() ?
+			EffectManager::Instance()->_postProcess.setEnableManualExposure(false) :
+			EffectManager::Instance()->_postProcess.setEnableManualExposure(true);
+	}
+	else if (Event_KEY_MINUS_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() + 0.005;
+		printf("Keyval: %.2f\n", keyVal);
+		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
+	}
+	else if (Event_KEY_EQUAL_HELD::GetClassId() == pEvt->getClassId())
+	{
+		float keyVal = EffectManager::Instance()->_postProcess.getKeyValue() - 0.005;
+		printf("Keyval: %.2f\n", keyVal);
+		EffectManager::Instance()->_postProcess.setKeyValue(keyVal);
+	}
+	else if (Event_KEY_R_HELD::GetClassId() == pEvt->getClassId())
+	{
+		EffectManager::Instance()->_postProcess.getEnableDOF() ?
+			EffectManager::Instance()->_postProcess.setEnableDOF(false) :
+			EffectManager::Instance()->_postProcess.setEnableDOF(true);
+	}
+	else if (Event_KEY_NUM_0::GetClassId() == pEvt->getClassId())
+	{
+
+
+		m_pContext->isSSR ? m_pContext->isSSR = false : m_pContext->isSSR = true;
+	}
+	else if (Event_KEY_NUM_1::GetClassId() == pEvt->getClassId())
+	{
+		float intensity = EffectManager::Instance()->_normalIntensity;
+		intensity += 0.03;
+		intensity = min(intensity, 1.0f);
+		EffectManager::Instance()->_normalIntensity = intensity;
+	}
+	else if (Event_KEY_NUM_2::GetClassId() == pEvt->getClassId())
+	{
+		float intensity = EffectManager::Instance()->_normalIntensity;
+		intensity -= 0.03;
+		intensity = max(intensity, 0.0f);
+		EffectManager::Instance()->_normalIntensity = intensity;
+	}
+	else if (Event_KEY_NUM_3::GetClassId() == pEvt->getClassId())
+	{
+		m_pContext->isSmallBalls ? m_pContext->isSmallBalls = false : m_pContext->isSmallBalls = true;
+	}
+	else
+	{
+		Component::handleEvent(pEvt);
+	}
+}
 
 
 void DefaultGameControls::handleControllerDebugInputEvents(Event *pEvt)

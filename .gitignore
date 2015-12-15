@@ -232,7 +232,26 @@ _Pvt_Extensions
 # PrimeEngine Miscs
 3rdPartyInstallations/**
 AssetsIn/**
-AssetsOut/**
+
+# Exclude AssetsOut except for shaders
+AssetsOut/*
+!AssetsOut/Default/
+AssetsOut/Default/*
+!AssetsOut/Default/GPUPrograms/
+
+# Exclude test level
+!AssetsOut/Basic/
+AssetsOut/Basic/*
+!AssetsOut/Basic/Levels/
+
+# Exclude Final assets
+!AssetsOut/FinalProjectAssets
+
+# Exclude SpecularLookupTex
+!AssetsOut/Default/Textures/
+AssetsOut/Default/Textures/*
+!AssetsOut/Default/Textures/SpecularLookup.dds
+
 External/**
 GlobalConfig/**
 Python25/**
@@ -248,3 +267,9 @@ Code/lua_dist/lua_dist-win32d3d11.vcxproj
 Code/lua_dist/lua_dist-win32d3d11.vcxproj.filters
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj
 Code/luasocket_dist/luasocket_dist-win32d3d11.vcxproj.filters
+
+*.exe
+*.dll
+*.bat
+
+

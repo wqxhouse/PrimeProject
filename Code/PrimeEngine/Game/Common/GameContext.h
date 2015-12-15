@@ -61,6 +61,21 @@ struct GameContext
 	void * m_pGameSpecificContext; // used to extend this structure
 	Components::DefaultGameControls *m_pDefaultGameControls;
 	int m_gameThreadThreadOwnershipMask;
+
+	int _renderMode;
+	int _debugMode;
+
+	int _curModel;
+	int _preModel;
+
+	float _roughness;
+	float _metallic;
+
+	bool isSSR;
+	bool isSmallBalls;
+	int _curCubeMap;
+
+	int _cubmapID[6];
 };
 
 

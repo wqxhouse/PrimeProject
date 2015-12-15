@@ -1,0 +1,156 @@
+#ifndef SKYBOX_NEW_PS
+#define SKYBOX_NEW_PS
+#include "ColoredMinimalMesh_Structs.fx"
+
+TextureCube<float3> NightCubemap : register(t0);
+SamplerState LinearSampler : register(s0);
+
+struct Coefficent
+{
+	float A;
+	float B;
+	float C;
+	float D;
+	float E;
+	float cpad0;
+	float cpad1;
+	float cpad2;
+};
+
+cbuffer SkyboxNewConstants : register(b0) 
+{
+	float solar_azimuth;
+	float solar_zenith;
+
+	float Yz;
+	float xz;
+	float yz;
+	
+	float turbidity;
+	
+	float pad0;
+	float pad1;
+	
+	Coefficent coeffsY;
+	Coefficent coeffsx;
+	Coefficent coeffsy;
+	
+	float3 sunColor;
+	float night;
+};
+
+
+float Gamma(float zenith, float azimuth)
+{
+	return acos(sin(solar_zenith)*sin(zenith)*cos(azimuth-solar_azimuth)+cos(solar_zenith)*cos(zenith));
+}
+
+float Perez(float zenith, float gamma, Coefficent coeffs)
+{
+	return	(1 + coeffs.A*exp(coeffs.B/cos(zenith)))*
+			(1 + coeffs.C*exp(coeffs.D*gamma)+coeffs.E*pow(cos(gamma),2));
+}
+
+float4 RGB(float Y, float x, float y)
+{
+	float X = x/y*Y;
+	float Z = (1-x-y)/y*Y;
+	float4 rgb;
+	rgb.a = 1;
+	rgb.r =  3.2406f * X - 1.5372f * Y - 0.4986f * Z;
+	rgb.g = -0.9689f * X + 1.8758f * Y + 0.0415f * Z;
+	rgb.b =  0.0557f * X - 0.2040f * Y + 1.0570f * Z;
+	return rgb;
+}
+
+float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float3 world_pos = normalize(pIn.iPosOS);
+	
+	float azimuth = atan2(world_pos.x, world_pos.z);
+	float zenith = acos(world_pos.y / length(world_pos.xyz));
+
+	float gamma = Gamma(zenith, azimuth);	
+	zenith = min(zenith, 3.1415926f/2.0f);
+	//float Yp = Yz * Perez(zenith, gamma, coeffsY) / Perez(0, solar_zenith, coeffsY);
+	//float xp = xz * Perez(zenith, gamma, coeffsx) / Perez(0, solar_zenith, coeffsx);
+	//float yp = yz * Perez(zenith, gamma, coeffsy) / Perez(0, solar_zenith, coeffsy);
+	
+	float Yp = Yz * Perez(zenith, gamma, coeffsY);
+	float xp = xz * Perez(zenith, gamma, coeffsx);
+	float yp = yz * Perez(zenith, gamma, coeffsy);
+
+	float4 color = RGB(Yp, xp, yp);
+	
+	float4 finalColor = float4(0, 0, 0, 1);
+
+	finalColor.xyz = lerp(sunColor * 10, color, saturate(abs(gamma) / 0.03));
+	finalColor.xyz *= 20;
+	if(night > 0)
+	{
+		float3 nightSky = NightCubemap.Sample(LinearSampler, world_pos).xyz;
+		return float4(nightSky, 1);
+	}
+	// fix for intel
+	/*
+	if(isnan(color.x)) 
+	{
+		return float4(5, 5, 5, 1);
+	}
+	*/
+	return finalColor;
+}
+
+/*
+cbuffer SkyboxNewConstants : register(b0) 
+{
+	float3 A;
+	float pad0;
+	float3 B;
+	float pad1;
+	float3 C;
+	float pad2;
+	float3 D;
+	float pad3;
+	float3 E;
+	float pad4;
+	float3 Z;
+	float pad5;
+	float3 SunDirection;
+	float pad6;
+}
+
+
+float3 perez(float cos_theta, float gamma, float cos_gamma, float3 A, float3 B, float3 C, float3 D, float3 E)
+{
+    return (1 + A * exp(B / (cos_theta + 0.01))) * (1 + C * exp(D * gamma) + E * cos_gamma * cos_gamma);
+}
+
+float4 SkyboxNew_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float3 V = normalize(pIn.iPosOS);
+
+	//float cos_theta = saturate(V.z);
+	float cos_theta = saturate(V.z);
+	
+	float cos_gamma = dot(V, SunDirection);
+	float gamma = acos(cos_gamma);
+
+	float3 R_xyY = Z * perez(cos_theta, gamma, cos_gamma, A, B, C, D, E);
+
+	float3 R_XYZ = float3(R_xyY.x, R_xyY.y, 1 - R_xyY.x - R_xyY.y) * R_xyY.z / R_xyY.y;
+
+	float R_r = dot(float3( 3.240479, -1.537150, -0.498535), R_XYZ);
+	float R_g = dot(float3(-0.969256,  1.875992,  0.041556), R_XYZ);
+	float R_b = dot(float3( 0.055648, -0.204043,  1.057311), R_XYZ);
+
+	float3 R = float3(R_r, R_g, R_b);
+
+	// return float4(pow(saturate(R), 1.0 / 2.2), 1);
+	//return float4(saturate(R), 1);
+	return float4(R, 1);
+}
+*/
+PS_wrapper_COLORED_MINIMAL_MESH(SkyboxNew_PS)
+
+#endif

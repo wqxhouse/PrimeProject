@@ -1,0 +1,18 @@
+LevelLoader.CreateGameObject("PEObject1_nazi_rep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, -0.0, 1.0, 'testSkinMeshGbuffer.x_PEObject1_nazi_r.lua', 'Basic',0xe212b1e1, 0x9d6211e5, 0xad0bce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject15_tArrow",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -475.185525, 0.0, 316.899888, 1.0, 'testSkinMeshGbuffer.x_PEObject15_tArro.lua', 'Basic',0x98f68a61, 0x9d6511e5, 0xad54ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject13_tArrow",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -992.675047, 0.0, 369.689511, 1.0, 'testSkinMeshGbuffer.x_PEObject13_tArro.lua', 'Basic',0x8f72c7b0, 0x9d6511e5, 0xb75ace76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject9_tArrow",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 493.044538, 0.0, -0.0, 1.0, 'testSkinMeshGbuffer.x_PEObject9_tArrow.lua', 'Basic',0x4d9d6800, 0x9d6411e5, 0x9627ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject10_tArrow",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, 350.752809, 0.0, 574.865975, 1.0, 'testSkinMeshGbuffer.x_PEObject10_tArro.lua', 'Basic',0x58c67640, 0x9d6411e5, 0xa420ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject12_nazi_rep",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -804.469359, 0.0, 408.531222, 1.0, 'testSkinMeshGbuffer.x_PEObject12_nazi_.lua', 'Basic',0x85a2b9c0, 0x9d6511e5, 0x9714ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject14_tArrow",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -742.137721, 0.0, -563.094762, 1.0, 'testSkinMeshGbuffer.x_PEObject14_tArro.lua', 'Basic',0x925acc6e, 0x9d6511e5, 0xa38ece76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject11_tArrow",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -215.927156, 0.0, -192.245233, 1.0, 'testSkinMeshGbuffer.x_PEObject11_tArro.lua', 'Basic',0x5e167a4f, 0x9d6411e5, 0xa127ce76, 0x21b31fb8)
+
+LevelLoader.CreateGameObject("PEObject0_pPlane1",1.0, 0.0, -0.0, 0.0, 0.0, 1.0, -0.0, 0.0, -0.0, -0.0, 1.0, 0.0, -8.326546, 0.0, -4.034357, 1.0, 'testSkinMeshGbuffer.x_PEObject0_pPlane.lua', 'Basic',0xd9295a70, 0x9d6211e5, 0xb33fce76, 0x21b31fb8)
+

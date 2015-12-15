@@ -261,6 +261,18 @@ void Effect::loadTechniqueAsync()
 	}
 }
 
+void Effect::setCurrentShaderOnly(VertexBufferGPU *pCurVertexBuffer)
+{
+	D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
+	ID3D11Device *pDevice = pD3D11Renderer->m_pD3DDevice;
+	ID3D11DeviceContext *pDeviceContext = pD3D11Renderer->m_pD3DContext;
+
+	pDeviceContext->VSSetShader(m_VS, NULL, 0);
+	pDeviceContext->GSSetShader(m_GS, NULL, 0);
+	pDeviceContext->PSSetShader(m_PS, NULL, 0);
+	pDeviceContext->CSSetShader(m_CS, NULL, 0);
+}
+
 void Effect::setCurrent(PE::VertexBufferGPU *pCurVertexBuffer)
 {
 	/*if (!lock())

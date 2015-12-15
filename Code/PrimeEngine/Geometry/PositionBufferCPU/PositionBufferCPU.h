@@ -7,7 +7,7 @@
 #include "PrimeEngine/APIAbstraction/APIAbstractionDefines.h"
 
 // Outer-Engine includes
-
+#include "math.h"
 // Inter-Engine includes
 #include "PrimeEngine/MemoryManagement/Handle.h"
 #include "PrimeEngine/PrimitiveTypes/PrimitiveTypes.h"
@@ -29,7 +29,8 @@ struct PositionBufferCPU : PE::PEAllocatableAndDefragmentable
 
 	void createBillboardCPUBuffer(PrimitiveTypes::Float32 w, PrimitiveTypes::Float32 h);
 	void createNormalizeBillboardCPUBufferXYWithPtOffsets(PrimitiveTypes::Float32 dx, PrimitiveTypes::Float32 dy);
-
+	//Liu
+	void PositionBufferCPU::createSphereForDeferred(float radius, int sliceCount, int stackCount);
 	void add3Floats(PrimitiveTypes::Float32 f0, PrimitiveTypes::Float32 f1, PrimitiveTypes::Float32 f2)
 	{
 		m_values.add(f0); m_values.add(f1); m_values.add(f2);

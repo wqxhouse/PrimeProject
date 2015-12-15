@@ -3,6 +3,7 @@
 #include "RenderJob.h"
 
 #include "PrimeEngine/Scene/DrawList.h"
+#include <string>
 
 #if APIABSTRACTION_IOS
 #import <QuartzCore/QuartzCore.h>
@@ -134,49 +135,49 @@ int ClientGame::runGameFrame()
 			// Push Event_PRE_GATHER_DRAWCALLS
 			{
 				Handle hctevt("EVENT", sizeof(Event_PRE_GATHER_DRAWCALLS));
-				Event_PRE_GATHER_DRAWCALLS *ctevt =  new(hctevt) Event_PRE_GATHER_DRAWCALLS ;
-        
+				Event_PRE_GATHER_DRAWCALLS *ctevt = new(hctevt)Event_PRE_GATHER_DRAWCALLS;
+
 				PE::Events::EventQueueManager::Instance()->add(hctevt, Events::QT_GENERAL);
 
 				ctevt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
 				ctevt->m_eyePos = pcam->m_worldTransform.getPos();
-				
+
 			}
 
-            {
-                Handle hdrawZOnlyEvt("EVENT", sizeof(Event_GATHER_DRAWCALLS_Z_ONLY));
-                Event_GATHER_DRAWCALLS_Z_ONLY *drawZOnlyEvt = new(hdrawZOnlyEvt) Event_GATHER_DRAWCALLS_Z_ONLY ;
-                
-                drawZOnlyEvt->m_pZOnlyDrawListOverride = 0;
+			{
+				Handle hdrawZOnlyEvt("EVENT", sizeof(Event_GATHER_DRAWCALLS_Z_ONLY));
+				Event_GATHER_DRAWCALLS_Z_ONLY *drawZOnlyEvt = new(hdrawZOnlyEvt)Event_GATHER_DRAWCALLS_Z_ONLY;
+
+				drawZOnlyEvt->m_pZOnlyDrawListOverride = 0;
 
 				RootSceneNode *pRoot = RootSceneNode::Instance();
 
-				if (pRoot->m_lights.m_size)
+				/*if (pRoot->m_lights.m_size)
 				{
-					PrimitiveTypes::Bool foundShadower = false;
-					for(PrimitiveTypes::UInt32 i=0; i<(pRoot->m_lights.m_size); i++){
-						Light *pLight = pRoot->m_lights[i].getObject<Light>();
-						if(pLight->castsShadow()){
+				PrimitiveTypes::Bool foundShadower = false;
+				for (PrimitiveTypes::UInt32 i = 0; i < (pRoot->m_lights.m_size); i++){
+				Light *pLight = pRoot->m_lights[i].getObject<Light>();
+				if (pLight->castsShadow()){
 
-							drawZOnlyEvt->m_projectionViewTransform = (pLight->m_viewToProjectedTransform * pLight->m_worldToViewTransform);
-							drawZOnlyEvt->m_eyePos = pLight->m_base.getPos();
-							foundShadower=true;
-							break;
-						}
-						if(!foundShadower){
-							drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
-							drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
-						}
-					}
+				drawZOnlyEvt->m_projectionViewTransform = (pLight->m_viewToProjectedTransform * pLight->m_worldToViewTransform);
+				drawZOnlyEvt->m_eyePos = pLight->m_base.getPos();
+				foundShadower = true;
+				break;
 				}
-				else
+				if (!foundShadower){
+				drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
+				drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
+				}
+				}
+				}
+				else*/
 				{
 					drawZOnlyEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
 					drawZOnlyEvt->m_eyePos = pcam->m_worldTransform.getPos();
 				}
-                drawZOnlyEvt->m_parentWorldTransform.loadIdentity();
-                Events::EventQueueManager::Instance()->add(hdrawZOnlyEvt);
-            }
+				drawZOnlyEvt->m_parentWorldTransform.loadIdentity();
+				Events::EventQueueManager::Instance()->add(hdrawZOnlyEvt);
+			}
             
             // After the transformations are done. We can put a DRAW event in the queue
             // Push DRAW event into message queue because camera has updated transformations
@@ -196,7 +197,7 @@ int ClientGame::runGameFrame()
 				drawEvt->m_projectionTransform = pcam->m_viewToProjectedTransform;
 				drawEvt->m_eyeDir = pcam->m_worldTransform.getN();
                 drawEvt->m_parentWorldTransform.loadIdentity();
-                drawEvt->m_viewInvTransform = pcam->m_worldToViewTransform.inverse();
+				drawEvt->m_viewInvTransform = pcam->m_worldToViewTransform.inverse();
                 
 				//Commented out by Mac because I'm pretty sure this does nothing but am afraid to delete it...
 				static bool setCameraAsLightSource = false;
@@ -311,22 +312,223 @@ int ClientGame::runGameFrame()
 				//FPS
 				{
 					float fps = (1.0f/m_frameTime);
-					//sprintf(PEString::s_buf, "%.2f zonglinw Fall 2015 FPS", fps);
 					sprintf(PEString::s_buf, "%.2f FPS", fps);
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0, 
-						Vector3(.75f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+						Vector3(0.75f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
+				
+				//U I
+				{
+					int curBuf = m_pContext->_debugMode;
+					std::string mode = "";
+					if (curBuf == 0)
+					{
+						mode += "Final Pass";
+					}
+					else if (curBuf == 1)
+					{
+						mode += "Albedo Buffer";
+					}
+					else if (curBuf == 2)
+					{
+						mode += "Normal Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 0)
+					{
+						mode += "Depth Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 1)
+					{
+						mode += "Position Buffer";
+					}
+					else if (curBuf == 4)
+					{
+						mode += "Lighting Buffer (Before Gamma Correction)";
+					}
+					sprintf(PEString::s_buf, "Button U/I: Switch Between Buffers: ", mode.c_str());
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
+				// K L roughness; O P metallic
+				{
+					
+					sprintf(PEString::s_buf, "Roughness: %.2f Metallic: %.2f", m_pContext->_roughness, m_pContext->_metallic); //Button K/L: Switch Between Shading Algorithms
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
+
+				// J H  _farFocusStart
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.1f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				//move this part to  {U I }
+				/*{
+					int curBuf = m_pContext->_debugMode;
+					std::string mode = "";
+					if (curBuf == 0)
+					{
+						mode += "Final Pass";
+					}
+					else if (curBuf == 1)
+					{
+						mode += "Albedo Buffer";
+					}
+					else if (curBuf == 2)
+					{
+						mode += "Normal Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 0)
+					{
+						mode += "Depth Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 1)
+					{
+						mode += "Position Buffer";
+					}
+					else if (curBuf == 4)
+					{
+						mode += "Lighting Buffer (Before Gamma Correction)";
+					}
+
+					sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}*/
+
+				// X C  sun
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// v  add gameobject
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.175f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+				
+				// t y  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.2f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// b n  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.225f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// m  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.25f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// z  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.275f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+				
+				// R  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.3f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// 6 7  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.325f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+				
+				// 8 9  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.35f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// 0  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.375f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// num0   function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.4f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// num1 num2   function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.425f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// num3   paritcal
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.45f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				//
+				//// light num
+				//{
+				//	auto &lights = PE::RootSceneNode::Instance()->m_lights;
+				//	int lightNum = lights.m_size;
+
+				//	sprintf(PEString::s_buf, "Light number: %d", lightNum);
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.175f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
 
                 PE::IRenderer::checkForErrors("");
 
 				//LUA Command Server, Server
 				PE::GameContext *pServer = &PE::Components::ServerGame::s_context;
 				{
-					sprintf(PEString::s_buf, "Lua Command Receiver Ports: Client: %d Server: %d", m_pContext->getLuaCommandServerPort(), pServer->getLuaEnvironment() ? pServer->getLuaCommandServerPort():0);
+					/*sprintf(PEString::s_buf, "Lua Command Receiver Ports: Client: %d Server: %d", m_pContext->getLuaCommandServerPort(), pServer->getLuaEnvironment() ? pServer->getLuaCommandServerPort():0);
 					DebugRenderer::Instance()->createTextMesh(
-						PEString::s_buf, true, false, false, false, 0,
-						Vector3(.0f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+					PEString::s_buf, true, false, false, false, 0,
+					Vector3(.0f, .05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);*/
 				}
 
                 PE::IRenderer::checkForErrors("");
@@ -347,12 +549,12 @@ int ClientGame::runGameFrame()
                 PE::IRenderer::checkForErrors("");
 
 				//gameplay timer
-				{
+				/*{
 					sprintf(PEString::s_buf, "GT frame wait:%.3f pre-draw:%.3f+render wait:%.3f+render:%.3f+post-render:%.3f = %.3f sec\n", m_gameTimeBetweenFrames, m_gameThreadPreDrawFrameTime, m_gameThreadDrawWaitFrameTime, m_gameThreadDrawFrameTime, m_gameThreadPostDrawFrameTime, m_frameTime);
 					DebugRenderer::Instance()->createTextMesh(
 						PEString::s_buf, true, false, false, false, 0,
 						Vector3(.0f, .075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				}
+				}*/
 				
 				//debug draw root and grid
 				DebugRenderer::Instance()->createRootLineMesh();// send event while the array is on the stack

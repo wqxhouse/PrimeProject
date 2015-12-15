@@ -54,6 +54,36 @@ struct Event_KEY_L_HELD : public Event {
 	virtual ~Event_KEY_L_HELD(){}
 };
 
+struct Event_KEY_C_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_C_HELD);
+	virtual ~Event_KEY_C_HELD(){}
+};
+
+struct Event_KEY_V_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_V_HELD);
+	virtual ~Event_KEY_V_HELD(){}
+};
+
+struct Event_KEY_B_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_B_HELD);
+	virtual ~Event_KEY_B_HELD(){}
+};
+
+struct Event_KEY_N_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_N_HELD);
+	virtual ~Event_KEY_N_HELD(){}
+};
+
+struct Event_KEY_M_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_M_HELD);
+	virtual ~Event_KEY_M_HELD(){}
+};
+
+struct Event_KEY_X_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_X_HELD);
+	virtual ~Event_KEY_X_HELD(){}
+};
+
 struct Event_KEY_LEFT_HELD : public Event {
 	PE_DECLARE_CLASS(Event_KEY_LEFT_HELD);
 	virtual ~Event_KEY_LEFT_HELD(){}
@@ -73,6 +103,94 @@ struct Event_KEY_UP_HELD : public Event {
 	PE_DECLARE_CLASS(Event_KEY_UP_HELD);
 	virtual ~Event_KEY_UP_HELD(){}
 };
+
+struct Event_KEY_O_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_O_HELD);
+	virtual ~Event_KEY_O_HELD(){}
+};
+
+struct Event_KEY_P_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_P_HELD);
+	virtual ~Event_KEY_P_HELD(){}
+};
+
+struct Event_KEY_T_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_T_HELD);
+	virtual ~Event_KEY_T_HELD(){}
+};
+
+struct Event_KEY_Y_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_Y_HELD);
+	virtual ~Event_KEY_Y_HELD(){}
+};
+
+struct Event_KEY_J_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_J_HELD);
+	virtual ~Event_KEY_J_HELD(){}
+};
+
+struct Event_KEY_H_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_H_HELD);
+	virtual ~Event_KEY_H_HELD(){}
+};
+
+struct Event_KEY_Z_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_Z_HELD);
+	virtual ~Event_KEY_Z_HELD(){}
+};
+
+struct Event_KEY_R_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_R_HELD);
+	virtual ~Event_KEY_R_HELD(){}
+};
+
+
+struct Event_KEY_LEFT_BRACKET_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_LEFT_BRACKET_HELD);
+	virtual ~Event_KEY_LEFT_BRACKET_HELD(){}
+};
+
+struct Event_KEY_RIGHT_BRACKET_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_RIGHT_BRACKET_HELD);
+	virtual ~Event_KEY_RIGHT_BRACKET_HELD(){}
+};
+
+struct Event_KEY_ZERO_HELD: public Event {
+	PE_DECLARE_CLASS(Event_KEY_ZERO_HELD);
+	virtual ~Event_KEY_ZERO_HELD(){}
+};
+
+struct Event_KEY_MINUS_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_MINUS_HELD);
+	virtual ~Event_KEY_MINUS_HELD(){}
+};
+
+struct Event_KEY_EQUAL_HELD : public Event {
+	PE_DECLARE_CLASS(Event_KEY_EQUAL_HELD);
+	virtual ~Event_KEY_EQUAL_HELD(){}
+};
+
+struct Event_KEY_NUM_0: public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_0);
+	virtual ~Event_KEY_NUM_0(){}
+};
+
+struct Event_KEY_NUM_1 : public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_1);
+	virtual ~Event_KEY_NUM_1(){}
+};
+
+struct Event_KEY_NUM_2 : public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_2);
+	virtual ~Event_KEY_NUM_2(){}
+};
+
+struct Event_KEY_NUM_3 : public Event {
+	PE_DECLARE_CLASS(Event_KEY_NUM_3);
+	virtual ~Event_KEY_NUM_3(){}
+};
+
+
 
 }; // namespace Events
 }; // namespace PE

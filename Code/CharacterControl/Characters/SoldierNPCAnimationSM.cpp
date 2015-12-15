@@ -15,6 +15,14 @@ PE_IMPLEMENT_CLASS1(SoldierNPCAnimSM_Event_STOP, Event);
 
 PE_IMPLEMENT_CLASS1(SoldierNPCAnimSM_Event_WALK, Event);
 
+PE_IMPLEMENT_CLASS1(SoldierNPCAnimSM_Event_HipHop, Event);
+
+PE_IMPLEMENT_CLASS1(SoldierNPCAnimSM_Event_FootWork, Event);
+
+PE_IMPLEMENT_CLASS1(SoldierNPCAnimSM_Event_Gangnam, Event);
+
+PE_IMPLEMENT_CLASS1(SoldierNPCAnimSM_Event_Cheering, Event);
+
 }
 namespace Components{
 
@@ -31,6 +39,10 @@ void SoldierNPCAnimationSM::addDefaultComponents()
 
 	PE_REGISTER_EVENT_HANDLER(Events::SoldierNPCAnimSM_Event_STOP, SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_STOP);
 	PE_REGISTER_EVENT_HANDLER(Events::SoldierNPCAnimSM_Event_WALK, SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_WALK);
+	PE_REGISTER_EVENT_HANDLER(Events::SoldierNPCAnimSM_Event_HipHop, SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_HipHop);
+	PE_REGISTER_EVENT_HANDLER(Events::SoldierNPCAnimSM_Event_FootWork, SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_FootWork);
+	PE_REGISTER_EVENT_HANDLER(Events::SoldierNPCAnimSM_Event_Cheering, SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_Cheering);
+	PE_REGISTER_EVENT_HANDLER(Events::SoldierNPCAnimSM_Event_Gangnam, SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_Gangnam);
 }
 
 void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_STOP(PE::Events::Event *pEvt)
@@ -40,7 +52,7 @@ void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_STOP(PE::Events::Event *pE
 	{
 		m_curId = SoldierNPCAnimationSM::STAND;
 		
-		setAnimation(0, SoldierNPCAnimationSM::STAND,
+		setAnimation(0, 0,//SoldierNPCAnimationSM::STAND,
 		0, 0, 1, 1,
 		PE::LOOPING);
 	}
@@ -51,12 +63,53 @@ void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_WALK(PE::Events::Event *pE
 	if (m_curId != SoldierNPCAnimationSM::WALK)
 	{
 		m_curId = SoldierNPCAnimationSM::WALK;
-		setAnimation(0, SoldierNPCAnimationSM::WALK,
+		setAnimation(1, 0,//1,0,//0, SoldierNPCAnimationSM::WALK,
 			0, 0, 1, 1,
 			PE::LOOPING);
 	}
 }
 
+void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_HipHop(PE::Events::Event *pEvt)
+{
+	//if (m_curId != SoldierNPCAnimationSM::WALK)
+	//{
+		
+		setAnimation(2, 0,//1,0,//0, SoldierNPCAnimationSM::WALK,
+			0, 0, 1, 1,
+			PE::LOOPING);
+	//}
+}
+
+void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_FootWork(PE::Events::Event *pEvt)
+{
+	if (m_curId != SoldierNPCAnimationSM::WALK)
+	{
+		
+		setAnimation(3, 0,//1,0,//0, SoldierNPCAnimationSM::WALK,
+			0, 0, 1, 1,
+			PE::LOOPING);
+	}
+}
+
+void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_Gangnam(PE::Events::Event *pEvt)
+{
+	
+		
+		setAnimation(4, 0,//1,0,//0, SoldierNPCAnimationSM::WALK,
+			0, 0, 1, 1,
+			PE::LOOPING);
+	
+}
+
+void SoldierNPCAnimationSM::do_SoldierNPCAnimSM_Event_Cheering(PE::Events::Event *pEvt)
+{
+	
+		
+		setAnimation(5, 0,//1,0,//0, SoldierNPCAnimationSM::WALK,
+			0, 0, 1, 1,
+			PE::LOOPING);
+	
+}
 
 }}
 

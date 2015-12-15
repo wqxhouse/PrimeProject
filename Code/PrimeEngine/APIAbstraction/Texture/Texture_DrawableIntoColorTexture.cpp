@@ -13,7 +13,7 @@
 #include "PrimeEngine/Render/D3D11Renderer.h"
 namespace PE {
 #if 1
-void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler)
+void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler, int textureMode /* = 0 */)
 {
 	
 	m_samplerState = sampler;
@@ -155,7 +155,8 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 	D3D11Renderer *pD3D11Renderer = static_cast<D3D11Renderer *>(m_pContext->getGPUScreen());
 	ID3D11Device *pDevice = pD3D11Renderer->m_pD3DDevice;
 	ID3D11DeviceContext *pDeviceContext = pD3D11Renderer->m_pD3DContext;
-
+	
+	
 	//ID3D11Texture2D *pColorMap = 0;
 
 	D3D11_TEXTURE2D_DESC texDesc;
@@ -163,15 +164,27 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 		texDesc.Height = h;
 		texDesc.MipLevels = 0;
 		texDesc.ArraySize = 1;
-		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		// + Deferred 
+		if (textureMode == 0)
+		{
+			texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+		else if (textureMode == 1)
+		{
+			texDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+		}
+		else if (textureMode == 2)
+		{
+			texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		}
 		texDesc.SampleDesc.Count = 1;
 		texDesc.SampleDesc.Quality = 0;
 		texDesc.Usage = D3D11_USAGE_DEFAULT;
 		texDesc.BindFlags = D3D11_BIND_RENDER_TARGET |
-		                    D3D11_BIND_SHADER_RESOURCE;
+		                    D3D11_BIND_SHADER_RESOURCE ;
 		texDesc.CPUAccessFlags = 0;
 		texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
+		
 		HRESULT hr = pDevice->CreateTexture2D(&texDesc, 0, &m_pTexture);
 		assert(SUCCEEDED(hr));
 
@@ -181,6 +194,9 @@ void TextureGPU::createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, Primit
 		assert(SUCCEEDED(hr));
 		hr = pDevice->CreateShaderResourceView(m_pTexture, 0, &m_pShaderResourceView);
 		assert(SUCCEEDED(hr));
+		
+		//pDeviceContext->GenerateMips(m_pShaderResourceView);
+		
 
 #endif
 }

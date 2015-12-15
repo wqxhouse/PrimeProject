@@ -1,0 +1,312 @@
+#ifndef DEFERRED_FINAL_PASS_PS
+#define DEFERRED_FINAL_PASS_PS
+
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "lighthelper.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
+
+float3 viewSpacePositionFromDepth(float2 rayHitPosSS,COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float perspectiveZ = gDepthMap.Load(float3(rayHitPosSS.xy, 0)).x;
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 posVS = mul(float4(posWS,1.0),gView).xyz;
+	return posVS;
+}
+
+float specularPowerToConeAngle(float specularPower)
+{
+ // based on phong distribution model
+ if(specularPower >= exp2(64))
+ {
+	return 0.0f;
+ }
+ const float xi = 0.244f;
+ float exponent = 1.0f / (specularPower + 1.0f);
+ return acos(pow(xi, exponent));
+}
+
+float roughnessToSpecularPower(float roughness)
+{
+	float value = pow(2.0f,(10 * (roughness / 255.0f) + 1));
+	return value;
+}
+
+float isoscelesTriangleOpposite(float adjacentLength, float coneTheta)
+{
+	// simple trig and algebra - soh, cah, toa - tan(theta) = opp/adj, opp = tan(theta) * adj, then multiply * 2.0f for isosceles triangle base
+	return 2.0f * tan(coneTheta) * adjacentLength;
+}
+
+float isoscelesTriangleInRadius(float a, float h)
+{
+	float a2 = a * a;
+	float fh2 = 4.0f * h * h;
+	return (a * (sqrt(a2 + fh2) - a)) / (4.0f * h);
+}
+
+float4 coneSampleWeightedColor(float2 samplePos, float mipChannel, float gloss)
+{
+	float3 sampleColor = gDiffuseMap.SampleLevel(gDiffuseMapSampler, float2(samplePos.x/1280.0f, samplePos.y/720.0f), mipChannel).rgb;
+	return float4(sampleColor* gloss, gloss);//  * gloss
+}
+
+float isoscelesTriangleNextAdjacent(float adjacentLength, float incircleRadius)
+{
+	// subtract the diameter of the incircle to get the adjacent side of the next level on the cone
+	return adjacentLength - (incircleRadius * 2.0f);
+}
+
+float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	uint3 fragCoord = int3(pIn.iPosH.xy, 0);
+	float4 shadingColor = float4(gWindMap.Load(fragCoord).xyz, 1.0f);	
+
+	// gamma correction
+	return float4(pow(shadingColor.xyz, 1.0 / 2.2), 1.0);
+}
+
+/*
+float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	int3 loadIndices = int3(pIn.iPosH.xy, 0);
+	// get screen-space ray intersection point
+	float4 raySS = gWindMap.Load(loadIndices).xyzw;
+	float4 fallbackColor = float4(0,0,0,1);
+
+	float perspectiveZ = gDepthMap.Load(loadIndices).x;
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	//float reflectivity = posWS.y>0?0:0.5;
+
+	float4 shadingColor = float4(gDiffuseMap.Load(loadIndices).xyz,1.0f);
+
+	if(raySS.w <= 0.0f)
+	{
+		return  shadingColor;//float4(gDiffuseMap.SampleLevel(gDiffuseMapSampler, float2((float)loadIndices.x/1280.0f, (float)loadIndices.y/720.0f), 3).rgb,1.0f);//shadingColor;
+	}
+
+	float3 n = gBumpMap.Load(loadIndices).xyz;
+	float3 positionVS = mul( float4(viewRay,0), gView);
+	float3 toPositionVS = normalize(positionVS); 
+	float3 normalVS  = mul( float4(n,0), gView);
+
+	float gloss = 0.3f;
+	float specularPower = roughnessToSpecularPower(1-gloss);
+
+	float coneTheta = 0.7f*0.5f;//specularPowerToConeAngle(specularPower) * 0.5f;//0.7f*0.5f;//0.01f * 0.5f;
+
+	float2 deltaP = raySS.xy - loadIndices.xy;
+	float adjacentLength = length(deltaP);
+	float2 adjacentUnit = normalize(deltaP);
+
+	float4 totalColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float remainingAlpha = 1.0f;
+	float maxMipLevel = 7;
+	float glossMult = gloss;
+
+	// cone-tracing using an isosceles triangle to approximate a cone in screen space
+	for(int i = 0; i < 14; ++i)
+	{
+		// intersection length is the adjacent side, get the opposite side using trig
+		float oppositeLength = isoscelesTriangleOpposite(adjacentLength, coneTheta);
+		
+		// calculate in-radius of the isosceles triangle
+		float incircleSize = isoscelesTriangleInRadius(oppositeLength, adjacentLength);
+		
+		// get the sample position in screen space
+		float2 samplePos = loadIndices.xy + adjacentUnit * (adjacentLength - incircleSize);
+		
+		// convert the in-radius into screen size then check what power N to raise 2 to reach it - that power N becomes mip level to sample from
+		float mipChannel = clamp(log2(incircleSize), 0.0f, maxMipLevel);
+		
+		// Read color and accumulate it using trilinear filtering and weight it.
+		// Uses pre-convolved image (color buffer) and glossiness to weigh color contributions.
+		// Visibility is accumulated in the alpha channel. Break if visibility is 100% or greater (>= 1.0f).
+		float4 newColor = coneSampleWeightedColor(samplePos, mipChannel, glossMult);
+		
+		remainingAlpha -= newColor.a;
+
+		if(remainingAlpha < 0.0f)
+		{
+			newColor.rgb *= (1.0f - abs(remainingAlpha));
+		}
+		totalColor += newColor;
+
+		if(totalColor.a >= 1.0f)
+		{
+			break;
+		}
+
+		adjacentLength = isoscelesTriangleNextAdjacent(adjacentLength, incircleSize);
+		glossMult *= gloss;
+	}
+
+	float3 toEye = -toPositionVS;
+	float3 specular = float3(0.5f,0.5f,0.5f);
+
+
+	// fade rays close to screen edge
+	float2 boundary = abs(raySS.xy - float2(0.5f, 0.5f)) * 2.0f;
+	const float fadeDiffRcp = 1.0f / (1.0f - 0.8f);
+	float fadeOnBorder = 1.0f - saturate((boundary.x - 0.8f) * fadeDiffRcp);
+	fadeOnBorder *= 1.0f - saturate((boundary.y - 0.8f) * fadeDiffRcp);
+	fadeOnBorder = smoothstep(0.0f, 1.0f, fadeOnBorder);
+	float3 rayHitPositionVS = viewSpacePositionFromDepth(raySS.xy, pIn);
+	float fadeOnDistance = 1.0f - saturate(distance(rayHitPositionVS, positionVS) / 300.0f);
+	// ray tracing steps stores rdotv in w component - always > 0 due to check at start of this method
+	float fadeOnPerpendicular = saturate(lerp(0.0f, 1.0f, saturate(raySS.w * 4.0f)));
+	float fadeOnRoughness = saturate(lerp(0.0f, 1.0f, gloss * 4.0f));
+	float totalFade = fadeOnBorder * fadeOnDistance * fadeOnPerpendicular * fadeOnRoughness * (1.0f - saturate(remainingAlpha));
+
+	//return float4(lerp(fallbackColor, totalColor.rgb , totalFade), 1.0f);//* specular
+	return float4(raySS.rgb ,1.0f);//   
+	//return float4(0,0,0,1.0f);
+}
+*/
+
+
+/* //Liu ssr
+#define MAX_STEPS 300
+#define MAX_INTERSECT_DIST 0.04
+
+float getReflZ(int2 coord, float3 viewRay)
+{
+	float perspectiveZ = gDepthMap.Load(uint3(coord.xy, 0)).x;
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+	return v0.z;
+}
+
+
+float2 NormalizedDeviceCoordToScreenCoord(float2 ndc, float2 dim)
+{
+   float2 screenCoord;
+   screenCoord.x = dim.x * ((ndc.x * 0.5)+0.5);
+   screenCoord.y = dim.y * (1.0f - ((ndc.y * 0.5)+0.5));
+   return screenCoord;
+}
+
+
+float4 DeferredFinalPass_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+		
+	//get world pos
+	uint4 fragCoord = pIn.iPosH;
+	
+	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	
+	//float3 posWS = gWindMap.Load(uint3(fragCoord.xy, 0)).xyz;
+
+	//Liu
+	
+	//get screen dimension
+	uint width;
+	uint height;
+	gDiffuseMap.GetDimensions(width, height);
+	float2 dim = float2(width, height);
+
+	//test coord
+	float2 coord;
+
+	//step counter;
+	float t = 1;
+
+	//get CS reflection ray
+	float3 n = gBumpMap.Load(uint3(fragCoord.xy, 0)).xyz;
+	float3 d = viewRay;//normalize(posWS.xyz - cs_camPos.xyz);//viewRay
+	float3 refl = normalize(reflect(d, n));
+	float3 ScreenRefl = mul( float4(refl,0), gView);
+
+	//get reflactivity
+	float reflectivity = posWS.y>0?0:0.5;
+
+	float4 reflColor = float4(0, 0, 0, 1);
+
+	//CS ray start & end point
+	float3 v0 = mul(float4(posWS,1.0),gView).xyz;
+
+	//float rayLength = ((v0.z + mul( float4(d,0), gView).z * cb_maxDistance) < cb_nearPlaneZ) ? (cb_nearPlaneZ - csOrig.z) / csDir.z : cb_maxDistance;
+
+	float3 v1 = v0 + ScreenRefl * cs_far;
+
+	//NDCS  ray start & end point
+	float4 p0 = mul( float4(v0,1.0), gViewProj );
+	float4 p1 = mul( float4(v1,1.0), gViewProj );
+
+	//projection factor
+	float k0 = 1.0f / p0.w;
+	float k1 = 1.0f / p1.w;
+
+	p0 *= k0; 
+	p1 *= k1;
+
+	//get screen space coord
+	p0.xy = NormalizedDeviceCoordToScreenCoord(p0.xy,dim);
+	p1.xy = NormalizedDeviceCoordToScreenCoord(p1.xy,dim);
+
+	v0 *= k0;
+	v1 *= k1;
+
+
+	float divisions = length(p1 - p0);
+	float3 dV = (v1 - v0) / divisions;
+	float dK = (k1 - k0) / divisions;
+	float2 traceDir = (p1 - p0) / divisions;
+
+
+	float maxSteps = min(MAX_STEPS, divisions);
+
+	if (reflectivity > 0.0f)
+	{
+       while( t < maxSteps)
+       {
+			coord = fragCoord + traceDir * t;
+			
+			if(coord.x >= dim.x || coord.y >= dim.y || coord.x < 0 || coord.y < 0)
+			{
+				
+				//reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
+				//break;
+			} 
+			
+			float curDepth = (v0 + dV * t).z;
+			curDepth /= k0 + dK * t; // Reverse the perspective divide back to view space
+			
+			//float3 curPosWS = gWindMap.Load(uint3(coord.xy, 0)).xyz;
+			float storedDepth = getReflZ(coord,viewRay); //getReflZ(coord,viewRay);//gWindMap.Load(uint3(coord.xy, 0)).z;
+
+			if( curDepth > storedDepth && curDepth - storedDepth < MAX_INTERSECT_DIST&& t > 15)
+			{
+				reflColor = float4(gDiffuseMap.Load(uint3(coord.xy, 0)).xyz,1.0);
+				break;
+			}
+			t++;
+	   }
+	}
+
+	//end liu
+
+	//return float4(reflColor.xyz,1.0);
+	
+	return  gDiffuseMap.Load(uint3(fragCoord.xy, 0)) * (1.0f - reflectivity) +reflColor * reflectivity;
+		
+}
+*/
+PS_wrapper_COLORED_MINIMAL_MESH(DeferredFinalPass_PS)
+
+#endif

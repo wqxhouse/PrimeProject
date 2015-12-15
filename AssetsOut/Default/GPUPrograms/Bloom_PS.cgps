@@ -1,0 +1,46 @@
+#ifndef BLOOM_PS
+#define BLOOM_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "StandardTextureResources.fx"
+#include "ExposureCommon.fx"
+
+// static const float KeyValue = 0.1150f;
+// static const float KeyValue = 0.2f;
+
+
+float4 Bloom_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float4 reds = gDiffuseMap.GatherRed(gDiffuseMapSampler, pIn.iColor);
+    float4 greens = gDiffuseMap.GatherGreen(gDiffuseMapSampler, pIn.iColor);
+    float4 blues = gDiffuseMap.GatherBlue(gDiffuseMapSampler, pIn.iColor);
+
+    float3 result = 0.0f;
+    float weightSum = 0.0f;
+
+    [unroll]
+    for(uint i = 0; i < 4; ++i)
+    {
+        float3 color = float3(reds[i], greens[i], blues[i]);
+
+        // Apply exposure offset
+        float avgLuminance = gAdditionalDiffuseMap.Load(uint3(0, 0, 0)).x;
+		avgLuminance = min(10.0, max(0.3, avgLuminance));
+		
+        float exposure = 0;
+        // result += CalcExposedColor(color, avgLuminance, BloomExposure, exposure);
+        result += CalcExposedColor(color, avgLuminance, 0, exposure);
+
+        float weight = 1.0f;
+		//float weight = 1.0f / (1.0f + CalcLuminance(color));
+        result *= weight;
+        weightSum += weight;
+    }
+
+    result /= weightSum;
+
+    return float4(result, 1.0f);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(Bloom_PS)
+
+#endif 

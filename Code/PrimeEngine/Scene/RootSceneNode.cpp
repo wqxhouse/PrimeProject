@@ -8,6 +8,13 @@
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 #include "../Lua/LuaEnvironment.h"
 #include "PrimeEngine/Render/ShaderActions/SetPerFrameConstantsShaderAction.h"
+
+// + Deferred
+#include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
+#include "PrimeEngine/Scene/CameraSceneNode.h"
+#include "PrimeEngine/Scene/CameraManager.h"
+#include "PrimeEngine/Math/Matrix4x4.h"
+
 namespace PE {
 namespace Components {
 
@@ -60,7 +67,7 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	{
 		// fill in the data object that will be submitted to pipeline
 		Handle &h = pDrawList->nextGlobalShaderValue();
-		h = Handle("RAW_DATA", sizeof(SetPerFrameConstantsShaderAction));
+		h = Handle("RAW_DATA_PER_FRAME", sizeof(SetPerFrameConstantsShaderAction));
 		SetPerFrameConstantsShaderAction *p = new(h) SetPerFrameConstantsShaderAction(*m_pContext, m_arena);
 		p->m_data.gGameTimes[0] = pDrawEvent ? pDrawEvent->m_gameTime : 0;
 		p->m_data.gGameTimes[1] = pDrawEvent ? pDrawEvent->m_frameTime : 0;
@@ -72,18 +79,27 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 	if (setGlobalValues)
 	{
 		Handle &hsvPerObjectGroup = pDrawList->nextGlobalShaderValue();
-		hsvPerObjectGroup = Handle("RAW_DATA", sizeof(SetPerObjectGroupConstantsShaderAction));
+		hsvPerObjectGroup = Handle("RAW_DATA_PER_OBJECTGROUP", sizeof(SetPerObjectGroupConstantsShaderAction));
 		SetPerObjectGroupConstantsShaderAction *psvPerObjectGroup = new(hsvPerObjectGroup) SetPerObjectGroupConstantsShaderAction(*m_pContext, m_arena);
 	
 		psvPerObjectGroup->m_data.gViewProj = pDrawEvent ? pDrawEvent->m_projectionViewTransform : pZOnlyDrawEvent->m_projectionViewTransform;
 
+		// psvPerObjectGroup->m_data.gViewInv = pDrawEvent ? pDrawEvent->m_viewInvTransform : Matrix4x4();
 		psvPerObjectGroup->m_data.gViewInv = pDrawEvent ? pDrawEvent->m_viewInvTransform : Matrix4x4();
+		//psvPerObjectGroup->m_data.gViewInv.turnRight(0.1f);
 		// TODO: fill these in for motion blur
 		psvPerObjectGroup->m_data.gPreviousViewProjMatrix = Matrix4x4();
-		psvPerObjectGroup->m_data.gViewProjInverseMatrix = Matrix4x4();
+
+		// + Deferred
+		psvPerObjectGroup->m_data.gViewProjInverseMatrix = 
+			  pDrawEvent ? pDrawEvent->m_projectionViewTransform.inverse()
+			: pZOnlyDrawEvent->m_projectionViewTransform.inverse();
+
 
 		psvPerObjectGroup->m_data.gDoMotionBlur = 0;
 		psvPerObjectGroup->m_data.gEyePosW = pDrawEvent ? pDrawEvent->m_eyePos : pZOnlyDrawEvent->m_eyePos;
+
+		psvPerObjectGroup->m_data.gDoMotionBlur = EffectManager::Instance()->_normalIntensity;
 
 
 		// the light that drops shadows is defined by a boolean isShadowCaster in maya light objects
@@ -104,14 +120,14 @@ void RootSceneNode::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 				}
 			}
 		}
-		for (PrimitiveTypes::UInt32 iLight = 0;iLight < pRoot->m_lights.m_size; iLight++)
-		{
-			Light *pLight = pRoot->m_lights[iLight].getObject<Light>();
-			if(pLight->castsShadow())
-				continue;
-			psvPerObjectGroup->m_data.gLights[iDestLight] = pLight->m_cbuffer;
-			iDestLight++;
-		}
+		//for (PrimitiveTypes::UInt32 iLight = 0;iLight < 8; iLight++)//pRoot->m_lights.m_size
+		//{
+		//	Light *pLight = pRoot->m_lights[iLight].getObject<Light>();
+		//	if(pLight->castsShadow())
+		//		continue;
+		//	psvPerObjectGroup->m_data.gLights[iDestLight] = pLight->m_cbuffer;
+		//	iDestLight++;
+		//}
 	}
 }
 }; // namespace Components

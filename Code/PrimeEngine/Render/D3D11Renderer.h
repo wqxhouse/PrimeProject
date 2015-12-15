@@ -36,9 +36,15 @@ public:
 
 	virtual void setRenderTargetsAndViewportWithDepth(TextureGPU *pDestColorTex = 0, TextureGPU *pDestDepthTex = 0, bool clearRenderTargte = false, bool clearDepth = false);
 
+	// + Deferred 
+	void setDeferredShadingRTsAndViewportWithDepth(TextureGPU **pTexArr, int nRTs, TextureGPU *pDestDepthTex, bool clearRT, bool clearDepth);
+
 	virtual void setDepthStencilOnlyRenderTargetAndViewport(TextureGPU *pDestDepthTex, bool clear = false);
 
 	virtual void setRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex = 0, bool clear = false);
+
+	//Liu
+	virtual void setMipsRenderTargetsAndViewportWithNoDepth(TextureGPU *pDestColorTex = 0, bool clear = false);
 
 	D3D11Renderer(PE::GameContext &context, unsigned int width, unsigned int height);
 
@@ -67,6 +73,9 @@ public:
 	ID3D11Texture2D *m_pDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pDepthStencilView;
 	ID3D11RenderTargetView *m_pRenderTargetView;
+
+	// + Deferred 
+	ID3D11ShaderResourceView *m_pDepthStencilShaderView;
 	
 public:
 	ID3D11ShaderResourceView *m_pSRV;

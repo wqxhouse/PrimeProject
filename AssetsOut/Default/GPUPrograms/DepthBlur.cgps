@@ -1,0 +1,34 @@
+#ifndef DEPTHBLUR_PS
+#define DEPTHBLUR_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "StandardTextureResources.fx"
+#include "ExposureCommon.fx"
+
+float BlurFactor(in float depth) 
+{
+    float f0 = 1.0f - saturate((depth - DOFDepths.x) / max(DOFDepths.y - DOFDepths.x, 0.01f));
+    float f1 = saturate((depth - DOFDepths.z) / max(DOFDepths.w - DOFDepths.z, 0.01f));
+    float blur = saturate(f0 + f1);
+
+    return blur;
+}
+
+float LinearDepth(in float zBufferDepth)
+{
+	return ProjectionAB.y / (zBufferDepth - ProjectionAB.x);
+}
+
+float4 DepthBlur_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	uint4 fragCoord = pIn.iPosH;
+	float depth = LinearDepth(gDepthMap.Load(uint3(fragCoord.xy, 0)).x);
+	float blur = BlurFactor(depth);
+
+	return float4(depth, blur, 1.0f, 1.0f);
+	//float test = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	//return float4(test, test, test, 1);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(DepthBlur_PS)
+
+#endif 

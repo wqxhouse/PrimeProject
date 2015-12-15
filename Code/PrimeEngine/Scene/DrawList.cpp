@@ -7,6 +7,10 @@
 #include "../Lua/LuaEnvironment.h"
 #include "../Profiling/Profiling.h"
 
+#include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
+#include "PrimeEngine/Render/ShaderActions/SetClusteredShadingConstantShaderAction.h"
+#include "PrimeEngine/Scene/CameraManager.h"
+
 namespace PE {
 namespace Components {
 
@@ -298,9 +302,12 @@ void DrawList::optimizeByVertexBuffer(Array<PrimitiveTypes::UInt32> &callIndices
 	processed.reset(0);
 }
 
-void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
+void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask, Matrix4x4 *viewProjMat, Matrix4x4 *viewInv)
 {
+	// printf("%d\n", (int *)pEvt);
+
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(threadOwnershipMask);
+
 
 	m_pCurIndBuf = 0;
 	m_pCurEffect = 0;
@@ -334,8 +341,36 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 	for (PrimitiveTypes::UInt32 isv = 0; isv < m_globalShaderValues.m_size; isv++)
 	{
 		ShaderAction *sv = m_globalShaderValues[isv].getObject<ShaderAction>();
-		sv->bindToPipeline(m_pCurEffect);
+		if (m_globalShaderValues[isv].getDbgName() == "RAW_DATA_PER_OBJECTGROUP")
+		{
+			if (viewProjMat != NULL)
+			{
+				SetPerObjectGroupConstantsShaderAction cbCopy(*m_pContext, m_arena);
+				SetPerObjectGroupConstantsShaderAction *orig = (SetPerObjectGroupConstantsShaderAction *)sv;
+				memcpy(&cbCopy.m_data, &orig->m_data, sizeof(SetPerObjectGroupConstantsShaderAction::Data));
+				memcpy(&cbCopy.m_nameToData, &orig->m_nameToData, sizeof(SetPerObjectGroupConstantsShaderAction::NameToData));
+				cbCopy.m_data.gViewProj = *viewProjMat;
+				cbCopy.m_data.gViewProjInverseMatrix = cbCopy.m_data.gViewProj.inverse();
+				cbCopy.m_data.gViewInv = *viewInv;
+				cbCopy.bindToPipeline(m_pCurEffect);
+			}
+			else
+			{
+				sv->bindToPipeline(m_pCurEffect);
+			}
+		}
+		else
+		{
+			sv->bindToPipeline(m_pCurEffect);
+		}
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	SetClusteredShadingConstantsShaderAction pscs(*m_pContext, m_arena);
+	pscs.m_data.pad2 = m_pContext->_roughness;
+	pscs.m_data.pad3 = m_pContext->_metallic;
+	pscs.bindToPipeline(m_pCurEffect);
+
 #endif
 
 	IRenderer::checkForErrors("starting to draw\n");
@@ -359,6 +394,41 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 			m_pCurEffect = hEffect.getObject<Effect>();
 			newEffect = true;
 		}
+
+		// + Deferred - resolve different shader for the same mesh type - PE has bad design here
+		Effect *gbufferEff= NULL;
+		Effect *gbufferWPosEff= NULL;
+
+		Handle hg = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_Tech");
+		Handle hgPos = EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_WithPosition_Tech");
+
+		gbufferEff = hg.getObject<Effect>();
+		gbufferWPosEff = hgPos.getObject<Effect>();
+
+		///////
+		Effect *gbufferSkinEff = NULL;
+		Handle hgSkin = EffectManager::Instance()->getEffectHandle("DetailedSkin_GBuffer_Tech");
+
+		gbufferSkinEff = hgSkin.getObject<Effect>();
+
+		if (m_pCurEffect == gbufferEff || m_pCurEffect == gbufferWPosEff)
+		{
+			if (m_pContext->_renderMode == 0)
+			{
+				m_pCurEffect = gbufferEff;
+			}
+			else
+			{
+				m_pCurEffect = gbufferWPosEff;
+			}
+		}
+		else if (m_pCurEffect == gbufferSkinEff)
+		{
+			m_pCurEffect = gbufferSkinEff;
+		}
+		// + End
+		
+
 #if DEBUG_DRAW_CALLS
 		PEINFO("Draw call[%d] DbgName: %s tech %s vs %s ps %s cs %s\n", i, dbgName ? dbgName : "none", m_pCurEffect->m_techName,
 			m_pCurEffect->m_vsFilename[0] == '\0' ? "none" : m_pCurEffect->m_vsFilename,
@@ -455,8 +525,34 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 		for (PrimitiveTypes::UInt32 isv = 0; isv < shaderValues.m_size; isv++)
 		{
 			ShaderAction *sv = shaderValues[isv].getObject<ShaderAction>();
-			sv->bindToPipeline(m_pCurEffect);
+
+			if (shaderValues[isv].getDbgName() == "RAW_DATA_PER_OBJECT")
+			{
+				if (viewProjMat != NULL)
+				{
+					SetPerObjectConstantsShaderAction pcCopy;
+					SetPerObjectConstantsShaderAction *orig = (SetPerObjectConstantsShaderAction *)sv;
+					memcpy(&pcCopy.m_data, &orig->m_data, sizeof(SetPerObjectConstantsShaderAction::Data));
+					pcCopy.m_useBones = orig->m_useBones;
+
+					pcCopy.m_data.gWVP = *viewProjMat * pcCopy.m_data.gW;
+					pcCopy.m_data.gWVPInverse = pcCopy.m_data.gWVP.inverse();
+					pcCopy.bindToPipeline(m_pCurEffect);
+				}
+				else
+				{
+					sv->bindToPipeline(m_pCurEffect);
+				}
+			}
+			else
+			{
+				sv->bindToPipeline(m_pCurEffect);
+			}
 		}
+		//////////////////////////////////////////////////////////////////////////
+		pscs.unbindFromPipeline(m_pCurEffect);
+
+
 
 		Handle houtput = m_outputs[icall];
 		
@@ -580,7 +676,7 @@ void DrawList::do_RENDER(Events::Event *pEvt, int &threadOwnershipMask)
 
 void DrawList::do_RENDER_Z_ONLY(Events::Event *pEvt, int &threadOwnershipMask)
 {
-	do_RENDER(pEvt, threadOwnershipMask);
+	do_RENDER(pEvt, threadOwnershipMask, NULL, NULL);
 }
 
 }; // namespace Components

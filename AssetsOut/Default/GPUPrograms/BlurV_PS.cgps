@@ -1,0 +1,12 @@
+#ifndef BLURV_PS
+#define BLURV_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "Blur_PS.fx"
+
+float4 BlurV_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	return Blur(pIn, float2(0, 1), 5.0);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(BlurV_PS)
+#endif 

@@ -1,0 +1,142 @@
+#ifndef DEFERRED_CUBEMAP_LIGHTING_PS
+#define DEFERRED_CUBEMAP_LIGHTING_PS
+
+#include "APIAbstraction.gpu"
+#include "StandardConstants.fx"
+#include "StandardTextureResources.fx"
+#include "samplerhelper.fx"
+#include "lighthelper.fx"
+#include "ColoredMinimalMesh_Structs.fx"
+#include "DeferredLightCommon.fx"
+
+#include "LightUtils.fx"
+
+float getPointLightAtt(float radius, float dist) 
+{
+    // Soft transition
+    float attenuation = pow(1.0 + (dist / radius) , -2.0) * 1.2;
+    
+    float cutoff = radius * 0.7;
+    attenuation *= 1.0 - smoothstep(0.0, 1.0, ( (dist / cutoff) - 1.0) * 4.0 );
+    attenuation = max(0.0, attenuation);
+    return attenuation;
+}
+
+float3 blinn_phong(float3 n, float3 l, float3 e, 
+				   float3 le, float3 la, float spec_pow, 
+				   float3 kd, float3 ks, float3 ka, float att)
+{
+	float NoH = 0.0f;
+	float NoL = dot(n, l);
+	float3 diffuse = float3(0, 0, 0);
+	float3 specular = float3(0, 0, 0);
+	if (NoL > 0)
+	{
+		float3 h = normalize(l + e);
+		NoH = max(dot(n, h), 0.0);
+		diffuse = kd * NoL;
+		specular = ks * pow(NoH, spec_pow);
+	}
+
+	return att * le * (diffuse + specular) + la; //ka * la;
+}
+
+float3 renderDirLight(float3 posWS, float3 albedo, float3 normal, cbDirectionalLight light)
+{
+	const float3 one = float3(1, 1, 1);
+	const float3 amb = float3(0.01, 0.01, 0.02);
+	
+	float3 camPos = float3(gView[3][0], gView[3][1], gView[3][2]);
+
+	float3 E = normalize(camPos - posWS);
+	float3 L = normalize(light.cDir); // check if inverted -- should be fine
+	
+	return blinn_phong(normal, L, E,
+		   light.cColor, amb, 30, 
+		   albedo, one, one, 1.0);	   
+}
+
+float3 renderPointLight(float3 posWS, float3 albedo, float3 normal, cbPointLight light)
+{
+	const float3 one = float3(1, 1, 1);
+	const float3 zero = float3(0, 0, 0);
+	
+	float3 camPos = float3(gView[3][0], gView[3][1], gView[3][2]);
+	
+	//float3 E = normalize(cs_camPos - posWS);
+	float3 E = normalize(camPos - posWS);
+	float3 L = light.cPos - posWS;
+	float  dist = length(L);
+	float  att = getPointLightAtt(light.cRadius, dist);
+	L = normalize(L);
+	
+	return blinn_phong(normal, L, E,
+				   light.cColor, zero, light.cSpecPow, 
+				   albedo, one, one, att);
+}
+
+float4 DeferredCubemapLighting_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	uint4 fragCoord = pIn.iPosH;
+
+	float4 albedo = gDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float4 normal = gAdditionalDiffuseMap.Load(uint3(fragCoord.xy, 0));
+	float4 material = gWindMap.Load(uint3(fragCoord.xy, 0));
+	float roughness = material.r;
+	float metallic = material.g;
+	
+	float perspectiveZ = gDepthMap.Load(uint3(fragCoord.xy, 0)).x;
+	
+	float3 viewRay = normalize(pIn.viewRay);
+	float linearZ = cs_projB / (perspectiveZ - cs_projA);
+	
+	float3 camZ = float3(gView[2][0], gView[2][1], gView[2][2]);
+	float3 camPos = float3(gView[3][0], gView[3][1], gView[3][2]);
+	float viewRayProjCamZ = dot(camZ, viewRay);
+	//float viewRayProjCamZ = dot(cs_camZAxis, viewRay);
+	//float3 posWS = cs_camPos + viewRay * (linearZ / viewRayProjCamZ);
+	float3 posWS = camPos + viewRay * (linearZ / viewRayProjCamZ);
+	
+	// Lighting 
+	float3 finalColor = float3(0, 0, 0);
+	
+	// Process directional light first
+	for (uint dir = 0; dir < cs_dirLightNum; dir++)
+	{
+		cbDirectionalLight dirL = cs_dirLights[dir];
+		finalColor += renderDirLight(posWS, albedo.xyz, normal.xyz, cs_dirLights[dir]);
+			
+		//finalColor += CalcDirectionalLight(normal.xyz, dirL.cDir, dirL.cColor, albedo.xyz, metallic, roughness, posWS, camPos);
+	}
+	
+	int4 cluster_coord = int4(posWS * cs_scale + cs_bias, 0);
+	
+	ClusterData data = gClusters.Load(cluster_coord);
+	uint offset = data.offset;
+	uint counts = data.counts;
+	
+	uint pointLightCount = counts >> 16;
+	uint spotLightCount  = counts & 0xFFFF;
+	
+	for (uint pt = 0; pt < pointLightCount; pt++)
+	{
+		uint lightIndex = gLightIndices[offset + pt];
+		
+		finalColor += renderPointLight(posWS, albedo.xyz, normal.xyz, cs_pointLights[lightIndex]);
+		/*
+		Surface surf;
+		surf.posWS = posWS;
+		surf.normalWS = normal.xyz;
+		surf.diffuse = albedo.xyz;
+		surf.roughness = roughness;
+		surf.metallic = metallic;
+		finalColor += CalcPointLight(surf, cs_pointLights[lightIndex], camPos);	
+		*/
+	}
+	
+	return float4(finalColor.xyz,1.0);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(DeferredCubemapLighting_PS)
+
+#endif

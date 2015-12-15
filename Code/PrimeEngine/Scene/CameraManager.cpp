@@ -19,9 +19,9 @@ CameraManager::CameraManager(PE::GameContext &context, PE::MemoryArena arena, Ha
 
 	SceneNode *pCamSN = debugCamera->getCamSceneNode();
 	
-	pCamSN->m_base.setPos(Vector3(0.0f,0.0f,-5.0f));
-	pCamSN->m_base.setPos(Vector3(-5.0f,4.0f,-7.0f));
-	pCamSN->m_base.turnInDirection(Vector3(0.0f, 1.0f, -1.1f) - Vector3(-5.0f,4.0f,-7.0f));
+	pCamSN->m_base.setPos(Vector3(0.0f,0.0f,0.0f)); //0.0f,0.0f,-5.0f
+	pCamSN->m_base.setPos(Vector3(0.0f,4.0f,-15.0f)); //-5.0f,4.0f,-7.0f
+	//pCamSN->m_base.turnInDirection(Vector3(0.0f, 1.0f, -1.1f) - Vector3(-5.0f,4.0f,-7.0f));
 }
 
 void CameraManager::Construct(PE::GameContext &context, PE::MemoryArena arena)
@@ -60,6 +60,9 @@ bool CameraManager::selectActiveCamera(CameraType type)
 		case VEHICLE:
 			m_hActiveCamera = m_hVehicleCamera;
 			break;
+		case CUBEMAP:
+			m_hActiveCamera = m_hCubemapCamera;
+			break;
         case CameraType_Count:
             assert(false);
             break;
@@ -82,6 +85,9 @@ Camera *CameraManager::getCamera(CameraType type)
 		case VEHICLE:
 			return m_hVehicleCamera.getObject<Camera>();
 			break;
+		case CUBEMAP:
+			return m_hCubemapCamera.getObject<Camera>();
+			break;
 		default:
 			return m_hPlayerCamera.getObject<Camera>();
 	};
@@ -102,6 +108,9 @@ Handle CameraManager::getCameraHandle(CameraType type)
 		case VEHICLE:
 			return m_hVehicleCamera;
 			break;
+		case CUBEMAP:
+			return m_hCubemapCamera;
+			break;
 		default:
 			return m_hDebugCamera;
 	};
@@ -121,6 +130,9 @@ void CameraManager::setCamera(CameraType type, Handle h)
 			break;
 		case VEHICLE:
 			m_hVehicleCamera = h;
+			break;
+		case CUBEMAP:
+			m_hCubemapCamera = h;
 			break;
 	};
 }

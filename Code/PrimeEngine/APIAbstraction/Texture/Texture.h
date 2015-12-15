@@ -55,7 +55,7 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	void createSpecularTextureGPU(const PrimitiveTypes::String textureFilename, const char *package = NULL);
 	void createGlowTextureGPU(const PrimitiveTypes::String textureFilename, const char *package = NULL);
 
-	void createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler);
+	void createDrawableIntoColorTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler, int textureMode=0);
 	void createDrawableIntoColorTextureWithDepth(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler, bool use32BitRedForDepth = false);
 	void createDrawableIntoDepthTexture(PrimitiveTypes::UInt32 w, PrimitiveTypes::UInt32 h, ESamplerState sampler);
 
@@ -92,6 +92,10 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	LPDIRECT3DSURFACE9 m_pEDRamColorRenderTargetSurface;
 #endif
 #elif APIABSTRACTION_D3D11
+	//liu
+	ID3D11ShaderResourceView *m_pMipsShaderResourceView; 
+	ID3D11RenderTargetView *m_pMipsRenderTargetView;
+
 	ID3D11ShaderResourceView *m_pShaderResourceView; // a standard texture view
 	ID3D11RenderTargetView *m_pRenderTargetView; // a view for D3D to draw into this texture
 
@@ -126,6 +130,7 @@ struct TextureGPU : PE::PEAllocatableAndDefragmentable
 	PE::MemoryArena m_arena; PE::GameContext *m_pContext;
 	char m_name[256];
 };
+
 
 }; // namespace PE
 

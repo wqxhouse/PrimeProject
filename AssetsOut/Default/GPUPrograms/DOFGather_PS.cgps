@@ -1,0 +1,83 @@
+#ifndef DOFGATHER_PS
+#define DOFGATHER_PS
+#include "ColoredMinimalMesh_Structs.fx"
+#include "StandardTextureResources.fx"
+#include "ExposureCommon.fx"
+SamplerState LinearSampler : register(s9);
+
+static const uint NumDiscSamples = 16;
+static const float2 DiscKernel[NumDiscSamples] = {
+    float2(0.2069841f, 0.2245269f),
+    float2(0.525808f, -0.2310817f),
+    float2(0.1383943f, 0.9056122f),
+    float2(0.6633009f, 0.5129843f),
+    float2(-0.4002792f, 0.3727058f),
+    float2(0.07912822f, -0.6512921f),
+    float2(-0.7726067f, -0.5151217f),
+    float2(-0.3843193f, -0.1494132f),
+    float2(-0.9107782f, 0.2500633f),
+    float2(0.6940153f, -0.7098927f),
+    float2(-0.1964669f, -0.379389f),
+    float2(-0.4769286f, 0.1840863f),
+    float2(-0.247328f, -0.8798459f),
+    float2(0.4206541f, -0.714772f),
+    float2(0.5829348f, -0.09794202f),
+    float2(0.3691838f, 0.4140642f)
+};
+
+float4 DOFGather_PS(COLORED_MINIMAL_MESH_PS_IN pIn)
+{
+	float2 centerCoord = pIn.iColor.xy;
+
+	// For converting from Poission disc offset -> texture coordinate offset
+	float2 offsetConversion = 0.5f / int2(1280, 720);
+
+	// Start with center sample color
+	float3 centerColor = gDiffuseMap.Sample(gDiffuseMapSampler, centerCoord).xyz;
+	float3 colorSum = centerColor;
+	float totalContribution = 1.0f;
+
+	// Sample the depth and blur at the center
+	float2 centerDepthBlur = gAdditionalDiffuseMap.Sample(gAdditionalDiffuseMapSampler, centerCoord).xy;
+	float centerDepth = centerDepthBlur.x;
+	float centerBlur = centerDepthBlur.y;
+
+	[branch]
+	if(centerBlur > 0)
+	{
+		// Compute CoC size based on blurriness
+		const float cocSize = centerBlur * GatherBlurSize;
+
+		// Run through all filter taps
+		[loop]
+		for(uint i = 0; i < NumDiscSamples; i++)
+		{
+			// Compute sample coordinates
+			float2 kernelValue = DiscKernel[i];
+			float2 offset = kernelValue * cocSize;
+			float2 tapCoord = centerCoord + offset * offsetConversion;
+
+			// Fetch the tap sample
+			float3 tapColor = gDiffuseMap.SampleLevel(LinearSampler, tapCoord, 0.0f).xyz;
+			float2 tapDepthBlur = gAdditionalDiffuseMap.SampleLevel(gAdditionalDiffuseMapSampler, tapCoord, 0.0f).xy;
+			float tapDepth = tapDepthBlur.x;
+			float tapBlur = tapDepthBlur.y;
+
+			// Compute tap contribution based on depth and blurriness
+			float tapContribution = (tapDepthBlur.x > centerDepth) ? 1.0f : tapDepthBlur.y;
+
+			// Accumulate color and sample contribution
+			colorSum += tapColor * tapContribution;
+			totalContribution += tapContribution;
+		}
+	}
+
+	// Normalize the color sum
+	float3 finalColor = colorSum / totalContribution;
+
+	return float4(finalColor, 1.0f);
+}
+
+PS_wrapper_COLORED_MINIMAL_MESH(DOFGather_PS)
+
+#endif 

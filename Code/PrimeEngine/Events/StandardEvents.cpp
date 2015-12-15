@@ -205,6 +205,10 @@ int Event_CREATE_LIGHT::l_Construct(lua_State* luaVM)
 	pEvt->m_range = range;
 	pEvt->m_isShadowCaster = isShadowCaster;
 
+	if (StringOps::strcmp(typeStr, "point") == 0)
+	{
+		pEvt->m_type = 0;
+	}
 	if (StringOps::strcmp(typeStr, "directional") == 0)
 	{
 		pEvt->m_type = 1;

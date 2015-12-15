@@ -30,6 +30,8 @@ void TextMesh::addDefaultComponents()
 	//add this handler before Mesh's handlers so we can intercept draw and modify transform
 	PE_REGISTER_EVENT_HANDLER(Events::Event_GATHER_DRAWCALLS, TextMesh::do_GATHER_DRAWCALLS);
 	Mesh::addDefaultComponents();
+
+	_isTextMesh = true;
 }
 
 void TextMesh::loadFromString_needsRC(const char *str, const char *techName, int &threadOwnershipMask)

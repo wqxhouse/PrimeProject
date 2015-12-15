@@ -40,6 +40,8 @@ struct Vector4
 	{}
 
 	Vector3 & asVector3Ref() { return *((Vector3 *)(this));}
+
+	float dotProduct(const Vector4 &v) { return m_x * v.m_x + m_y * v.m_y + m_z * v.m_z + m_w * v.m_w; }
 };
 
 inline Vector4 operator+(const Vector4 &a, const Vector4 &b)
@@ -56,5 +58,6 @@ inline Vector4 operator*(const Vector4 &a, const float &f)
 {
 	return Vector4(a.m_x * f, a.m_y * f, a.m_z * f, a.m_w * f);
 }
+
 
 #endif

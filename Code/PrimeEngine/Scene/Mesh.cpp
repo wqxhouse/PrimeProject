@@ -36,6 +36,7 @@ Mesh::Mesh(PE::GameContext &context, PE::MemoryArena arena, Handle hMyself)
 {
 	m_processShowEvt = true;
     m_performBoundingVolumeCulling = false;
+	_isTextMesh = false;
 }
 
 
@@ -129,20 +130,24 @@ void chooseEffects(MaterialCPU &curMatCpu, bool hasBlendShapes, EPEVertexFormat 
 			//todo : have glow and no glow versions
 			if (format == PEVertexFormat_DetailedMesh)
 			{
-				effects.add(EffectManager::Instance()->getEffectHandle("DetailedMesh_Shadowed_A_Glow_Tech"));
-				shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("DetailedMesh_ZOnly_Tech"));
-				//instanceEffects;// = EffectManager::Instance()->getEffectHandle("DetailedMesh_Shadowed_A_Glow_Tech");
+				//effects.add(EffectManager::Instance()->getEffectHandle("DetailedMesh_Shadowed_A_Glow_Tech"));
+				//shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("DetailedMesh_ZOnly_Tech"));
+				////instanceEffects;// = EffectManager::Instance()->getEffectHandle("DetailedMesh_Shadowed_A_Glow_Tech");
+
+				// + Deferred
+				effects.add(EffectManager::Instance()->getEffectHandle("DetailedMesh_GBuffer_Tech"));
 			}
 			else
 			{
-				effects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_A_Glow_Tech"));
-				shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_ZOnly_Tech"));
-
-#if PE_API_IS_D3D11
-				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Instanced_CS_Tech"));
-				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Reduce_Instanced_CS_Tech"));
-				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_Instanced_Tech"));
-#endif
+//				effects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_A_Glow_Tech"));
+//				shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_ZOnly_Tech"));
+//
+//#if PE_API_IS_D3D11
+//				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Instanced_CS_Tech"));
+//				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Reduce_Instanced_CS_Tech"));
+//				instanceEffects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_Shadowed_Instanced_Tech"));
+//#endif
+				effects.add(EffectManager::Instance()->getEffectHandle("DetailedSkin_GBuffer_Tech"));
 			}
 		}
 		else if (format == PEVertexFormat_StdMesh || format == PEVertexFormat_StdSkin)
@@ -177,9 +182,14 @@ void chooseEffects(MaterialCPU &curMatCpu, bool hasBlendShapes, EPEVertexFormat 
 		}
 		else if (format == PEVertexFormat_ColoredMinimalMesh)
 		{
+			//effects.add(EffectManager::Instance()->getEffectHandle("ColoredMinimalMesh_Tech"));
+			////shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("StdMesh_ZOnly_Tech"));
+			////instanceEffects;//todo: create instance effects = EffectManager::Instance()->getEffectHandle("DetailedMesh_Shadowed_A_Glow_Tech");
+
+			// + Deferred -> used to render full screen quads for intermediate passes ????
+			// TODO: this may influence normal functionality of ColoredMinimalMesh ????
+			// mei gai
 			effects.add(EffectManager::Instance()->getEffectHandle("ColoredMinimalMesh_Tech"));
-			//shadowMapEffects.add(EffectManager::Instance()->getEffectHandle("StdMesh_ZOnly_Tech"));
-			//instanceEffects;//todo: create instance effects = EffectManager::Instance()->getEffectHandle("DetailedMesh_Shadowed_A_Glow_Tech");
 		}
 	}
 	else
@@ -200,6 +210,10 @@ void Mesh::loadFromMeshCPU_needsRC(MeshCPU &mcpu, int &threadOwnershipMask)
 	// Draw controls -------------------------------------------------------
 	m_bDrawControl = true;
 	EPEVertexFormat format = updateGeoFromMeshCPU_needsRC(mcpu, threadOwnershipMask);
+
+	// + Deferred
+	_type = format;
+
 	/*
 	// Index Buffer --------------------------------------------------------
 	m_hIndexBufferGPU = VertexBufferGPUManager::Instance()->createIndexGPUBuffer(mcpu.m_hIndexBufferCPU, !mcpu.m_manualBufferManagement);

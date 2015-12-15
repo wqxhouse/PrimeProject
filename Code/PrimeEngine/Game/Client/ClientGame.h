@@ -3,7 +3,8 @@
 
 #include "PrimeEngine/APIAbstraction/APIAbstractionDefines.h"
 
-#define PYENGINE_2_0_MULTI_THREADED !APIABSTRACTION_IOS && !APIABSTRACTION_PS3 && !PE_PLAT_IS_PSVITA
+// #define PYENGINE_2_0_MULTI_THREADED !APIABSTRACTION_IOS && !APIABSTRACTION_PS3 && !PE_PLAT_IS_PSVITA
+#define PYENGINE_2_0_MULTI_THREADED 0
 
 #include "PrimeEngine/Render/IRenderer.h"
 #include "PrimeEngine/Game/Common/GameContext.h"

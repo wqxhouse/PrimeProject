@@ -12,6 +12,7 @@
 #include "CharacterControlContext.h"
 #if PE_PLAT_IS_WIN32
 #include "test.h"
+#include "PrimeEngine/TestModels.h"
 #endif
 
 using namespace PE;
@@ -147,27 +148,6 @@ int ClientCharacterControlGame::initGame()
 				
 				pSkelInst->addComponent(hMeshInstance);
 			}
-
-			
-// 			{
-// 				// create a scene node for gun attached to a joint
-// 				PE::Handle hMyGunSN = PE::Handle("SCENE_NODE", sizeof(JointSceneNode));
-// 				JointSceneNode *pGunSN = new(hMyGunSN) JointSceneNode(*m_pContext, m_arena, hMyGunSN, 38);
-// 				pGunSN->addDefaultComponents();
-// 				{
-// 					PE::Handle hMyGunMesh = PE::Handle("MeshInstance", sizeof(MeshInstance));
-// 					MeshInstance *pGunMeshInstance = new(hMyGunMesh) MeshInstance(*m_pContext, m_arena, hMyGunMesh);
-// 
-// 					pGunMeshInstance->addDefaultComponents();
-// 					pGunMeshInstance->initFromFile(pEvt->m_gunMeshName, pEvt->m_gunMeshPackage, pEvt->m_threadOwnershipMask);
-// 
-// 					// add gun to joint
-// 					pGunSN->addComponent(hMyGunMesh);
-// 				}
-// 				// add gun scene node to the skin
-// 				pSkelInst->addComponent(hMyGunSN);
-// 			}
-
 		
 			Events::SoldierNPCAnimSM_Event_WALK evt;
 			pSkelInst->handleEvent(&evt);
@@ -223,7 +203,248 @@ int ClientCharacterControlGame::initGame()
                 RootSceneNode::Instance()->addComponent(hSN);
             }
         }
-    }
+	}
+
+	//Simple one imord
+		{
+#if 1
+
+			PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+			SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+			pMainSN->addDefaultComponents();
+
+			pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+			PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+			MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+			pImrodMeshInst->addDefaultComponents();
+
+			pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+			pMainSN->addComponent(hImrodMeshInst);
+
+			Handle hTestModel("LIGHT", sizeof(TestModel));
+
+			TestModel *pTestModel = new(hTestModel)TestModel(
+				*m_pContext,
+				m_arena,
+				hTestModel,
+				pMainSN,
+				0
+				);
+			RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+			RootSceneNode::Instance()->addComponent(hSN);
+
+#endif
+
+		}
+
+	//scene with 4 Ganfauls playing different animations
+	{
+		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+		pMainSN->addDefaultComponents();
+
+		pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+		pImrodMeshInst->addDefaultComponents();
+		pImrodMeshInst->initFromFile("cobbleplane.x_pplaneshape1_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+		pMainSN->addComponent(hImrodMeshInst);
+
+		for (int ix = 0; ix < 2; ++ix)
+		{
+			for (int iy = 0; iy < 2; ++iy)
+			{
+				PE::Handle subhSN("SCENE_NODE", sizeof(SceneNode));
+				SceneNode *pSubSN = new(subhSN)SceneNode(*m_pContext, m_arena, subhSN);
+				pSubSN->addDefaultComponents();
+
+				pSubSN->m_base.setPos(Vector3(ix * 5.0f, 0, iy * 5.0f));
+
+				{
+					PE::Handle hSoldierAnimSM("SoldierNPCAnimationSM", sizeof(SoldierNPCAnimationSM));
+					SoldierNPCAnimationSM *pSoldierAnimSM = new(hSoldierAnimSM)SoldierNPCAnimationSM(*m_pContext, m_arena, hSoldierAnimSM);
+					pSoldierAnimSM->addDefaultComponents();
+
+					pSoldierAnimSM->m_debugAnimIdOffset = 0;// rand() % 3;
+
+
+					PE::Handle hSkeletonInstance("SkeletonInstance", sizeof(SkeletonInstance));
+					SkeletonInstance *pSkelInst = new(hSkeletonInstance)SkeletonInstance(*m_pContext, m_arena, hSkeletonInstance,
+						hSoldierAnimSM);
+					pSkelInst->addDefaultComponents();
+
+					pSkelInst->initFromFiles("Ganfaul-t-pose_Hips.skela", "Ganfaul", m_pContext->m_gameThreadThreadOwnershipMask);
+
+					pSkelInst->setAnimSet("Ganfaul_idle_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul-walking_Hips.animseta", "Ganfaul");
+
+					pSkelInst->setAnimSet("Ganfaul_hiphop_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul_footwork_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul_gangnam_Hips.animseta", "Ganfaul");
+					pSkelInst->setAnimSet("Ganfaul_cheering_Hips.animseta", "Ganfaul");
+					
+
+					{
+						PE::Handle hMeshInstance("MeshInstance", sizeof(MeshInstance));
+						MeshInstance *pMeshInstance = new(hMeshInstance)MeshInstance(*m_pContext, m_arena, hMeshInstance);
+						pMeshInstance->addDefaultComponents();
+
+						pMeshInstance->initFromFile("Ganfaul.mesha", "Ganfaul", m_pContext->m_gameThreadThreadOwnershipMask);
+
+						pSkelInst->addComponent(hMeshInstance);
+					}
+
+					switch (ix*2 + iy)
+					{
+					case 0:
+					{
+						Events::SoldierNPCAnimSM_Event_HipHop evt0;
+						pSkelInst->handleEvent(&evt0);
+					}
+						break;
+					case 1:
+					{
+						Events::SoldierNPCAnimSM_Event_FootWork evt1;
+						pSkelInst->handleEvent(&evt1);
+					}
+						break;
+					case 2:
+					{
+						Events::SoldierNPCAnimSM_Event_Gangnam evt2;
+						pSkelInst->handleEvent(&evt2);
+					}
+						break;
+					case 3:
+					{
+						Events::SoldierNPCAnimSM_Event_Cheering evt3;
+						pSkelInst->handleEvent(&evt3);
+					}
+						break;
+					default:
+						break;
+					}
+					
+
+					// add skeleton to scene node
+					pSubSN->addComponent(pSkelInst);
+				}
+
+				pMainSN->addComponent(subhSN);
+			}
+		}
+
+		Handle hTestModel("TESTMODEL", sizeof(TestModel));
+
+		TestModel *pTestModel = new(hTestModel)TestModel(
+			*m_pContext,
+			m_arena,
+			hTestModel,
+			pMainSN,
+			0
+			);
+		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+		RootSceneNode::Instance()->addComponent(hSN);
+
+
+	}
+
+	//scene with 9 imords
+	{
+
+		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+		pMainSN->addDefaultComponents();
+
+		pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+		pImrodMeshInst->addDefaultComponents();
+		pImrodMeshInst->initFromFile("cobbleplane.x_pplaneshape1_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+		pMainSN->addComponent(hImrodMeshInst);
+
+		for (int ix = 0; ix < 3; ++ix)
+		{
+			for (int iy = 0; iy < 3; ++iy)
+			{
+				PE::Handle subhSN("SCENE_NODE", sizeof(SceneNode));
+				SceneNode *pSubSN = new(subhSN)SceneNode(*m_pContext, m_arena, subhSN);
+				pSubSN->addDefaultComponents();
+
+				pSubSN->m_base.setPos(Vector3(ix * 2.0f, 0, iy * 2.0f));
+
+				PE::Handle hImrodMeshInstSub = PE::Handle("MeshInstance", sizeof(MeshInstance));
+				MeshInstance *pImrodMeshInstSub = new(hImrodMeshInstSub)MeshInstance(*m_pContext, m_arena, hImrodMeshInstSub);
+
+				pImrodMeshInstSub->addDefaultComponents();
+				pImrodMeshInstSub->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
+
+				pSubSN->addComponent(hImrodMeshInstSub);
+
+				pMainSN->addComponent(subhSN);
+			}
+		}
+
+		Handle hTestModel("TESTMODEL", sizeof(TestModel));
+
+		TestModel *pTestModel = new(hTestModel)TestModel(
+			*m_pContext,
+			m_arena,
+			hTestModel,
+			pMainSN,
+			0
+			);
+		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+		RootSceneNode::Instance()->addComponent(hSN);
+
+
+	}
+
+	{
+
+		//////////////////////////////////////////////////////////////////////////
+#if 0
+
+		PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
+		SceneNode *pMainSN = new(hSN)SceneNode(*m_pContext, m_arena, hSN);
+		pMainSN->addDefaultComponents();
+
+		pMainSN->m_base.setPos(Vector3(0, -100, 0));
+
+		PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pImrodMeshInst = new(hImrodMeshInst)MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
+
+		pImrodMeshInst->addDefaultComponents();
+
+		pImrodMeshInst->initFromFile("Ganfaul.mesha", "Ganfaul_Mesh", m_pContext->m_gameThreadThreadOwnershipMask);
+
+		pMainSN->addComponent(hImrodMeshInst);
+
+		Handle hTestModel("LIGHT", sizeof(TestModel));
+
+		TestModel *pTestModel = new(hTestModel)TestModel(
+			*m_pContext,
+			m_arena,
+			hTestModel,
+			pMainSN,
+			0
+			);
+		RootSceneNode::Instance()->m_testmodels.add(hTestModel);
+		RootSceneNode::Instance()->addComponent(hSN);
+
+#endif
+
+	}
+	
+
 
 	
 #if PE_PLAT_IS_WIN32
@@ -255,9 +476,42 @@ int ClientCharacterControlGame::initGame()
 #if PE_PLAT_IS_PSVITA // do it for ps3 becasue right now communication between pyClient and ps3 is not working
 	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('ccontrollvl0.x_level.levela', 'CharacterControl')");
 #endif
-	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
-
+	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testbrickspire.x_level.levela', 'Basic')");
+	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testdeferred.x_level.levela', 'Basic')");
+	 //m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('lightingtest.x_level.levela', 'Basic')");
+	// m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('char_highlight.x_level.levela', 'Basic')");
+	//m_pContext->getLuaEnvironment()->runString("LevelLoader.loadLevel('testskinmeshgbuffer.x_level.levela', 'Basic')");
+	
 	m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
+
+#if 1
+	int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Ennis.dds");
+	m_pContext->_cubmapID[0] = id0;
+	int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Doge.dds");
+	m_pContext->_cubmapID[1] = id1;
+	int id2 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Glacier.dds");
+	m_pContext->_cubmapID[2] = id2;
+	int id3 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Pisa.dds");
+	m_pContext->_cubmapID[3] = id3;
+	int id4 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\Uffizi.dds");
+	m_pContext->_cubmapID[4] = id4;
+	int id5 = EffectManager::Instance()->getSkybox()->AddCubemap(L"C:\\Users\\Liu_\\Desktop\\EnvMaps\\GraceCathedral.dds");
+	m_pContext->_cubmapID[5] = id5;
+#else
+	int id0 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Ennis.dds");
+	m_pContext->_cubmapID[0] = id0;
+	int id1 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Doge.dds");
+	m_pContext->_cubmapID[1] = id1;
+	int id2 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Glacier.dds");
+	m_pContext->_cubmapID[2] = id2;
+	int id3 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Pisa.dds");
+	m_pContext->_cubmapID[3] = id3;
+	int id4 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\Uffizi.dds");
+	m_pContext->_cubmapID[4] = id4;
+	int id5 = EffectManager::Instance()->getSkybox()->AddCubemap(L"E:\\Downloads\\ToneMapping\\ToneMapping\\Content\\EnvMaps\\GraceCathedral.dds");
+	m_pContext->_cubmapID[5] = id5;
+#endif
+	//EffectManager::Instance()->getSkybox()->SetCubemap(id0);
 
 	return 1; // 1 (true) = success. no errors. TODO: add error checking
 }

@@ -88,7 +88,7 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 
 		pSN->addComponent(hRotateSN);
 
-		pRotateSN->m_base.turnLeft(3.1415);
+		//pRotateSN->m_base.turnLeft(3.1415);
 
 		PE::Handle hSoldierAnimSM("SoldierNPCAnimationSM", sizeof(SoldierNPCAnimationSM));
 		SoldierNPCAnimationSM *pSoldierAnimSM = new(hSoldierAnimSM) SoldierNPCAnimationSM(*m_pContext, m_arena, hSoldierAnimSM);
@@ -101,16 +101,30 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 			hSoldierAnimSM);
 		pSkelInst->addDefaultComponents();
 
-		pSkelInst->initFromFiles("soldier_Soldier_Skeleton.skela", "Soldier", pEvt->m_threadOwnershipMask);
+		//pSkelInst->initFromFiles("soldier_Soldier_Skeleton.skela", "Soldier", pEvt->m_threadOwnershipMask);
+		pSkelInst->initFromFiles("Ganfaul-t-pose_Hips.skela", "Ganfaul", pEvt->m_threadOwnershipMask);
 
-		pSkelInst->setAnimSet("soldier_Soldier_Skeleton.animseta", "Soldier");
+		pSkelInst->setAnimSet("Ganfaul_idle_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul-walking_Hips.animseta", "Ganfaul");
+
+		pSkelInst->setAnimSet("Ganfaul_hiphop_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_footwork_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_gangnam_Hips.animseta", "Ganfaul");
+		pSkelInst->setAnimSet("Ganfaul_cheering_Hips.animseta", "Ganfaul");
+		
+		
+		
+		
+
+		//pSkelInst->setAnimSet("soldier_Soldier_Skeleton.animseta", "Soldier");
 
 		PE::Handle hMeshInstance("MeshInstance", sizeof(MeshInstance));
 		MeshInstance *pMeshInstance = new(hMeshInstance) MeshInstance(*m_pContext, m_arena, hMeshInstance);
 		pMeshInstance->addDefaultComponents();
 		
-		pMeshInstance->initFromFile(pEvt->m_meshFilename, pEvt->m_package, pEvt->m_threadOwnershipMask);
-		
+		//pMeshInstance->initFromFile(pEvt->m_meshFilename, pEvt->m_package, pEvt->m_threadOwnershipMask);
+		pMeshInstance->initFromFile("Ganfaul.mesha", "Ganfaul", pEvt->m_threadOwnershipMask);
+
 		pSkelInst->addComponent(hMeshInstance);
 
 		// add skin to scene node
@@ -139,6 +153,13 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 		#endif
 				
 		pMainSN->addComponent(hSN);
+
+		/*PE::Handle hMeshInstance1("MeshInstance", sizeof(MeshInstance));
+		MeshInstance *pMeshInstance1 = new(hMeshInstance1) MeshInstance(*m_pContext, m_arena, hMeshInstance1);
+		pMeshInstance1->addDefaultComponents();
+
+		pMeshInstance1->initFromFile("pSphere1.mesha", "Default",pEvt->m_threadOwnershipMask);
+		pMainSN->addComponent(hMeshInstance1);*/
 	}
 
 	m_pContext->getGPUScreen()->ReleaseRenderContextOwnership(pEvt->m_threadOwnershipMask);

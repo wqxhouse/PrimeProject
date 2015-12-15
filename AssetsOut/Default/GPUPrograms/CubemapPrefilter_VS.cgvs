@@ -1,0 +1,42 @@
+#ifndef CUBEMAP_PREFILTER_VS
+#define CUBEMAP_PREFILTER_VS
+
+struct VS_IN
+{
+	
+};
+
+struct PS_IN
+{
+	
+};
+
+COLORED_MINIMAL_MESH_PS_IN ColoredMinimalMesh_VS(COLORED_MINIMAL_MESH_VS_IN vIn)
+{
+    COLORED_MINIMAL_MESH_PS_IN vOut;
+    vOut.iPosH = mul(make_float4(vIn.iPosL, 1.0), gWVP);
+    vOut.iPosW =  mul(make_float4(vIn.iPosL, 1.0), gW).xyz;
+	
+	// + Deferred -- hacking ColoredMinimalMesh -- only valid for screen quad
+	// where input is NDC space corners
+	matrix testing = gViewProjInverseMatrix;
+	
+	float4 quadWPos = mul(make_float4(vIn.iPosL, 1.0), gViewProjInverseMatrix);
+	quadWPos /= quadWPos.w;
+	//vOut.viewRay = quadWPos.xyz - cs_camPos;
+	float3 camPos = float3(gView[3][0], gView[3][1], gView[3][2]);
+	vOut.viewRay = quadWPos.xyz - camPos;
+	
+    vOut.iColor = vIn.iColor;
+    
+//     vOut.iPosH = make_float4(vIn.iPosL.xy, 0, 1.0);
+//     vOut.iPosH = mul(make_float4(vIn.iPosL, 1.0), gW);
+//     //vOut.iNormalW = vIn.iNormal;
+//     vOut.iPosW =  vIn.iPosL;
+    
+    return vOut;
+}
+
+VS_wrapper_COLORED_MINIMAL_MESH(ColoredMinimalMesh_VS)
+
+#endif

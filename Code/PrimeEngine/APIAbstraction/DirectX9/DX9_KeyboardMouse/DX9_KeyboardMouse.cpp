@@ -41,6 +41,33 @@ void DX9_KeyboardMouse::generateButtonEvents()
 	if(GetFocus() == pWinApp->getWindowHandle())
 #endif
 	{
+		static bool udown = false;
+		static bool idown = false;
+		static bool kdown = false;
+		static bool ldown = false;
+
+		static bool xdown = false;
+		static bool cdown = false;
+		static bool vdown = false;
+		static bool bdown = false;
+		static bool ndown = false;
+		static bool mdown = false;
+		static bool odown = false;
+		static bool pdown = false;
+
+		static bool tdown = false;
+		static bool ydown = false;
+		static bool jdown = false;
+		static bool hdown = false;
+		static bool zdown = false;
+
+		static bool rdown = false;
+
+		static bool zeroDown = false;
+
+		static bool numpadZeroDown = false;
+
+		static bool isSmallBall = false;
 		//Check for Button Down events
 
 		//Check for Button Up events
@@ -94,30 +121,360 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			new (h) Event_KEY_UP_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		if(GetAsyncKeyState(',') & 0x8000)
+		if(GetAsyncKeyState('U') & 0x8000)
+		{
+			udown = true;
+		}
+		else if (udown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_COMMA_HELD));
-			new (h) Event_KEY_COMMA_HELD;
+			new (h)Event_KEY_COMMA_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
+			udown = false;
 		}
-		if(GetAsyncKeyState('.') & 0x8000)
+
+		if(GetAsyncKeyState('I') & 0x8000)
+		{
+			idown = true;
+		}
+		else if (idown == true)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_PERIOD_HELD));
-			new (h) Event_KEY_PERIOD_HELD;
+			new (h)Event_KEY_PERIOD_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			idown = false;
 		}
+
 		if(GetAsyncKeyState('K') & 0x8000)
 		{
+			kdown = true;
 			Handle h("EVENT", sizeof(Event_KEY_K_HELD));
-			new (h) Event_KEY_K_HELD;
+			new (h)Event_KEY_K_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
+		/*else if (kdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_K_HELD));
+			new (h)Event_KEY_K_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			kdown = false;
+		}*/
+
 		if(GetAsyncKeyState('L') & 0x8000)
+		{
+			ldown = true;
+			Handle h("EVENT", sizeof(Event_KEY_L_HELD));
+			new (h)Event_KEY_L_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (ldown)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_L_HELD));
 			new (h) Event_KEY_L_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			ldown = false;
+		}*/
+
+		if (GetAsyncKeyState('X') & 0x8000)
+		{
+			// xdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_X_HELD));
+			new (h)Event_KEY_X_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
+	/*	else if (xdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_X_HELD));
+			new (h)Event_KEY_X_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			xdown = false;
+		}*/
+
+		if (GetAsyncKeyState('C') & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_C_HELD));
+			new (h)Event_KEY_C_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+			// cdown = true;
+		}
+		/*else if (cdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_C_HELD));
+			new (h)Event_KEY_C_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			cdown = false;
+		}*/
+
+		if (GetAsyncKeyState('V') & 0x8000)
+		{
+			 vdown = true;
+
+			/*Handle h("EVENT", sizeof(Event_KEY_V_HELD));
+			new (h)Event_KEY_V_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);*/
+
+		}
+		else if (vdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_V_HELD));
+			new (h)Event_KEY_V_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			vdown = false;
+		}
+
+		if (GetAsyncKeyState('B') & 0x8000)
+		{
+			bdown = true;
+
+			/*	Handle h("EVENT", sizeof(Event_KEY_B_HELD));
+				new (h)Event_KEY_B_HELD;
+				m_pQueueManager->add(h, Events::QT_INPUT)*/;
+		}
+		else if (bdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_B_HELD));
+			new (h)Event_KEY_B_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			bdown = false;
+		}
+
+		if (GetAsyncKeyState('N') & 0x8000)
+		{
+			ndown = true;
+		}
+		else if (ndown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_N_HELD));
+			new (h)Event_KEY_N_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			ndown = false;
+		}
+
+		if (GetAsyncKeyState('M') & 0x8000)
+		{
+			mdown = true;
+		}
+		else if (mdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_M_HELD));
+			new (h)Event_KEY_M_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			mdown = false;
+		}
+
+
+		if (GetAsyncKeyState('O') & 0x8000)
+		{
+			odown = true;
+			Handle h("EVENT", sizeof(Event_KEY_O_HELD));
+			new (h)Event_KEY_O_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (odown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_O_HELD));
+			new (h)Event_KEY_O_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			odown = false;
+		}*/
+
+		if (GetAsyncKeyState('P') & 0x8000)
+		{
+			pdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_P_HELD));
+			new (h)Event_KEY_P_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (pdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_P_HELD));
+			new (h)Event_KEY_P_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			pdown = false;
+		}*/
+
+		if (GetAsyncKeyState('T') & 0x8000)
+		{
+			//tdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_T_HELD));
+			new (h)Event_KEY_T_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (tdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_T_HELD));
+			new (h)Event_KEY_T_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			tdown = false;
+		}*/
+
+		if (GetAsyncKeyState('Y') & 0x8000)
+		{
+			//ydown = true;
+			Handle h("EVENT", sizeof(Event_KEY_Y_HELD));
+			new (h)Event_KEY_Y_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (ydown)
+		{
+		Handle h("EVENT", sizeof(Event_KEY_Y_HELD));
+		new (h)Event_KEY_Y_HELD;
+		m_pQueueManager->add(h, Events::QT_INPUT);
+
+		ydown = false;
+		}*/
+
+		if (GetAsyncKeyState('J') & 0x8000)
+		{
+			//jdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_J_HELD));
+			new (h)Event_KEY_J_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (jdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_J_HELD));
+			new (h)Event_KEY_J_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			jdown = false;
+		}*/
+
+		if (GetAsyncKeyState('H') & 0x8000)
+		{
+			//hdown = true;
+			Handle h("EVENT", sizeof(Event_KEY_H_HELD));
+			new (h)Event_KEY_H_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		/*else if (hdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_H_HELD));
+			new (h)Event_KEY_H_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			hdown = false;
+		}*/
+
+		if (GetAsyncKeyState('Z') & 0x8000)
+		{
+			zdown = true;
+		}
+		else if (zdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_Z_HELD));
+			new (h)Event_KEY_Z_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			zdown = false;
+		}
+
+		if (GetAsyncKeyState('R') & 0x8000)
+		{
+			rdown = true;
+		}
+		else if (rdown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_R_HELD));
+			new (h)Event_KEY_R_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			rdown = false;
+		}
+
+
+
+		if (GetAsyncKeyState('8') & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_LEFT_BRACKET_HELD));
+			new (h)Event_KEY_LEFT_BRACKET_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+
+		if (GetAsyncKeyState('9') & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_RIGHT_BRACKET_HELD));
+			new (h)Event_KEY_RIGHT_BRACKET_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+
+		if (GetAsyncKeyState('0') & 0x8000)
+		{
+			zeroDown = true;
+		}
+		else if (zeroDown)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_ZERO_HELD));
+			new (h)Event_KEY_ZERO_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+
+			zeroDown = false;
+		}
+
+		if (GetAsyncKeyState('6') & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_MINUS_HELD));
+			new (h)Event_KEY_MINUS_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+
+		if (GetAsyncKeyState('7') & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_EQUAL_HELD));
+			new (h)Event_KEY_EQUAL_HELD;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+		
+		if (GetAsyncKeyState(VK_NUMPAD0) & 0x8000)
+		{
+			numpadZeroDown = true;
+		}
+		else if (numpadZeroDown == true)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_0));
+			new (h)Event_KEY_NUM_0;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+			numpadZeroDown = false;
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD1) & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_1));
+			new (h)Event_KEY_NUM_1;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD2) & 0x8000)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_2));
+			new (h)Event_KEY_NUM_2;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD3) & 0x8000)
+		{
+			isSmallBall = true;
+		}
+		else if (isSmallBall == true)
+		{
+			Handle h("EVENT", sizeof(Event_KEY_NUM_3));
+			new (h)Event_KEY_NUM_3;
+			m_pQueueManager->add(h, Events::QT_INPUT);
+			isSmallBall = false;
+		}
+
 	}
 #endif
 }
