@@ -2211,7 +2211,7 @@ void EffectManager::updateLightDirection(Vector3 sprinkleDir)
 		Vector3 pos = l->m_base.getPos();
 		Vector3 dir = l->m_oribitAxis;
 
-		l->m_physicsRest += 0.03f;
+		l->m_physicsRest += 0.01f;
 
 		if (l->m_physicsRest >= 4.0){
 			// Restart animation

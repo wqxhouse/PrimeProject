@@ -318,78 +318,194 @@ int ClientGame::runGameFrame()
 						Vector3(0.75f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				}
 				
-				//{
-				//	sprintf(PEString::s_buf, "Button U/I: Switch Between Buffers");
-				//	DebugRenderer::Instance()->createTextMesh(
-				//		PEString::s_buf, true, false, false, false, 0,
-				//		Vector3(0.06f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				//}
+				//U I
+				{
+					int curBuf = m_pContext->_debugMode;
+					std::string mode = "";
+					if (curBuf == 0)
+					{
+						mode += "Final Pass";
+					}
+					else if (curBuf == 1)
+					{
+						mode += "Albedo Buffer";
+					}
+					else if (curBuf == 2)
+					{
+						mode += "Normal Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 0)
+					{
+						mode += "Depth Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 1)
+					{
+						mode += "Position Buffer";
+					}
+					else if (curBuf == 4)
+					{
+						mode += "Lighting Buffer (Before Gamma Correction)";
+					}
+					sprintf(PEString::s_buf, "Button U/I: Switch Between Buffers: ", mode.c_str());
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.05f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
 
-				//{
-				//	
-				//	sprintf(PEString::s_buf, "Roughness: %.2f Metallic: %.2f", m_pContext->_roughness, m_pContext->_metallic); //Button K/L: Switch Between Shading Algorithms
-				//	DebugRenderer::Instance()->createTextMesh(
-				//		PEString::s_buf, true, false, false, false, 0,
-				//		Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				//}
+				// K L roughness; O P metallic
+				{
+					
+					sprintf(PEString::s_buf, "Roughness: %.2f Metallic: %.2f", m_pContext->_roughness, m_pContext->_metallic); //Button K/L: Switch Between Shading Algorithms
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.075f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}
 
+				// J H  _farFocusStart
 				//{
-
 				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
 				//	DebugRenderer::Instance()->createTextMesh(
 				//		PEString::s_buf, true, false, false, false, 0,
 				//		Vector3(0.06f, 0.1f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				//}
 
+				//move this part to  {U I }
+				/*{
+					int curBuf = m_pContext->_debugMode;
+					std::string mode = "";
+					if (curBuf == 0)
+					{
+						mode += "Final Pass";
+					}
+					else if (curBuf == 1)
+					{
+						mode += "Albedo Buffer";
+					}
+					else if (curBuf == 2)
+					{
+						mode += "Normal Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 0)
+					{
+						mode += "Depth Buffer";
+					}
+					else if (curBuf == 3 & m_pContext->_renderMode == 1)
+					{
+						mode += "Position Buffer";
+					}
+					else if (curBuf == 4)
+					{
+						mode += "Lighting Buffer (Before Gamma Correction)";
+					}
 
+					sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
+					DebugRenderer::Instance()->createTextMesh(
+						PEString::s_buf, true, false, false, false, 0,
+						Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				}*/
+
+				// X C  sun
 				//{
-				//	int curBuf = m_pContext->_debugMode;
-				//	std::string mode = "";
-				//	if (curBuf == 0)
-				//	{
-				//		mode += "Final Pass";
-				//	}
-				//	else if (curBuf == 1)
-				//	{
-				//		mode += "Albedo Buffer";
-				//	}
-				//	else if (curBuf == 2)
-				//	{
-				//		mode += "Normal Buffer";
-				//	}
-				//	else if (curBuf == 3 & m_pContext->_renderMode == 0)
-				//	{
-				//		mode += "Depth Buffer";
-				//	}
-				//	else if (curBuf == 3 & m_pContext->_renderMode == 1)
-				//	{
-				//		mode += "Position Buffer";
-				//	}
-				//	else if (curBuf == 4)
-				//	{
-				//		mode += "Lighting Buffer (Before Gamma Correction)";
-				//	}
-
-				//	sprintf(PEString::s_buf, "Current Buffer: %s", mode.c_str());
-				//	DebugRenderer::Instance()->createTextMesh(
-				//		PEString::s_buf, true, false, false, false, 0,
-				//		Vector3(0.06f, 0.125f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
-				//}
-
-				//{
-				//	std::string shading = "";
-				//	if (m_pContext->_renderMode == 0)
-				//	{
-				//		shading = "Clustered Deferred (Culling by 3D clustered)";
-				//	}
-				//	else 
-				//	{
-				//		shading = "Classical Deferred (Culling by light volume)";
-				//	}
-				//	sprintf(PEString::s_buf, "Current Shading: %s", shading.c_str());
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
 				//	DebugRenderer::Instance()->createTextMesh(
 				//		PEString::s_buf, true, false, false, false, 0,
 				//		Vector3(0.06f, 0.15f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// v  add gameobject
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.175f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+				
+				// t y  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.2f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// b n  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.225f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// m  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.25f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// z  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.275f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+				
+				// R  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.3f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// 6 7  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.325f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+				
+				// 8 9  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.35f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// 0  function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.375f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// num0   function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.4f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// num1 num2   function unknown
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.425f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
+				//}
+
+				// num3   paritcal
+				//{
+				//	sprintf(PEString::s_buf, "FarFocusStart: %.2f FarFocusEnd: %.2f", m_pContext->_farFocusStart, m_pContext->_farFocusEnd); //Button K/L: Switch Between Shading Algorithms
+				//	DebugRenderer::Instance()->createTextMesh(
+				//		PEString::s_buf, true, false, false, false, 0,
+				//		Vector3(0.06f, 0.45f, 0), 1.0f, m_pContext->m_gameThreadThreadOwnershipMask);
 				//}
 
 				//
